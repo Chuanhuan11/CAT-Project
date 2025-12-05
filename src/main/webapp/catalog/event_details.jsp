@@ -10,8 +10,8 @@
 
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" href="home.jsp">Univent</a>
-        <a href="home.jsp" class="btn btn-outline-light btn-sm">Back to Catalog</a>
+        <a class="navbar-brand" href="${pageContext.request.contextPath}/EventListServlet">Univent</a>
+        <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-outline-light btn-sm">Back to Catalog</a>
     </div>
 </nav>
 
