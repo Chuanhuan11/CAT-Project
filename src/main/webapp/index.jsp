@@ -11,31 +11,29 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* --- NEW BRAND HEADER (Top Left) --- */
         .brand-header {
             position: absolute;
             top: 30px;
-            left: 10%; /* Aligns with the main text padding */
+            left: 10%;
             display: flex;
             align-items: center;
-            z-index: 10; /* Ensures it sits on top of background */
+            z-index: 10;
         }
 
         .brand-logo {
             height: 50px;
             margin-right: 15px;
-            border-radius: 50%; /* <--- THIS MAKES IT ROUND */
+            border-radius: 50%;
         }
 
         .brand-text {
             font-size: 2rem;
             font-weight: 800;
-            color: #2c1a4d; /* Matches your brand purple */
+            color: #2c1a4d;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* --- HERO SECTION --- */
         .hero-container {
             background-image: url('${pageContext.request.contextPath}/assets/img/landing-bg.jpg');
             height: 100%;
