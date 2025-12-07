@@ -38,3 +38,20 @@ INSERT INTO users (username, password, email, role) VALUES
 INSERT INTO events (title, description, event_date, location, price, available_seats) VALUES
                                                                                           ('Java Workshop', 'Learn Java Fast', '2026-02-10', 'DK F', 10.00, 50),
                                                                                           ('Campus Run', '5km Run', '2026-03-15', 'Stadium', 25.00, 198);
+
+USE univent_db;
+
+INSERT INTO events (title, description, event_date, location, price, image_url, total_seats, available_seats) VALUES
+                                                                                                                  ('USM Grand Concert', 'A night of music featuring local bands and special guests.', '2026-04-10', 'Dewan Tunku Syed Putra', 35.00, 'event3.jpg', 500, 450),
+
+                                                                                                                  ('Inter-Varsity Football Final', 'Cheer for USM as they face off against UM in the finals.', '2026-05-02', 'USM Stadium', 5.00, 'event4.jpg', 1000, 800),
+
+                                                                                                                  ('Career Fair 2026', 'Meet employers from top tech companies like Intel, Grab, and Google.', '2026-03-20', 'Exam Hall', 0.00, 'event5.jpg', 600, 550),
+
+                                                                                                                  ('Digital Art Exhibition', 'Showcasing amazing digital artwork by the School of Arts.', '2026-02-15', 'Muzium & Galeri Tuanku Fauziah', 12.00, 'event6.jpg', 100, 95),
+
+                                                                                                                  ('Python for Data Science', 'Intermediate workshop on using Pandas and NumPy.', '2026-06-12', 'Computer Lab 3', 15.00, 'event7.jpg', 40, 40),
+
+                                                                                                                  ('Badminton Tournament', 'Open to all students. Register your team now!', '2026-07-01', 'Sports Complex', 10.00, 'event8.jpg', 32, 30);
+
+DELETE FROM events WHERE id IN (3,4);
