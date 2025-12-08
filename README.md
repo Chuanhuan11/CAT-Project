@@ -39,7 +39,7 @@ Part 1: Install MySQL Server
 
 If you already have XAMPP, just click "Start" next to MySQL and skip to Part 2.
 
-1. Download: Go to the MySQL Community Installer Page.
+1. Download: Go to the MySQL Community Installer Page. https://dev.mysql.com/downloads/installer/
 2. Select: Download the Windows (x86, 32-bit), MSI Installer (The larger file).
 3. Install: Run the installer.
 
