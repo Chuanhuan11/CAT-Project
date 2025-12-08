@@ -1,6 +1,43 @@
 package com.univent.admin;
 
-public class ManageUsersServlet {
-}
+import com.univent.model.User;
+import com.univent.util.DBConnection;
 
-//This is the logic that allows the Admin to view a list of all students registered in the system.
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+@WebServlet("/ManageUsersServlet")
+public class ManageUsersServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<User> users = new ArrayList<>();
+
+        try (Connection con = DBConnection.getConnection()) {
+            String sql = "SELECT * FROM users";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUsername(rs.getString("username"));
+                u.setEmail(rs.getString("email"));
+                u.setRole(rs.getString("role"));
+                users.add(u);
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching user list: " + e.getMessage());
+        }
+
+        request.setAttribute("userList", users);
+        request.getRequestDispatcher("/admin/manage_users.jsp").forward(request, response);
+    }
+}
