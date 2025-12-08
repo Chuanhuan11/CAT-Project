@@ -53,5 +53,3 @@ INSERT INTO events (title, description, event_date, location, price, image_url, 
                                                                                                                   ('Python for Data Science', 'Intermediate workshop on using Pandas and NumPy.', '2026-06-12', 'Computer Lab 3', 15.00, 'event7.jpg', 40, 40),
 
                                                                                                                   ('Badminton Tournament', 'Open to all students. Register your team now!', '2026-07-01', 'Sports Complex', 10.00, 'event8.jpg', 32, 30);
-
-DELETE FROM events WHERE id IN (3,4);
