@@ -19,9 +19,9 @@ public class SearchServlet extends HttpServlet {
         String keyword = request.getParameter("keyword");
 
         List<Event> allEvents = new ArrayList<>();
-        allEvents.add(new Event(1, "Java Workshop", "Master Java logic without a database first!", Date.valueOf("2026-02-10"), "DK F", 10.00, "event1.jpg", 50, 50));
-        allEvents.add(new Event(2, "USM Color Run", "Join the most colorful 5km run on campus.", Date.valueOf("2026-03-15"), "Stadium", 25.00, "event2.jpg", 200, 198));
-        allEvents.add(new Event(3, "AI Seminar", "Talk by Google Expert on GenAI.", Date.valueOf("2026-01-20"), "Dewan Budaya", 0.00, "event3.jpg", 300, 50));
+        allEvents.add(new Event(1, "Java Workshop", "Master Java logic without a database first!", Date.valueOf("2026-02-10"), "DK F", 10.00, "event1.jpg", 50, 50, 1));
+        allEvents.add(new Event(2, "USM Color Run", "Join the most colorful 5km run on campus.", Date.valueOf("2026-03-15"), "Stadium", 25.00, "event2.jpg", 200, 198, 1));
+        allEvents.add(new Event(3, "AI Seminar", "Talk by Google Expert on GenAI.", Date.valueOf("2026-01-20"), "Dewan Budaya", 0.00, "event3.jpg", 300, 50, 1));
 
         List<Event> filteredList;
 

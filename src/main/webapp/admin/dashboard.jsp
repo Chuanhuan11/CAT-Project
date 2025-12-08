@@ -30,7 +30,7 @@
         <h3>Current Events</h3>
         <div>
             <a href="${pageContext.request.contextPath}/ManageUsersServlet" class="btn btn-info text-white me-2">Manage Users</a>
-            <a href="${pageContext.request.contextPath}/admin/add_event.jsp" class="btn btn-success">+ Add New Event</a>
+            <a href="${pageContext.request.contextPath}/AddEventServlet" class="btn btn-success">+ Add New Event</a>
         </div>
     </div>
 
@@ -62,11 +62,12 @@
                             </span>
                         </td>
                         <td>
-                            <a href="${pageContext.request.contextPath}/admin/add_event.jsp?id=${event.id}" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="${pageContext.request.contextPath}/AddEventServlet?id=${event.id}" class="btn btn-primary btn-sm">Edit</a>
 
-                            <a href="${pageContext.request.contextPath}/DeleteEventServlet?id=${event.id}"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Are you sure you want to delete this event?');">Delete</a>
+                            <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}"
+                               class="btn btn-info btn-sm text-white">Attendees</a>
+
+                            <a href="${pageContext.request.contextPath}/DeleteEventServlet?id=${event.id}" class="btn btn-danger btn-sm" ...>Delete</a>
                         </td>
                     </tr>
                 </c:forEach>

@@ -14,7 +14,7 @@
 
 <nav class="navbar navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="${pageContext.request.contextPath}/AdminDashboardServlet">Univent Admin</a>
+        <a class="navbar-brand" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Univent Admin</a>
         <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
 </nav>
@@ -27,7 +27,7 @@
 <div class="container">
     <div class="d-flex justify-content-between mb-3">
         <h3>Registered Users</h3>
-        <a href="${pageContext.request.contextPath}/AdminDashboardServlet" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 
     <div class="card shadow-sm">
@@ -49,15 +49,21 @@
                         <td><strong>${user.username}</strong></td>
                         <td>${user.email}</td>
                         <td>
-                            <span class="badge ${user.role == 'ADMIN' ? 'bg-danger' : 'bg-info text-dark'}">
-                                    ${user.role}
-                            </span>
+                                <%-- Form to update role --%>
+                            <form action="${pageContext.request.contextPath}/UpdateUserRoleServlet" method="post" class="d-flex align-items-center m-0">
+                                <input type="hidden" name="userId" value="${user.id}">
+                                <select name="role" class="form-select form-select-sm me-2" onchange="this.form.submit()">
+                                    <option value="STUDENT" ${user.role == 'STUDENT' ? 'selected' : ''}>Student</option>
+                                    <option value="ORGANIZER" ${user.role == 'ORGANIZER' ? 'selected' : ''}>Organizer</option>
+                                    <option value="ADMIN" ${user.role == 'ADMIN' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </form>
                         </td>
                         <td>
                             <c:if test="${user.username != 'admin'}">
                                 <a href="${pageContext.request.contextPath}/DeleteUserServlet?id=${user.id}"
                                    class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Are you sure? This will also cancel all their bookings.');">Delete</a>
+                                   onclick="return confirm('Delete this user?');">Delete</a>
                             </c:if>
                         </td>
                     </tr>

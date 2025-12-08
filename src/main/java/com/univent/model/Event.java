@@ -13,10 +13,11 @@ public class Event implements Serializable {
     private String imageUrl;
     private int totalSeats;
     private int availableSeats;
+    private int organizerId;
 
     public Event() {}
 
-    public Event(int id, String title, String description, Date eventDate, String location, double price, String imageUrl, int totalSeats, int availableSeats) {
+    public Event(int id, String title, String description, Date eventDate, String location, double price, String imageUrl, int totalSeats, int availableSeats, int organizerId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -26,6 +27,7 @@ public class Event implements Serializable {
         this.imageUrl = imageUrl;
         this.totalSeats = totalSeats;
         this.availableSeats = availableSeats;
+        this.organizerId = organizerId;
     }
 
     // Getters and Setters
@@ -55,4 +57,7 @@ public class Event implements Serializable {
 
     public int getAvailableSeats() { return availableSeats; }
     public void setAvailableSeats(int availableSeats) { this.availableSeats = availableSeats; }
+
+    public int getOrganizerId() { return organizerId; }
+    public void setOrganizerId(int organizerId) { this.organizerId = organizerId; }
 }

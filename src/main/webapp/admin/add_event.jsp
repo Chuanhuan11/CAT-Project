@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
     <title>Event Form</title>
@@ -11,47 +12,52 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h4>${param.id == null ? 'Create New Event' : 'Edit Event'}</h4>
+                    <h4>${event != null ? 'Edit Event' : 'Create New Event'}</h4>
                 </div>
                 <div class="card-body">
                     <form action="${pageContext.request.contextPath}/AddEventServlet" method="post">
-                        <input type="hidden" name="id" value="${param.id}">
+                        <input type="hidden" name="id" value="${event.id}">
 
                         <div class="mb-3">
                             <label for="title" class="form-label">Event Title</label>
-                            <input type="text" id="title" name="title" class="form-control" required placeholder="e.g. Java Workshop">
+                            <input type="text" id="title" name="title" class="form-control" required
+                                   value="${event.title}" placeholder="e.g. Java Workshop">
                         </div>
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                            <textarea id="description" name="description" class="form-control" rows="3">${event.description}</textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="eventDate" class="form-label">Date</label>
-                                <input type="date" id="eventDate" name="eventDate" class="form-control" required>
+                                <input type="date" id="eventDate" name="eventDate" class="form-control" required
+                                       value="${event.eventDate}">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="location" class="form-label">Location</label>
-                                <input type="text" id="location" name="location" class="form-control" required>
+                                <input type="text" id="location" name="location" class="form-control" required
+                                       value="${event.location}">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="price" class="form-label">Price (RM)</label>
-                                <input type="number" step="0.01" id="price" name="price" class="form-control" required>
+                                <input type="number" step="0.01" id="price" name="price" class="form-control" required
+                                       value="${event.price}">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="totalSeats" class="form-label">Total Seats</label>
-                                <input type="number" id="totalSeats" name="totalSeats" class="form-control" required>
+                                <input type="number" id="totalSeats" name="totalSeats" class="form-control" required
+                                       value="${event.totalSeats}">
                             </div>
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">Save Event</button>
-                            <a href="${pageContext.request.contextPath}/AdminDashboardServlet" class="btn btn-secondary">Cancel</a>
+                            <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>

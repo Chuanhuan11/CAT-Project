@@ -46,6 +46,6 @@ public class DeleteEventServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect("AdminDashboardServlet");
+        response.sendRedirect("OrganiserDashboardServlet");
     }
 }
