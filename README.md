@@ -87,16 +87,24 @@ We are using IntelliJ to run the script, so you don't need to open Workbench.
 4. Verify: You should see output at the bottom saying CREATE TABLE successful.
 
 
-Part 3: Connect Java to Database
+Part 3: Connect Java to Database (Secure Method)
 
-Your code needs to know your local password to connect.
+We use Environment Variables to handle database passwords securely. You do not need to edit the Java code.
 
-1. Open File: Go to src/main/java/com/univent/util/DBConnection.java.
+1. Open Run Configurations:
+   In IntelliJ, go to the top-right toolbar (where the Play button is).
+   Click the dropdown menu (it might say "Tomcat 9" or "Univent") > Select **Edit Configurations...**
 
-2. Edit Password:
+2. Select Your Server:
+   On the left sidebar, select your **Tomcat Server** configuration.
 
-   Find the line: private static final String PASSWORD = "";
+3. Add the Password Variable:
+   - Go to the **Startup/Connection** tab (or "Server" tab in some versions).
+   - Find the **Environment variables** field.
+   - Click the folder icon or `+` button.
+   - Add a new variable:
+     - **Name:** `DB_PASSWORD`
+     - **Value:** *[Type your actual MySQL root password here, e.g., 1234]*
 
-   Change "" to your actual password (e.g., "1234").
-
-   Don't Commit This: Try not to push your personal password to GitHub if possible, or remember to change it back before pushing.
+4. Save:
+   Click **OK**. The application will now read this password automatically when it runs.
