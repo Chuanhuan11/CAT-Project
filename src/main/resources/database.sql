@@ -1,6 +1,8 @@
 CREATE DATABASE IF NOT EXISTS univent_db;
 USE univent_db;
 
+DROP TABLE users, events, bookings;
+
 CREATE TABLE users (
                        id INT AUTO_INCREMENT PRIMARY KEY,
                        username VARCHAR(50) NOT NULL UNIQUE,
@@ -35,13 +37,13 @@ INSERT INTO users (username, password, email, role) VALUES
                                                         ('admin', '123', 'admin@univent.com', 'ADMIN'),
                                                         ('ali', '123', 'ali@student.usm.my', 'STUDENT');
 
-INSERT INTO events (title, description, event_date, location, price, available_seats) VALUES
-                                                                                          ('Java Workshop', 'Learn Java Fast', '2026-02-10', 'DK F', 10.00, 50),
-                                                                                          ('Campus Run', '5km Run', '2026-03-15', 'Stadium', 25.00, 198);
-
 USE univent_db;
 
 INSERT INTO events (title, description, event_date, location, price, image_url, total_seats, available_seats) VALUES
+                                                                                                                  ('Java Workshop', 'Learn Java Fast', '2026-02-10', 'DK F', 10.00, 'event1.jpg', 50, 40),
+
+                                                                                                                  ('Campus Run', '5km Run', '2026-03-15', 'Stadium', 25.00, 'event2.jpg', 500, 450),
+
                                                                                                                   ('USM Grand Concert', 'A night of music featuring local bands and special guests.', '2026-04-10', 'Dewan Tunku Syed Putra', 35.00, 'event3.jpg', 500, 450),
 
                                                                                                                   ('Inter-Varsity Football Final', 'Cheer for USM as they face off against UM in the finals.', '2026-05-02', 'USM Stadium', 5.00, 'event4.jpg', 1000, 800),
@@ -53,5 +55,3 @@ INSERT INTO events (title, description, event_date, location, price, image_url, 
                                                                                                                   ('Python for Data Science', 'Intermediate workshop on using Pandas and NumPy.', '2026-06-12', 'Computer Lab 3', 15.00, 'event7.jpg', 40, 40),
 
                                                                                                                   ('Badminton Tournament', 'Open to all students. Register your team now!', '2026-07-01', 'Sports Complex', 10.00, 'event8.jpg', 32, 30);
-
-DELETE FROM events WHERE id IN (3,4);
