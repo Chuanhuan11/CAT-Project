@@ -1,0 +1,61 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rules & Regulations - Univent</title>
+        <link rel="stylesheet" href="css/style_user.css">
+    </head>
+
+    <body>
+        <nav class="navbar">
+            <a href="index.jsp" class="logo"><img src="assets/img/logo.png" alt="Univent" style="height: 40px;"></a>
+            <div class="nav-links">
+                <a href="index.jsp">Home</a>
+                <a href="register.jsp" class="btn-primary">Back to Sign Up</a>
+            </div>
+        </nav>
+
+        <div class="rules-container">
+            <div class="auth-header">
+                <h2>Rules & Regulations</h2>
+                <p>Please read carefully before joining Univent</p>
+            </div>
+
+            <ol class="rules-list">
+                <li>
+                    <strong>Student Identity Verification</strong>
+                    <p>Only current USM students with a valid student email address are allowed to register and
+                        participate in events.</p>
+                </li>
+                <li>
+                    <strong>Event Registration</strong>
+                    <p>Students should only register for events they intend to attend. Repeated no-shows may lead to
+                        account restrictions.</p>
+                </li>
+                <li>
+                    <strong>Payment Policy</strong>
+                    <p>All payments made on the platform are simulated but are considered binding for the purpose of
+                        event registration.</p>
+                </li>
+                <li>
+                    <strong>Respectful Conduct</strong>
+                    <p>Harassment, hate speech, or abusive behavior towards event organizers or other participants will
+                        not be tolerated.</p>
+                </li>
+                <li>
+                    <strong>Cancellations</strong>
+                    <p>If you cannot attend an event, please cancel your registration at least 24 hours in advance to
+                        allow others to join.</p>
+                </li>
+            </ol>
+
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="register.jsp" class="btn-primary">I Understand & Agree</a>
+            </div>
+        </div>
+    </body>
+
+    </html>
