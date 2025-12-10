@@ -1,8 +1,10 @@
 package com.univent.servlets;
 
-import com.univent.dao.UserDAO;
 import com.univent.models.User;
+import com.univent.util.DBConnection;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,11 +14,6 @@ import javax.servlet.http.HttpSession;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
-    private UserDAO userDAO;
-
-    public void init() {
-        userDAO = new UserDAO();
-    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -39,16 +36,27 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        User newUser = new User(fullname, email, password, "student");
+        try (Connection con = DBConnection.getConnection()) {
+            String sql = "INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, fullname);
+            ps.setString(2, email);
+            ps.setString(3, password); // In a real app, hash this!
+            ps.setString(4, "student");
 
-        if (userDAO.registerUser(newUser)) {
-            // Registration success
-            HttpSession session = request.getSession();
-            session.setAttribute("user", newUser);
-            response.sendRedirect("user/login.jsp");
-        } else {
-            // Registration failed
-            request.setAttribute("errorMessage", "Registration failed. Email might already be in use.");
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                User newUser = new User(fullname, email, password, "student");
+                HttpSession session = request.getSession();
+                session.setAttribute("user", newUser);
+                response.sendRedirect("user/login.jsp");
+            } else {
+                request.setAttribute("errorMessage", "Registration failed.");
+                request.getRequestDispatcher("user/register.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Error: " + e.getMessage());
             request.getRequestDispatcher("user/register.jsp").forward(request, response);
         }
     }
