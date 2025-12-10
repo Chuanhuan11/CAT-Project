@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Univent</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style_user.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
 </head>
 
 <body>
@@ -27,7 +27,10 @@
             <p>Join the Univent community</p>
         </div>
 
-        <form action="${pageContext.request.contextPath}/register" method="post">
+        <form action="${pageContext.request.contextPath}/RegisterServlet" method="post">
+            <div class="error-message" style="color: red; text-align: center; margin-bottom: 1rem;">
+                ${errorMessage}
+            </div>
             <div class="form-group">
                 <label for="fullname">Full Name</label>
                 <input type="text" id="fullname" name="fullname" class="form-control" placeholder="John Doe" required>
@@ -53,7 +56,7 @@
             <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
                 <input type="checkbox" id="terms" name="terms" required style="width: auto;">
                 <label for="terms" style="margin: 0; font-weight: normal; font-size: 0.85rem;">
-                    I agree to the <a href="${pageContext.request.contextPath}/rules.jsp" target="_blank"
+                    I agree to the <a href="rules.jsp" target="_blank"
                                       style="color: var(--primary-color);">Rules & Regulations</a>
                 </label>
             </div>
@@ -62,7 +65,7 @@
         </form>
 
         <div class="auth-footer">
-            <p>Already have an account? <a href="${pageContext.request.contextPath}/user/login.jsp">Login</a></p>
+            <p>Already have an account? <a href="${pageContext.request.contextPath}/LoginServlet">Login</a></p>
         </div>
     </div>
 </div>

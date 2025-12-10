@@ -24,11 +24,11 @@ public class CheckoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        /*if (session.getAttribute("user") == null) {
+        if (session.getAttribute("user") == null) {
             // Redirect to login if user is not logged in
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
-        }*/
+        }
 
         request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
     }

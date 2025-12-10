@@ -1,6 +1,6 @@
 package com.univent.user;
 
-import com.univent.models.User;
+import com.univent.model.User;
 import com.univent.util.DBConnection;
 import java.io.IOException;
 import java.sql.Connection;
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/login")
+@WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -32,7 +32,7 @@ public class LoginServlet extends HttpServlet {
             if (rs.next()) {
                 User user = new User();
                 user.setId(rs.getInt("id"));
-                user.setFullname(rs.getString("fullname"));
+                user.setUsername(rs.getString("username"));
                 user.setEmail(rs.getString("email"));
                 user.setRole(rs.getString("role"));
 
