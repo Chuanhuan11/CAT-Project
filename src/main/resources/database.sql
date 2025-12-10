@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS univent_db;
 USE univent_db;
 
+
 DROP TABLE users, events, bookings;
 
 CREATE TABLE users (
@@ -55,3 +56,8 @@ INSERT INTO events (title, description, event_date, location, price, image_url, 
                                                                                                                   ('Python for Data Science', 'Intermediate workshop on using Pandas and NumPy.', '2026-06-12', 'Computer Lab 3', 15.00, 'event7.jpg', 40, 40),
 
                                                                                                                   ('Badminton Tournament', 'Open to all students. Register your team now!', '2026-07-01', 'Sports Complex', 10.00, 'event8.jpg', 32, 30);
+
+ALTER TABLE events ADD COLUMN organizer_id INT;
+ALTER TABLE events ADD CONSTRAINT fk_organizer FOREIGN KEY (organizer_id) REFERENCES users(id) ON DELETE SET NULL;
+
+UPDATE events SET organizer_id = 1 WHERE organizer_id IS NULL;

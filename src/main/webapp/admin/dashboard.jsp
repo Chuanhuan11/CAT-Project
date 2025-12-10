@@ -28,7 +28,10 @@
 <div class="container">
     <div class="d-flex justify-content-between mb-3">
         <h3>Current Events</h3>
-        <a href="${pageContext.request.contextPath}/admin/add_event.jsp" class="btn btn-success">+ Add New Event</a>
+        <div>
+            <a href="${pageContext.request.contextPath}/ManageUsersServlet" class="btn btn-info text-white me-2">Manage Users</a>
+            <a href="${pageContext.request.contextPath}/admin/add_event.jsp" class="btn btn-success">+ Add New Event</a>
+        </div>
     </div>
 
     <div class="card shadow-sm">
