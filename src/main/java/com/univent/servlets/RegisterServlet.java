@@ -1,7 +1,7 @@
-package com.unitrade.servlets;
+package com.univent.servlets;
 
-import com.unitrade.dao.UserDAO;
-import com.unitrade.models.User;
+import com.univent.dao.UserDAO;
+import com.univent.models.User;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

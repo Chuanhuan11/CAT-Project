@@ -1,7 +1,7 @@
-package com.unitrade.dao;
+package com.univent.dao;
 
-import com.unitrade.models.User;
-import com.unitrade.utils.DBConnection;
+import com.univent.models.User;
+import com.univent.utils.DBConnection;
 import java.sql.*;
 
 public class UserDAO {
