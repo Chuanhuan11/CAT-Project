@@ -6,15 +6,15 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Rules & Regulations - Univent</title>
-        <link rel="stylesheet" href="css/style_user.css">
+        <link rel="stylesheet" href="../css/style_user.css">
     </head>
 
     <body>
         <nav class="navbar">
-            <a href="index.jsp" class="logo"><img src="assets/img/logo.png" alt="Univent" style="height: 40px;"></a>
+            <a href="../index.jsp" class="logo"><img src="../assets/img/logo.png" alt="Univent" style="height: 40px;"></a>
             <div class="nav-links">
-                <a href="index.jsp">Home</a>
-                <a href="user/register.jsp" class="btn-primary">Back to Sign Up</a>
+                <a href="../index.jsp">Home</a>
+                <a href="register.jsp" class="btn-primary">Back to Sign Up</a>
             </div>
         </nav>
 
@@ -53,7 +53,7 @@
             </ol>
 
             <div style="text-align: center; margin-top: 3rem;">
-                <a href="user/register.jsp" class="btn-primary">I Understand & Agree</a>
+                <a href="register.jsp" class="btn-primary">I Understand & Agree</a>
             </div>
         </div>
     </body>
