@@ -28,9 +28,7 @@
         </div>
 
         <form action="${pageContext.request.contextPath}/RegisterServlet" method="post">
-            <div class="error-message" style="color: red; text-align: center; margin-bottom: 1rem;">
-                ${errorMessage}
-            </div>
+
             <div class="form-group">
                 <label for="fullname">Full Name</label>
                 <input type="text" id="fullname" name="fullname" class="form-control" placeholder="John Doe" required>
@@ -60,7 +58,9 @@
                                       style="color: var(--primary-color);">Rules & Regulations</a>
                 </label>
             </div>
-
+            <div class="error-message" style="color: red; text-align: center; margin-bottom: 1rem;">
+                ${errorMessage}
+            </div>
             <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Sign Up</button>
         </form>
 
