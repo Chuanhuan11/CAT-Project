@@ -32,17 +32,13 @@ public class LoginServlet extends HttpServlet {
             response.sendRedirect("index.jsp");
         } else {
             request.setAttribute("errorMessage", "Invalid email or password.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("user/login.jsp").forward(request, response);
         }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Handle Logout
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        response.sendRedirect("login.jsp");
+        // Simple redirect to the JSP page
+        response.sendRedirect("user/login.jsp");
     }
 }

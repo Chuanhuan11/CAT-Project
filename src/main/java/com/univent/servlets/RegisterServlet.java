@@ -29,13 +29,13 @@ public class RegisterServlet extends HttpServlet {
         // Basic Validation
         if (password == null || !password.equals(confirmPassword)) {
             request.setAttribute("errorMessage", "Passwords do not match!");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("user/register.jsp").forward(request, response);
             return;
         }
 
         if (!email.endsWith("usm.my")) {
             request.setAttribute("errorMessage", "Please use a valid USM email address.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("user/register.jsp").forward(request, response);
             return;
         }
 
@@ -45,11 +45,11 @@ public class RegisterServlet extends HttpServlet {
             // Registration success
             HttpSession session = request.getSession();
             session.setAttribute("user", newUser);
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("user/login.jsp");
         } else {
             // Registration failed
             request.setAttribute("errorMessage", "Registration failed. Email might already be in use.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("user/register.jsp").forward(request, response);
         }
     }
 }

@@ -13,8 +13,8 @@
         <nav class="navbar">
             <a href="#" class="logo"><img src="assets/img/logo.png" alt="Univent" style="height: 40px;"></a>
             <div class="nav-links">
-                <a href="login.jsp" class="btn-secondary">Login</a>
-                <a href="register.jsp" class="btn-primary">Get Started</a>
+                <a href="login" class="btn-secondary">Login</a>
+                <a href="user/register.jsp" class="btn-primary">Get Started</a>
             </div>
         </nav>
 
@@ -23,7 +23,7 @@
             <p>The exclusive marketplace for Universiti Sains Malaysia students. Trade textbooks, electronics, and find
                 campus events easily.</p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <a href="register.jsp" class="btn-primary"
+                <a href="user/register.jsp" class="btn-primary"
                     style="background: var(--white); color: var(--primary-color);">Join Now</a>
                 <a href="#features" class="btn-secondary" style="border-color: var(--white); color: var(--white);">Learn
                     More</a>
