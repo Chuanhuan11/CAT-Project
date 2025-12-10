@@ -56,7 +56,7 @@
             <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
                 <input type="checkbox" id="terms" name="terms" required style="width: auto;">
                 <label for="terms" style="margin: 0; font-weight: normal; font-size: 0.85rem;">
-                    I agree to the <a href="rules.jsp" target="_blank"
+                    I agree to the <a href="${pageContext.request.contextPath}/user/rules.jsp" target="_blank"
                                       style="color: var(--primary-color);">Rules & Regulations</a>
                 </label>
             </div>
