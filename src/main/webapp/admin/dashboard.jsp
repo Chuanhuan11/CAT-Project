@@ -16,7 +16,7 @@
 <nav class="navbar navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="#">Univent Admin</a>
-        <a href="${pageContext.request.contextPath}/index.jsp" class="btn btn-outline-light btn-sm">Logout</a>
+        <a href="${pageContext.request.contextPath}/LogoutServlet" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
 </nav>
 

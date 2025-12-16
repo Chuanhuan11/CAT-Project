@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
         body {
-\            background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
+            background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -75,8 +75,21 @@
                 <button class="btn btn-outline-light" type="submit">Search</button>
             </form>
 
-            <div class="ms-3">
-                <a href="${pageContext.request.contextPath}/user/login.jsp" class="btn btn-warning btn-sm">Login</a>
+            <div class="ms-3 ">
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <span class="text-white me-3">Welcome, ${sessionScope.user.username}</span>
+                        <c:if test="${sessionScope.user.role == 'ADMIN'}">
+                            <c:redirect url="/AdminDashboardServlet"/>
+                        </c:if>
+                        <a href="${pageContext.request.contextPath}/LogoutServlet"
+                           class="btn btn-outline-danger btn-sm">Logout</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/user/login.jsp"
+                           class="btn btn-warning btn-sm">Login</a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>
