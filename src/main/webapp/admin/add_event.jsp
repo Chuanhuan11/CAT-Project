@@ -15,8 +15,12 @@
                     <h4>${event != null ? 'Edit Event' : 'Create New Event'}</h4>
                 </div>
                 <div class="card-body">
-                    <form action="${pageContext.request.contextPath}/AddEventServlet" method="post">
+                    <%-- CRITICAL CHANGE: Added enctype="multipart/form-data" for file uploads --%>
+                    <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data">
+                        <%-- Keep ID for editing --%>
                         <input type="hidden" name="id" value="${event.id}">
+                        <%-- Keep current image name so we don't lose it if the user doesn't upload a new one --%>
+                        <input type="hidden" name="currentImage" value="${event.imageUrl}">
 
                         <div class="mb-3">
                             <label for="title" class="form-label">Event Title</label>
@@ -27,6 +31,13 @@
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <textarea id="description" name="description" class="form-control" rows="3">${event.description}</textarea>
+                        </div>
+
+                        <%-- NEW SECTION: Image Upload --%>
+                        <div class="mb-3">
+                            <label for="imageFile" class="form-label">Event Poster</label>
+                            <input class="form-control" type="file" id="imageFile" name="imageFile" accept="image/*">
+                            <div class="form-text">Supported formats: JPG, PNG. Leave empty to keep current image.</div>
                         </div>
 
                         <div class="row">
