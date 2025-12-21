@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS univent_db;
 USE univent_db;
 
 
-DROP TABLE users, events, bookings;
+/*DROP TABLE users, events, bookings;*/
 
 CREATE TABLE users (
                        id INT AUTO_INCREMENT PRIMARY KEY,
