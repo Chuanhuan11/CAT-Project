@@ -96,6 +96,7 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/EventListServlet">Catalog</a></li>
+                <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CartServlet">My Cart</a></li>
             </ul>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
@@ -103,9 +104,10 @@
                         Hello, ${sessionScope.username}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item active" href="#">My Tickets</a></li>
-                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/booking/cart.jsp">My Cart</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                        </c:if>
                         <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
                     </ul>
                 </div>

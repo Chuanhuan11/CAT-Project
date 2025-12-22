@@ -16,7 +16,8 @@
         .hero-section {
             background-color: rgba(50, 13, 70, 0.9);
             color: white;
-            padding: 60px 0;
+            /* CHANGED: Reduced padding to match Tickets page */
+            padding: 40px 0;
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
@@ -31,9 +32,8 @@
         .event-card:hover { transform: scale(1.02); }
         .card-img-top { height: 200px; object-fit: cover; }
 
-        /* NEW STYLE: Search Icon Positioning */
         .search-icon {
-            pointer-events: none; /* Let clicks pass through to the input if needed */
+            pointer-events: none;
             color: #6c757d;
         }
     </style>
@@ -43,8 +43,6 @@
 <%-- NAVBAR SECTION --%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
-
-        <%-- BRAND LOGO --%>
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
             <img src="${pageContext.request.contextPath}/assets/img/logo.png"
                  alt="Logo" width="30" height="30"
@@ -57,8 +55,6 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-
-            <%-- LEFT SIDE: NAVIGATION LINKS --%>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a>
@@ -73,20 +69,14 @@
                 </c:if>
             </ul>
 
-            <%-- RIGHT SIDE: SEARCH + LOGIN --%>
             <div class="d-flex align-items-center">
-
-                <%-- 1. ROUNDED SEARCH BAR WITH ICON --%>
                 <div class="me-3 position-relative">
-                    <%-- Input: rounded-pill for shape, pe-5 to make room for icon --%>
                     <input id="searchInput"
                            class="form-control form-control-sm rounded-pill px-3 pe-5"
                            type="search"
                            placeholder="Search"
                            aria-label="Search"
                            style="width: 250px;">
-
-                    <%-- Icon: Absolute position to the right --%>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                          class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 search-icon"
                          viewBox="0 0 16 16">
@@ -94,7 +84,6 @@
                     </svg>
                 </div>
 
-                <%-- 2. AUTH BUTTONS --%>
                 <div>
                     <c:choose>
                         <c:when test="${not empty sessionScope.username}">
@@ -113,41 +102,37 @@
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <%-- Login Button also uses rounded-pill for consistency --%>
                             <a href="${pageContext.request.contextPath}/user/login.jsp" class="btn btn-warning btn-sm fw-bold px-3 rounded-pill">Login</a>
                         </c:otherwise>
                     </c:choose>
                 </div>
             </div>
-
         </div>
     </div>
 </nav>
 
-<%-- HERO SECTION --%>
+<%-- HERO SECTION (UPDATED) --%>
 <div class="hero-section text-center">
     <div class="container">
-        <h1 class="display-4 fw-bold">Univent Catalog</h1>
-        <p class="lead">Find your next experience here.</p>
+        <%-- Changed from h1 display-4 to h2 to match Tickets page --%>
+        <h2 class="fw-bold">Univent Catalog</h2>
+        <%-- Changed from p lead to p mb-0 to match Tickets page --%>
+        <p class="mb-0">Find your next experience here.</p>
     </div>
 </div>
 
-<%-- MAIN CONTENT --%>
 <div class="container mb-5">
     <div class="content-box">
-
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3>Upcoming Events</h3>
             <span id="filterCount" class="text-muted small">Showing all events</span>
         </div>
 
-        <%-- EVENT GRID --%>
         <div class="row" id="eventsContainer">
             <c:forEach var="event" items="${eventList}">
                 <div class="col-md-4 mb-4 event-item">
                     <div class="card h-100 event-card shadow-sm">
                         <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
-
                         <div class="card-body">
                             <h5 class="card-title event-title">${event.title}</h5>
                             <p class="card-text text-muted small">
@@ -159,7 +144,6 @@
                                     ${event.description.length() > 60 ? event.description.substring(0, 60).concat('...') : event.description}
                             </p>
                         </div>
-
                         <div class="card-footer bg-white border-top-0 pb-3">
                             <a href="${pageContext.request.contextPath}/EventDetailsServlet?id=${event.id}" class="btn btn-primary w-100 fw-bold">View Details</a>
                         </div>
@@ -194,7 +178,6 @@
                 item.style.display = 'none';
             }
         });
-
         let noResultsMsg = document.getElementById('noResultsMessage');
         if (visibleCount === 0) {
             noResultsMsg.style.display = 'block';

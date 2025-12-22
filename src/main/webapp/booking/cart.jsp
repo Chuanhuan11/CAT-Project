@@ -16,7 +16,6 @@
             min-height: 100vh;
         }
         .navbar { box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-
         .hero-section {
             background-color: rgba(50, 13, 70, 0.9); /* Brand Purple */
             color: white;
@@ -24,7 +23,6 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-
         .content-box {
             background-color: rgba(255, 255, 255, 0.95);
             padding: 40px;
@@ -32,14 +30,12 @@
             margin-bottom: 50px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
-
         /* --- TABLE STYLING --- */
         .custom-table thead {
             background-color: #2c1a4d;
             color: white;
             border-bottom: 3px solid #ffc107; /* Gold Accent */
         }
-
         .custom-table th {
             font-weight: 600;
             text-transform: uppercase;
@@ -47,18 +43,15 @@
             padding: 15px;
             border: none;
         }
-
         .custom-table td {
             padding: 15px;
             vertical-align: middle;
             font-size: 1rem;
         }
-
         .event-title {
             color: #2c1a4d;
             font-weight: bold;
         }
-
         .total-section {
             background-color: #f8f9fa;
             border-radius: 10px;
@@ -70,7 +63,6 @@
 </head>
 <body>
 
-<%-- NAVBAR (Standard Univent Navbar) --%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
@@ -86,8 +78,6 @@
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/EventListServlet">Catalog</a></li>
                 <li class="nav-item"><a class="nav-link active fw-bold" href="${pageContext.request.contextPath}/CartServlet">My Cart</a></li>
             </ul>
-
-            <%-- User Dropdown --%>
             <div class="d-flex align-items-center">
                 <c:choose>
                     <c:when test="${not empty sessionScope.username}">
@@ -100,6 +90,7 @@
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                 </c:if>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrderHistoryServlet">My Tickets</a></li>
                                 <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
                             </ul>
                         </div>
@@ -113,19 +104,18 @@
     </div>
 </nav>
 
-<%-- HERO HEADER --%>
+<%-- HERO HEADER (UPDATED) --%>
 <div class="hero-section text-center">
     <div class="container">
-        <h1 class="display-4 fw-bold">Your Shopping Cart</h1>
-        <p class="lead">Review your selected events before checkout.</p>
+        <%-- Changed from h1 display-4 to h2 --%>
+        <h2 class="fw-bold">Your Shopping Cart</h2>
+        <%-- Changed from p lead to p mb-0 --%>
+        <p class="mb-0">Review your selected events before checkout.</p>
     </div>
 </div>
 
-<%-- MAIN CONTENT --%>
 <div class="container mb-5">
     <div class="content-box">
-
-        <%-- Error Messages --%>
         <c:if test="${not empty param.error}">
             <div class="alert alert-danger text-center rounded-pill mb-4">
                 <c:choose>
@@ -137,7 +127,6 @@
             </div>
         </c:if>
 
-        <%-- EMPTY CART STATE --%>
         <c:if test="${empty sessionScope.cart}">
             <div class="text-center py-5">
                 <div class="mb-3 text-muted" style="font-size: 4rem;">🛒</div>
@@ -149,7 +138,6 @@
             </div>
         </c:if>
 
-        <%-- CART TABLE --%>
         <c:if test="${not empty sessionScope.cart}">
             <div class="table-responsive">
                 <table class="table table-hover align-middle custom-table mb-0">
@@ -168,7 +156,6 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                        <%-- Optional: Add small thumbnail if available --%>
                                     <div class="event-title">${item.title}</div>
                                 </div>
                             </td>
@@ -189,12 +176,10 @@
                 </table>
             </div>
 
-            <%-- TOTAL & ACTIONS --%>
             <div class="total-section d-flex justify-content-between align-items-center">
                 <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-outline-secondary rounded-pill px-4">
                     &larr; Continue Shopping
                 </a>
-
                 <div class="text-end d-flex align-items-center">
                     <div class="me-4 text-end">
                         <span class="text-muted small d-block">Total Amount</span>
