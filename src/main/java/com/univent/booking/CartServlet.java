@@ -13,94 +13,117 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/CartServlet")
 public class CartServlet extends HttpServlet {
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-
         if ("add".equals(action)) {
             addToCart(request, response);
         } else {
-            response.sendRedirect("CartServlet");
+            response.sendRedirect(request.getContextPath() + "/CartServlet");
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-
         if ("remove".equals(action)) {
             removeFromCart(request, response);
         } else {
-            viewCart(request, response);
+            // Default Action: VIEW CART
+            // Load from DB first so we see items even after logging out and back in
+            loadCartFromDatabase(request);
+            request.getRequestDispatcher("/booking/cart.jsp").forward(request, response);
         }
     }
 
+    // --- 1. ADD TO DATABASE ---
     private void addToCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int eventId = Integer.parseInt(request.getParameter("eventId"));
-        Event event = getEventById(eventId);
-
-        if (event != null) {
-            HttpSession session = request.getSession();
-            List<Event> cart = (List<Event>) session.getAttribute("cart");
-            if (cart == null) {
-                cart = new ArrayList<>();
-                session.setAttribute("cart", cart);
-            }
-            cart.add(event);
-        }
-
-        // Redirect back to catalog or cart
-        response.sendRedirect("CartServlet");
-    }
-
-    private void removeFromCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int eventId = Integer.parseInt(request.getParameter("eventId"));
         HttpSession session = request.getSession();
-        List<Event> cart = (List<Event>) session.getAttribute("cart");
+        Integer userId = (Integer) session.getAttribute("userId"); // Uses Integer ID, not User object
 
-        if (cart != null) {
-            cart.removeIf(e -> e.getId() == eventId);
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
         }
-        response.sendRedirect("CartServlet");
+
+        int eventId = Integer.parseInt(request.getParameter("eventId"));
+
+        try (Connection con = DBConnection.getConnection()) {
+            // Check if item already exists to prevent duplicates
+            String checkSql = "SELECT id FROM cart WHERE user_id = ? AND event_id = ?";
+            PreparedStatement checkPs = con.prepareStatement(checkSql);
+            checkPs.setInt(1, userId);
+            checkPs.setInt(2, eventId);
+            ResultSet rs = checkPs.executeQuery();
+
+            if (!rs.next()) {
+                // Insert into DB if not exists
+                String insertSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
+                PreparedStatement ps = con.prepareStatement(insertSql);
+                ps.setInt(1, userId);
+                ps.setInt(2, eventId);
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        response.sendRedirect(request.getContextPath() + "/CartServlet");
     }
 
-    private void viewCart(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        request.getRequestDispatcher("/booking/cart.jsp").forward(request, response);
+    // --- 2. REMOVE FROM DATABASE ---
+    private void removeFromCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        Integer userId = (Integer) session.getAttribute("userId");
+
+        if (userId != null) {
+            int eventId = Integer.parseInt(request.getParameter("eventId"));
+            try (Connection con = DBConnection.getConnection()) {
+                String sql = "DELETE FROM cart WHERE user_id = ? AND event_id = ?";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setInt(1, userId);
+                ps.setInt(2, eventId);
+                ps.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        response.sendRedirect(request.getContextPath() + "/CartServlet");
     }
 
-    private Event getEventById(int id) {
-        Event event = null;
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM events WHERE id = ?")) {
+    // --- 3. LOAD FROM DATABASE (Persist on Logout) ---
+    private void loadCartFromDatabase(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Integer userId = (Integer) session.getAttribute("userId");
+        List<Event> cart = new ArrayList<>();
 
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    event = new Event();
+        if (userId != null) {
+            try (Connection con = DBConnection.getConnection()) {
+                // Join cart with events to get titles/prices
+                String sql = "SELECT e.* FROM events e JOIN cart c ON e.id = c.event_id WHERE c.user_id = ?";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setInt(1, userId);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    Event event = new Event();
                     event.setId(rs.getInt("id"));
                     event.setTitle(rs.getString("title"));
-                    event.setDescription(rs.getString("description"));
                     event.setEventDate(rs.getDate("event_date"));
                     event.setLocation(rs.getString("location"));
                     event.setPrice(rs.getDouble("price"));
                     event.setImageUrl(rs.getString("image_url"));
-                    event.setTotalSeats(rs.getInt("total_seats"));
-                    event.setAvailableSeats(rs.getInt("available_seats"));
+                    cart.add(event);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return event;
+        // Save list to session so JSP can display it
+        session.setAttribute("cart", cart);
     }
 }

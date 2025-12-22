@@ -1,65 +1,107 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<!DOCTYPE html>
-<html lang="en">
-
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Univent</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style_user.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
+    <style>
+        /* Matches your Catalog 'home.jsp' background style */
+        body {
+            background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glass-morphism Card Style */
+        .login-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background-color: #2c1a4d; /* Your Brand Purple */
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .btn-brand {
+            background-color: #2c1a4d;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-brand:hover {
+            background-color: #4a2c82; /* Lighter purple on hover */
+            color: white;
+        }
+
+        .form-control:focus {
+            border-color: #2c1a4d;
+            box-shadow: 0 0 0 0.25rem rgba(44, 26, 77, 0.25);
+        }
+    </style>
 </head>
-
 <body>
-<nav class="navbar">
-    <a href="${pageContext.request.contextPath}/index.jsp" class="logo">
-        <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Univent"
-             style="height: 80px; width: auto;">
-    </a>
-    <div class="nav-links">
-        <a href="${pageContext.request.contextPath}/index.jsp">Home</a>
-        <a href="${pageContext.request.contextPath}/user/register.jsp" class="btn-secondary">Sign Up</a>
-    </div>
-</nav>
 
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h2>Welcome Back</h2>
-            <p>Login to discover events</p>
-        </div>
+<a href="${pageContext.request.contextPath}/index.jsp"
+   class="btn btn-light position-absolute top-0 start-0 m-4 shadow-sm rounded-pill px-4 fw-bold"
+   style="color: #2c1a4d; text-decoration: none;">
+    &larr; Back to Home
+</a>
 
-        <form action="${pageContext.request.contextPath}/login" method="post">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="student@usm.my" required>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card login-card">
+                <div class="login-header">
+                    <img src="${pageContext.request.contextPath}/assets/img/logo.png"
+                         alt="Univent" width="60" class="rounded-circle mb-2 shadow-sm">
+                    <h4 class="mb-0">Welcome Back</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    <%-- Error Message Alert --%>
+                    <c:if test="${not empty errorMessage}">
+                        <div class="alert alert-danger text-center p-2 small">
+                                ${errorMessage}
+                        </div>
+                    </c:if>
+
+                    <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">USERNAME</label>
+                            <input type="text" name="username" class="form-control form-control-lg" required placeholder="Enter username">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold">PASSWORD</label>
+                            <input type="password" name="password" class="form-control form-control-lg" required placeholder="Enter password">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-brand btn-lg">Log In</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center bg-white py-3 border-0">
+                    <small class="text-muted">
+                        Don't have an account?
+                        <a href="register.jsp" class="fw-bold" style="color: #2c1a4d;">Register here</a>
+                    </small>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
-            </div>
-
-
-            <% if ("success".equals(request.getParameter("registration"))) { %>
-            <div class="success-message"
-                 style="color: green; text-align: center; margin-bottom: 1rem; padding: 10px; background-color: #d4edda; border-radius: 5px;">
-                Registration successful! Please login.
-            </div>
-            <% } %>
-
-            <div class="error-message" style="color: red; text-align: center; margin-bottom: 1rem;">
-                ${errorMessage}
-            </div>
-
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Don't have an account? <a href="${pageContext.request.contextPath}/user/register.jsp">Sign up</a></p>
-            <p style="margin-top: 0.5rem;"><a href="#" style="font-size: 0.85rem; color: #888;">Forgot Password?</a></p>
         </div>
     </div>
 </div>
-</body>
 
+</body>
 </html>

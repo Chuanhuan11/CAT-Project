@@ -114,7 +114,7 @@
                 ${message}
         </div>
         <p style="text-align: center;">Thank you for your purchase!</p>
-        <a href="${pageContext.request.contextPath}/catalog/EventListServlet" class="btn"
+        <a href="${pageContext.request.contextPath}/EventListServlet" class="btn"
            style="background-color: #3498db; text-align: center; text-decoration: none;">Back to Events</a>
     </c:if>
 

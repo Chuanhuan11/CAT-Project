@@ -1,7 +1,6 @@
 package com.univent.booking;
 
 import com.univent.model.Event;
-import com.univent.model.User;
 import com.univent.util.DBConnection;
 
 import javax.servlet.ServletException;
@@ -24,11 +23,12 @@ public class CheckoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        /*if (session.getAttribute("user") == null) {
-            // Redirect to login if user is not logged in
+
+        // FIX: Check for 'userId' (Integer), NOT 'user' object
+        if (session.getAttribute("userId") == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
-        }*/
+        }
 
         request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
     }
@@ -37,25 +37,38 @@ public class CheckoutServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
+
+        // FIX: Retrieve 'userId' directly
+        Integer userId = (Integer) session.getAttribute("userId");
         List<Event> cart = (List<Event>) session.getAttribute("cart");
+
+        // Basic Security Check
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
 
         String cardNumber = request.getParameter("cardNumber");
         String expiry = request.getParameter("expiry");
         String cvv = request.getParameter("cvv");
 
-        if (cardNumber == null || cardNumber.trim().isEmpty() || expiry == null || expiry.trim().isEmpty()
-                || cvv == null || cvv.trim().isEmpty()) {
+        if (cardNumber == null || cardNumber.trim().isEmpty() ||
+                expiry == null || expiry.trim().isEmpty() ||
+                cvv == null || cvv.trim().isEmpty()) {
             request.setAttribute("error", "Please fill in all payment fields.");
             request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
             return;
         }
 
-        if (user != null && cart != null && !cart.isEmpty()) {
-            boolean success = saveBookings(user.getId(), cart);
+        if (cart != null && !cart.isEmpty()) {
+            boolean success = saveBookings(userId, cart);
+
             if (success) {
-                session.removeAttribute("cart");
-                request.setAttribute("message", "Booking confirmed successfully!");
+                // Clear the database cart so user doesn't buy same items twice
+                clearDatabaseCart(userId);
+
+                session.removeAttribute("cart"); // Clear session visual
+                request.setAttribute("message", "Payment Successful! Tickets sent to your email.");
                 request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
             } else {
                 request.setAttribute("error", "Booking failed. Please try again.");
@@ -84,6 +97,17 @@ public class CheckoutServlet extends HttpServlet {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private void clearDatabaseCart(int userId) {
+        try (Connection con = DBConnection.getConnection()) {
+            String sql = "DELETE FROM cart WHERE user_id = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
