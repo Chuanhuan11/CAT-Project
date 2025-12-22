@@ -24,8 +24,13 @@ public class EventListServlet extends HttpServlet {
 
         // 2. Connect to Database using your DBConnection utility
         try (Connection con = DBConnection.getConnection()) {
-            // 3. Write the SQL Query
-            String sql = "SELECT * FROM events";
+
+            // --- UPDATED SQL QUERY ---
+            // Filter 1: event_date >= CURDATE()  -> Hides past events
+            // Filter 2: available_seats > 0      -> Hides sold-out events
+            // Order by: event_date ASC           -> Shows soonest events first
+            String sql = "SELECT * FROM events WHERE event_date >= CURDATE() AND available_seats > 0 ORDER BY event_date ASC";
+
             PreparedStatement ps = con.prepareStatement(sql);
 
             // 4. Execute and get results
@@ -37,10 +42,10 @@ public class EventListServlet extends HttpServlet {
                 e.setId(rs.getInt("id"));
                 e.setTitle(rs.getString("title"));
                 e.setDescription(rs.getString("description"));
-                e.setEventDate(rs.getDate("event_date")); // Matches SQL column 'event_date'
+                e.setEventDate(rs.getDate("event_date"));
                 e.setLocation(rs.getString("location"));
                 e.setPrice(rs.getDouble("price"));
-                e.setImageUrl(rs.getString("image_url")); // Matches SQL column 'image_url'
+                e.setImageUrl(rs.getString("image_url"));
                 e.setTotalSeats(rs.getInt("total_seats"));
                 e.setAvailableSeats(rs.getInt("available_seats"));
 
@@ -52,7 +57,7 @@ public class EventListServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // 6. Send the Real List to the JSP
+        // 6. Send the Filtered List to the JSP
         request.setAttribute("eventList", events);
 
         // 7. Forward to the Home Page

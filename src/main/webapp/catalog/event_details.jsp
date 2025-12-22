@@ -8,9 +8,16 @@
 </head>
 <body class="bg-light">
 
+<%-- UPDATED NAVBAR WITH LOGO --%>
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" href="${pageContext.request.contextPath}/EventListServlet">Univent</a>
+        <%-- Added d-flex and align-items-center for proper logo alignment --%>
+        <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/EventListServlet">
+            <img src="${pageContext.request.contextPath}/assets/img/logo.png"
+                 alt="Logo" width="30" height="30"
+                 class="d-inline-block align-text-top me-2 rounded-circle">
+            Univent
+        </a>
         <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-outline-light btn-sm">Back to Catalog</a>
     </div>
 </nav>
@@ -18,10 +25,15 @@
 <div class="container">
     <div class="card shadow-sm">
         <div class="row g-0">
+            <%-- Left Column: Event Image --%>
             <div class="col-md-6">
-                <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="img-fluid rounded-start w-100" style="height: 500px; object-fit: cover;" alt="Event Poster">
+                <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}"
+                     class="img-fluid rounded-start w-100"
+                     style="height: 500px; object-fit: cover;"
+                     alt="Event Poster">
             </div>
 
+            <%-- Right Column: Event Details --%>
             <div class="col-md-6">
                 <div class="card-body p-5">
                     <h2 class="card-title display-5 mb-3">${event.title}</h2>
@@ -38,6 +50,7 @@
 
                     <hr class="my-4">
 
+                    <%-- Add to Cart Form --%>
                     <div class="d-grid gap-2">
                         <form action="${pageContext.request.contextPath}/CartServlet" method="post">
                             <input type="hidden" name="eventId" value="${event.id}">

@@ -68,7 +68,7 @@
                 </li>
                 <c:if test="${not empty sessionScope.username}">
                     <li class="nav-item">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/booking/cart.jsp">My Cart</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/CartServlet">My Cart</a>
                     </li>
                 </c:if>
             </ul>
@@ -107,6 +107,7 @@
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                     </c:if>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrderHistoryServlet">My Tickets</a></li>
                                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
                                 </ul>
                             </div>

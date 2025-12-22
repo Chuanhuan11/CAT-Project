@@ -1,51 +1,53 @@
 package com.univent.admin;
 
 import com.univent.util.DBConnection;
+
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.ResultSet;
 
 @WebServlet("/DeleteEventServlet")
 public class DeleteEventServlet extends HttpServlet {
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String idParam = request.getParameter("id");
+        HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+        Integer userId = (Integer) session.getAttribute("userId");
 
-        if (idParam != null && !idParam.isEmpty()) {
-            int eventId = Integer.parseInt(idParam);
-
+        if (idParam != null) {
             try (Connection con = DBConnection.getConnection()) {
-                con.setAutoCommit(false);
-
-                try {
-                    String deleteBookingsSql = "DELETE FROM bookings WHERE event_id = ?";
-                    PreparedStatement psBookings = con.prepareStatement(deleteBookingsSql);
-                    psBookings.setInt(1, eventId);
-                    psBookings.executeUpdate();
-
-                    String deleteEventSql = "DELETE FROM events WHERE id = ?";
-                    PreparedStatement psEvent = con.prepareStatement(deleteEventSql);
-                    psEvent.setInt(1, eventId);
-                    psEvent.executeUpdate();
-
-                    con.commit();
-
-                } catch (SQLException e) {
-                    con.rollback();
-                    System.err.println("Error deleting event: " + e.getMessage());
+                // 1. Ownership Check
+                if (!"ADMIN".equals(role)) {
+                    String checkSql = "SELECT organizer_id FROM events WHERE id = ?";
+                    PreparedStatement checkPs = con.prepareStatement(checkSql);
+                    checkPs.setInt(1, Integer.parseInt(idParam));
+                    ResultSet rs = checkPs.executeQuery();
+                    if (rs.next()) {
+                        if (rs.getInt("organizer_id") != userId) {
+                            // Not the owner -> Deny Access
+                            response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
+                            return;
+                        }
+                    }
                 }
 
+                // 2. Perform Delete
+                String sql = "DELETE FROM events WHERE id = ?";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setInt(1, Integer.parseInt(idParam));
+                ps.executeUpdate();
+
             } catch (Exception e) {
-                System.err.println("Error deleting event: " + e.getMessage());
+                e.printStackTrace();
             }
         }
-
-        response.sendRedirect("OrganiserDashboardServlet");
+        response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
     }
 }

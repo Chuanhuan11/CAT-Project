@@ -54,6 +54,15 @@ CREATE TABLE cart (
                       FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS payment_methods (
+                                               id INT AUTO_INCREMENT PRIMARY KEY,
+                                               user_id INT NOT NULL,
+                                               card_alias VARCHAR(100),   -- e.g. "Visa ending in 1234"
+                                               card_number VARCHAR(20),   -- Storing dummy number for display
+                                               expiry VARCHAR(10),
+                                               FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- 3. SEED DATA (Insert Default Data)
 
 -- Insert Users

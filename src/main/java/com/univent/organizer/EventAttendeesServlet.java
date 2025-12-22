@@ -22,7 +22,7 @@ public class EventAttendeesServlet extends HttpServlet {
 
         // Basic Validation
         if (eventIdParam == null || eventIdParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/AdminDashboardServlet");
+            response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
             return;
         }
 
@@ -30,7 +30,7 @@ public class EventAttendeesServlet extends HttpServlet {
         try {
             eventId = Integer.parseInt(eventIdParam);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/AdminDashboardServlet");
+            response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
             return;
         }
 
@@ -38,7 +38,7 @@ public class EventAttendeesServlet extends HttpServlet {
         List<User> attendees = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
-            // QUERY 1: Fetch Event Title Securely from DB (Fixes XSS)
+            // QUERY 1: Fetch Event Title
             String titleSql = "SELECT title FROM events WHERE id = ?";
             try (PreparedStatement psTitle = con.prepareStatement(titleSql)) {
                 psTitle.setInt(1, eventId);
@@ -71,7 +71,10 @@ public class EventAttendeesServlet extends HttpServlet {
         }
 
         request.setAttribute("attendees", attendees);
-        request.setAttribute("eventTitle", eventTitle); // Now contains safe DB data
+        request.setAttribute("eventTitle", eventTitle);
+        // NEW: Pass ID to JSP for the 'Remove' link
+        request.setAttribute("eventId", eventId);
+
         request.getRequestDispatcher("/organizer/view_attendees.jsp").forward(request, response);
     }
 }

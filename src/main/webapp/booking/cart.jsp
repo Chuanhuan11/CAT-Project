@@ -1,192 +1,214 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<html>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
+<html>
 <head>
     <title>Shopping Cart - Univent</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
+        /* --- THEME SETUP --- */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9f9f9;
-            padding: 20px;
-            margin: 0;
+            background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .navbar { box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        .hero-section {
+            background-color: rgba(50, 13, 70, 0.9); /* Brand Purple */
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .content-box {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 50px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
 
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            text-align: center;
+        /* --- TABLE STYLING --- */
+        .custom-table thead {
+            background-color: #2c1a4d;
+            color: white;
+            border-bottom: 3px solid #ffc107; /* Gold Accent */
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th,
-        td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #ecf0f1;
-            color: #2c3e50;
+        .custom-table th {
             font-weight: 600;
-        }
-
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 14px;
-            text-decoration: none;
-            border-radius: 4px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            padding: 15px;
             border: none;
-            cursor: pointer;
-            transition: background 0.3s;
         }
 
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
+        .custom-table td {
+            padding: 15px;
+            vertical-align: middle;
+            font-size: 1rem;
         }
 
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-secondary {
-            background-color: #95a5a6;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #7f8c8d;
-        }
-
-        .btn-danger {
-            background-color: #e74c3c;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-
-        .total {
-            font-size: 1.2em;
+        .event-title {
+            color: #2c1a4d;
             font-weight: bold;
-            text-align: right;
-            margin-top: 10px;
         }
 
-        .actions {
-            text-align: right;
+        .total-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
             margin-top: 20px;
-        }
-
-        .message {
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .empty-cart {
-            text-align: center;
-            margin: 40px 0;
-            color: #7f8c8d;
+            border: 1px solid #e9ecef;
         }
     </style>
 </head>
-
 <body>
-<div class="container">
-    <h1>Your Shopping Cart</h1>
 
-    <c:if test="${not empty param.error}">
-        <div class="message error">
-            <c:choose>
-                <c:when test="${param.error == 'Missing Event ID'}">Error: Event ID is missing.</c:when>
-                <c:when test="${param.error == 'Invalid Event ID'}">Error: Invalid Event ID.</c:when>
-                <c:when test="${param.error == 'Event Not Found'}">Error: Event not found.</c:when>
-                <c:otherwise>An unknown error occurred.</c:otherwise>
-            </c:choose>
+<%-- NAVBAR (Standard Univent Navbar) --%>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
+            <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2 rounded-circle">
+            Univent
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/EventListServlet">Catalog</a></li>
+                <li class="nav-item"><a class="nav-link active fw-bold" href="${pageContext.request.contextPath}/CartServlet">My Cart</a></li>
+            </ul>
+
+            <%-- User Dropdown --%>
+            <div class="d-flex align-items-center">
+                <c:choose>
+                    <c:when test="${not empty sessionScope.username}">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                Hello, ${sessionScope.username}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                </c:if>
+                                <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+                            </ul>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/user/login.jsp" class="btn btn-warning btn-sm fw-bold px-3 rounded-pill">Login</a>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
-    </c:if>
+    </div>
+</nav>
 
-    <c:if test="${empty sessionScope.cart}">
-        <div class="empty-cart">
-            <p>Your cart is empty.</p>
-            <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-primary">Browse
-                Events</a>
-        </div>
-    </c:if>
-
-    <c:if test="${not empty sessionScope.cart}">
-        <table>
-            <thead>
-            <tr>
-                <th>Event</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Price</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <c:set var="total" value="0" />
-            <c:forEach var="item" items="${sessionScope.cart}">
-                <tr>
-                    <td>${item.title}</td>
-                    <td>${item.eventDate}</td>
-                    <td>${item.location}</td>
-                    <td>RM${item.price}</td>
-                    <td>
-                        <a href="${pageContext.request.contextPath}/CartServlet?action=remove&eventId=${item.id}"
-                           class="btn btn-danger">Remove</a>
-                    </td>
-                </tr>
-                <c:set var="total" value="${total + item.price}" />
-            </c:forEach>
-            </tbody>
-        </table>
-
-        <div class="total">
-            Total: RM
-            <c:out value="${total}" />
-        </div>
-
-        <div class="actions">
-            <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-secondary">Continue
-                Shopping</a>
-            <a href="${pageContext.request.contextPath}/CheckoutServlet" class="btn btn-primary">Proceed to Checkout</a>
-        </div>
-    </c:if>
+<%-- HERO HEADER --%>
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Your Shopping Cart</h1>
+        <p class="lead">Review your selected events before checkout.</p>
+    </div>
 </div>
-</body>
 
+<%-- MAIN CONTENT --%>
+<div class="container mb-5">
+    <div class="content-box">
+
+        <%-- Error Messages --%>
+        <c:if test="${not empty param.error}">
+            <div class="alert alert-danger text-center rounded-pill mb-4">
+                <c:choose>
+                    <c:when test="${param.error == 'Missing Event ID'}">Error: Event ID is missing.</c:when>
+                    <c:when test="${param.error == 'Invalid Event ID'}">Error: Invalid Event ID.</c:when>
+                    <c:when test="${param.error == 'Event Not Found'}">Error: Event not found.</c:when>
+                    <c:otherwise>An unknown error occurred.</c:otherwise>
+                </c:choose>
+            </div>
+        </c:if>
+
+        <%-- EMPTY CART STATE --%>
+        <c:if test="${empty sessionScope.cart}">
+            <div class="text-center py-5">
+                <div class="mb-3 text-muted" style="font-size: 4rem;">🛒</div>
+                <h3 class="text-muted mb-3">Your cart is currently empty.</h3>
+                <p class="text-muted mb-4">Looks like you haven't added any events yet.</p>
+                <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-primary rounded-pill px-5 py-2 fw-bold" style="background-color: #2c1a4d; border: none;">
+                    Browse Events
+                </a>
+            </div>
+        </c:if>
+
+        <%-- CART TABLE --%>
+        <c:if test="${not empty sessionScope.cart}">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle custom-table mb-0">
+                    <thead>
+                    <tr>
+                        <th style="width: 40%;">Event</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Price</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:set var="total" value="0" />
+                    <c:forEach var="item" items="${sessionScope.cart}">
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                        <%-- Optional: Add small thumbnail if available --%>
+                                    <div class="event-title">${item.title}</div>
+                                </div>
+                            </td>
+                            <td class="text-muted">${item.eventDate}</td>
+                            <td class="text-muted small"><em>${item.location}</em></td>
+                            <td class="fw-bold text-primary">RM <fmt:formatNumber value="${item.price}" type="number" minFractionDigits="2" /></td>
+                            <td class="text-end">
+                                <a href="${pageContext.request.contextPath}/CartServlet?action=remove&eventId=${item.id}"
+                                   class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                   onclick="return confirm('Remove this event from your cart?');">
+                                    Remove
+                                </a>
+                            </td>
+                        </tr>
+                        <c:set var="total" value="${total + item.price}" />
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+
+            <%-- TOTAL & ACTIONS --%>
+            <div class="total-section d-flex justify-content-between align-items-center">
+                <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-outline-secondary rounded-pill px-4">
+                    &larr; Continue Shopping
+                </a>
+
+                <div class="text-end d-flex align-items-center">
+                    <div class="me-4 text-end">
+                        <span class="text-muted small d-block">Total Amount</span>
+                        <span class="h3 fw-bold text-dark m-0">RM <fmt:formatNumber value="${total}" type="number" minFractionDigits="2" /></span>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/CheckoutServlet" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                        Proceed to Checkout &rarr;
+                    </a>
+                </div>
+            </div>
+        </c:if>
+    </div>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

@@ -68,12 +68,10 @@
                         </div>
                     </c:if>
 
-                    <%-- FIX 1: Action updated to "/register" to match @WebServlet("/register") --%>
                     <form action="${pageContext.request.contextPath}/register" method="post">
 
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">FULL NAME</label>
-                            <%-- FIX 2: Name updated to "fullname" to match request.getParameter("fullname") --%>
                             <input type="text" name="fullname" class="form-control" required placeholder="John Doe">
                         </div>
 
@@ -83,6 +81,16 @@
                             <div class="form-text small">Must be a valid USM email ending in .usm.my</div>
                         </div>
 
+                        <%-- NEW: Role Selection Dropdown --%>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">ACCOUNT TYPE</label>
+                            <select name="role" class="form-select" required>
+                                <option value="STUDENT" selected>Student (Participant)</option>
+                                <option value="ORGANIZER">Event Organizer</option>
+                            </select>
+                            <div class="form-text small">Organizers can create and manage their own events.</div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold">PASSWORD</label>
@@ -90,12 +98,10 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold">CONFIRM</label>
-                                <%-- FIX 3: Name updated to "confirm_password" to match backend --%>
                                 <input type="password" name="confirm_password" class="form-control" required>
                             </div>
                         </div>
 
-                        <%-- Terms Checkbox (Optional visual, as Servlet doesn't check it yet, but good for UI) --%>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="terms" required>
                             <label class="form-check-label small" for="terms">

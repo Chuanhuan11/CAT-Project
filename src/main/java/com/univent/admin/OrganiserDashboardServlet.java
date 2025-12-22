@@ -2,6 +2,7 @@ package com.univent.admin;
 
 import com.univent.model.Event;
 import com.univent.util.DBConnection;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,29 +17,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/OrganiserDashboardServlet")
-public class DashboardServlet extends HttpServlet {
+public class OrganiserDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
         String role = (String) session.getAttribute("role");
+        Integer userId = (Integer) session.getAttribute("userId");
 
-        if (userId == null || role == null) {
-            session.setAttribute("userId", 1);
-            session.setAttribute("role", "ADMIN");
-
-            userId = 1;
-            role = "ADMIN";
+        // 1. Security Check
+        if (role == null || (!role.equals("ADMIN") && !role.equals("ORGANIZER"))) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
         }
 
         List<Event> events = new ArrayList<>();
+
         try (Connection con = DBConnection.getConnection()) {
             String sql;
             PreparedStatement ps;
 
+            // 2. Role-Based Logic
             if ("ADMIN".equals(role)) {
+                // Admin sees EVERYTHING
                 sql = "SELECT * FROM events";
                 ps = con.prepareStatement(sql);
             } else {
+                // Organizer sees ONLY their own events
                 sql = "SELECT * FROM events WHERE organizer_id = ?";
                 ps = con.prepareStatement(sql);
                 ps.setInt(1, userId);
@@ -53,11 +56,11 @@ public class DashboardServlet extends HttpServlet {
                 e.setLocation(rs.getString("location"));
                 e.setPrice(rs.getDouble("price"));
                 e.setAvailableSeats(rs.getInt("available_seats"));
-                e.setOrganizerId(rs.getInt("organizer_id"));
+                e.setOrganizerId(rs.getInt("organizer_id")); // Ensure Event model has this setter
                 events.add(e);
             }
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
 
         request.setAttribute("eventList", events);
