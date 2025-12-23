@@ -99,6 +99,7 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/EventListServlet">Home Page</a></li>
+                    <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
                 </ul>
             </div>

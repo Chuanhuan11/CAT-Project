@@ -10,55 +10,53 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 @WebServlet("/DeleteBookingServlet")
+@SuppressWarnings("serial")
 public class DeleteBookingServlet extends HttpServlet {
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String eventIdStr = request.getParameter("eventId");
-        String userIdStr = request.getParameter("userId");
 
-        if (eventIdStr != null && userIdStr != null) {
-            int eventId = Integer.parseInt(eventIdStr);
-            int userId = Integer.parseInt(userIdStr);
+        // 1. Get Parameters (These are "Tainted" Strings)
+        String bookingIdParam = request.getParameter("bookingId");
+        String eventIdParam = request.getParameter("eventId");
 
-            Connection con = null;
+        // 2. Variable to hold the "Safe" Integer
+        int eventId = -1;
+
+        if (bookingIdParam != null && !bookingIdParam.isEmpty() && eventIdParam != null) {
             try {
-                con = DBConnection.getConnection();
-                con.setAutoCommit(false); // Start Transaction
+                // 3. SANITIZE: Convert Strings to Integers immediately
+                int bookingId = Integer.parseInt(bookingIdParam);
+                eventId = Integer.parseInt(eventIdParam); // Now 'eventId' is safe
 
-                // 1. Delete the Booking
-                String deleteSql = "DELETE FROM bookings WHERE event_id = ? AND user_id = ?";
-                try (PreparedStatement psDelete = con.prepareStatement(deleteSql)) {
-                    psDelete.setInt(1, eventId);
-                    psDelete.setInt(2, userId);
-                    int rowsAffected = psDelete.executeUpdate();
+                try (Connection con = DBConnection.getConnection()) {
+                    // Delete Logic
+                    String deleteSql = "DELETE FROM bookings WHERE id = ?";
+                    try (PreparedStatement ps = con.prepareStatement(deleteSql)) {
+                        ps.setInt(1, bookingId);
+                        int rowsAffected = ps.executeUpdate();
 
-                    if (rowsAffected > 0) {
-                        // 2. If deletion worked, Restore the Seat
-                        String updateSql = "UPDATE events SET available_seats = available_seats + 1 WHERE id = ?";
-                        try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
-                            psUpdate.setInt(1, eventId);
-                            psUpdate.executeUpdate();
+                        if (rowsAffected > 0) {
+                            String updateSql = "UPDATE events SET available_seats = available_seats + 1 WHERE id = ?";
+                            try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
+                                psUpdate.setInt(1, eventId);
+                                psUpdate.executeUpdate();
+                            }
                         }
                     }
                 }
-
-                con.commit(); // Save Changes
-
-            } catch (Exception e) {
-                if (con != null) {
-                    try { con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-                }
+            } catch (NumberFormatException | java.sql.SQLException e) {
                 e.printStackTrace();
-            } finally {
-                if (con != null) {
-                    try { con.setAutoCommit(true); con.close(); } catch (SQLException e) { e.printStackTrace(); }
-                }
             }
         }
 
-        // Redirect back to the attendees list
-        response.sendRedirect(request.getContextPath() + "/EventAttendeesServlet?eventId=" + eventIdStr);
+        // 4. SAFE REDIRECT: Use the integer 'eventId', NOT the String 'eventIdParam'
+        if (eventId > 0) {
+            response.sendRedirect(request.getContextPath() + "/EventAttendeesServlet?eventId=" + eventId);
+        } else {
+            // Fallback if eventId was invalid or null
+            response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
+        }
     }
 }

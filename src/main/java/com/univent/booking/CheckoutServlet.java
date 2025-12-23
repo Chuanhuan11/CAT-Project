@@ -142,7 +142,7 @@ public class CheckoutServlet extends HttpServlet {
             }
         }
 
-        // Process Payment (Dummy Logic)
+        // Process Payment
         if (cart != null && !cart.isEmpty()) {
             boolean success = saveBookings(userId, cart);
             if (success) {
@@ -161,7 +161,6 @@ public class CheckoutServlet extends HttpServlet {
 
     // --- HELPER TO SAVE CARD ---
     private void savePaymentMethod(int userId, String number, String expiry) {
-        // Create an Alias like "Visa ending 1234"
         String last4 = number.length() > 4 ? number.substring(number.length() - 4) : number;
         String alias = "Card ending " + last4;
 
@@ -170,7 +169,7 @@ public class CheckoutServlet extends HttpServlet {
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
             ps.setString(2, alias);
-            ps.setString(3, number); // In real app, encrypt this!
+            ps.setString(3, number);
             ps.setString(4, expiry);
             ps.executeUpdate();
         } catch (Exception e) {
@@ -192,16 +191,22 @@ public class CheckoutServlet extends HttpServlet {
                 String date = LocalDate.now().toString();
 
                 for (Event event : cart) {
-                    // Add Booking
-                    psBooking.setInt(1, userId);
-                    psBooking.setInt(2, event.getId());
-                    psBooking.setString(3, date);
-                    psBooking.setString(4, "CONFIRMED");
-                    psBooking.addBatch();
+                    // FIX: Loop through the quantity. If quantity is 10, run this loop 10 times.
+                    int qty = event.getQuantity();
+                    if(qty < 1) qty = 1;
 
-                    // Decrease Seats
-                    psUpdate.setInt(1, event.getId());
-                    psUpdate.addBatch();
+                    for(int i = 0; i < qty; i++) {
+                        // Add Booking (One row per ticket)
+                        psBooking.setInt(1, userId);
+                        psBooking.setInt(2, event.getId());
+                        psBooking.setString(3, date);
+                        psBooking.setString(4, "CONFIRMED");
+                        psBooking.addBatch();
+
+                        // Decrease Seats (Decrease by 1 per ticket)
+                        psUpdate.setInt(1, event.getId());
+                        psUpdate.addBatch();
+                    }
                 }
 
                 psBooking.executeBatch();
@@ -217,9 +222,11 @@ public class CheckoutServlet extends HttpServlet {
 
             } catch (Exception e) {
                 con.rollback();
+                e.printStackTrace();
                 return false;
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         } finally {
             if (con != null) try { con.close(); } catch (Exception e) {}

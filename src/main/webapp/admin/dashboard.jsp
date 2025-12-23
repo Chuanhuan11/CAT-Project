@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<%-- 1. GET TODAY'S DATE FOR COMPARISON --%>
+<% request.setAttribute("todayDate", new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date())); %>
+
 <html>
 <head>
     <title>Dashboard - Univent</title>
@@ -38,12 +41,21 @@
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             border: 1px solid #ddd;
+            margin-bottom: 2rem;
         }
 
-        .custom-table thead {
+        /* Active Table Header */
+        .active-table thead {
             background-color: #2c1a4d;
             color: white;
             border-bottom: 4px solid #ffc107;
+        }
+
+        /* Past Table Header (Grey) */
+        .history-table thead {
+            background-color: #6c757d;
+            color: white;
+            border-bottom: 4px solid #dee2e6;
         }
 
         .custom-table th {
@@ -62,29 +74,25 @@
             color: #444;
         }
 
-        /* ZEBRA STRIPING */
-        .custom-table tbody tr:nth-of-type(even) {
-            background-color: rgba(44, 26, 77, 0.04);
-        }
-        .custom-table tbody tr:nth-of-type(odd) {
-            background-color: #ffffff;
-        }
+        /* Zebra Striping */
+        .custom-table tbody tr:nth-of-type(even) { background-color: rgba(0,0,0, 0.02); }
+        .custom-table tbody tr:nth-of-type(odd) { background-color: #ffffff; }
 
-        /* GLITCH FIX: Apply Border to First Cell instead of Row */
+        /* Hover Effect (Active only) */
+        .active-table tbody tr:hover { background-color: rgba(255, 193, 7, 0.1); }
+        .active-table tbody tr:hover td:first-child { border-left: 4px solid #ffc107; }
+
+        /* Past Row Styling */
+        .history-table td { color: #adb5bd; }
+        .history-table strong { color: #6c757d; }
+        .history-table .btn { filter: grayscale(100%); opacity: 0.7; }
+        .history-table .btn:hover { filter: grayscale(0%); opacity: 1; }
+
         .custom-table tbody tr td:first-child {
-            border-left: 4px solid transparent; /* Always take up 4px space */
+            border-left: 4px solid transparent;
             transition: border-left 0.2s ease;
         }
 
-        .custom-table tbody tr:hover {
-            background-color: rgba(255, 193, 7, 0.1); /* Gold Tint on Hover */
-        }
-
-        .custom-table tbody tr:hover td:first-child {
-            border-left: 4px solid #ffc107; /* Gold Left Border appears on hover */
-        }
-
-        /* Typography */
         .col-id { color: #888; font-weight: bold; font-size: 0.9rem; }
         .col-title { font-size: 1.05rem; color: #000; }
         .col-price { font-family: 'Segoe UI', sans-serif; font-size: 1.1rem; }
@@ -126,10 +134,19 @@
 
 <div class="container">
     <div class="content-box">
+        <%-- SERVER ERROR FALLBACK --%>
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <strong>System Notice:</strong> ${sessionScope.errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <c:remove var="errorMessage" scope="session"/>
+        </c:if>
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h3 class="fw-bold text-dark mb-0">Current Events</h3>
-                <p class="text-muted small mb-0">Manage your event listings below</p>
+                <h3 class="fw-bold text-dark mb-0">Active Events</h3>
+                <p class="text-muted small mb-0">Upcoming events visible to students</p>
             </div>
             <div>
                 <c:if test="${sessionScope.role == 'ADMIN'}">
@@ -144,7 +161,7 @@
         </div>
 
         <div class="table-responsive table-container">
-            <table class="table custom-table mb-0">
+            <table class="table custom-table active-table mb-0">
                 <thead>
                 <tr>
                     <th style="width: 5%;">ID</th>
@@ -157,66 +174,121 @@
                 </tr>
                 </thead>
                 <tbody>
+                <c:set var="hasActive" value="false" />
                 <c:forEach var="event" items="${eventList}">
-                    <tr>
-                        <td class="col-id">
-                            #${event.id}
-                            <input type="hidden" class="data-id" value="${event.id}">
-                            <input type="hidden" class="data-title" value="${event.title}">
-                            <input type="hidden" class="data-date" value="${event.eventDate}">
-                            <input type="hidden" class="data-loc" value="${event.location}">
-                            <input type="hidden" class="data-price" value="${event.price}">
-                            <input type="hidden" class="data-seats" value="${event.totalSeats}">
-                            <input type="hidden" class="data-img" value="${event.imageUrl}">
-                            <div class="d-none data-desc"><c:out value="${event.description}"/></div>
+                    <%-- FILTER: Only Future Events --%>
+                    <c:if test="${event.eventDate >= todayDate}">
+                        <c:set var="hasActive" value="true" />
+                        <tr>
+                            <td class="col-id">
+                                #${event.id}
+                                <input type="hidden" class="data-id" value="${event.id}">
+                                <input type="hidden" class="data-title" value="${event.title}">
+                                <input type="hidden" class="data-date" value="${event.eventDate}">
+                                <input type="hidden" class="data-loc" value="${event.location}">
+                                <input type="hidden" class="data-price" value="${event.price}">
+                                <input type="hidden" class="data-seats" value="${event.totalSeats}">
+                                <input type="hidden" class="data-img" value="${event.imageUrl}">
+                                <div class="d-none data-desc"><c:out value="${event.description}"/></div>
+                                <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
+                                <input type="hidden" class="data-booked" value="${bookedCount}">
+                            </td>
 
-                                <%-- NEW: Calculate Booked Seats for Validation --%>
-                            <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
-                            <input type="hidden" class="data-booked" value="${bookedCount}">
-                        </td>
-
-                        <td><strong class="col-title">${event.title}</strong></td>
-                        <td class="col-date">${event.eventDate}</td>
-                        <td class="col-venue">${event.location}</td>
-                        <td class="col-price text-primary fw-bold">RM ${event.price}</td>
-                        <td class="text-center">
-                            <span class="badge rounded-pill ${event.availableSeats > 0 ? 'bg-success' : 'bg-danger'} px-3">
-                                ${event.availableSeats} Left
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-primary btn-sm rounded-start"
-                                        onclick="openEditModal(this)">
-                                    Edit
-                                </button>
-
-                                <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}"
-                                   class="btn btn-outline-info btn-sm">Attendees</a>
-
-                                <a href="${pageContext.request.contextPath}/DeleteEventServlet?id=${event.id}"
-                                   class="btn btn-outline-danger btn-sm rounded-end"
-                                   onclick="return confirm('Are you sure you want to delete this event?');">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
+                            <td><strong class="col-title">${event.title}</strong></td>
+                            <td class="col-date">${event.eventDate}</td>
+                            <td class="col-venue">${event.location}</td>
+                            <td class="col-price text-primary fw-bold">RM ${event.price}</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill ${event.availableSeats > 0 ? 'bg-success' : 'bg-danger'} px-3">
+                                    ${event.availableSeats} Left
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-start" onclick="openEditModal(this)">Edit</button>
+                                    <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}" class="btn btn-outline-info btn-sm">Attendees</a>
+                                    <a href="${pageContext.request.contextPath}/DeleteEventServlet?id=${event.id}" class="btn btn-outline-danger btn-sm rounded-end" onclick="return confirm('Delete this event?');">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:if>
                 </c:forEach>
 
-                <c:if test="${empty eventList}">
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <h5>No events found.</h5>
-                            <p>Click "Add New Event" to get started.</p>
-                        </td>
-                    </tr>
+                <c:if test="${!hasActive}">
+                    <tr><td colspan="7" class="text-center py-5 text-muted"><h5>No active events.</h5></td></tr>
                 </c:if>
                 </tbody>
             </table>
         </div>
+
+        <h4 class="fw-bold text-secondary mb-3 mt-5">Event History</h4>
+        <div class="table-responsive table-container">
+            <table class="table custom-table history-table mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 5%;">ID</th>
+                    <th style="width: 25%;">Event Title</th>
+                    <th style="width: 15%;">Date</th>
+                    <th style="width: 15%;">Venue</th>
+                    <th style="width: 10%;">Price</th>
+                    <th style="width: 10%;" class="text-center">Seats</th>
+                    <th style="width: 20%;" class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:set var="hasHistory" value="false" />
+                <c:forEach var="event" items="${eventList}">
+                    <%-- FILTER: Only Past Events --%>
+                    <c:if test="${event.eventDate < todayDate}">
+                        <c:set var="hasHistory" value="true" />
+                        <tr>
+                            <td class="col-id">#${event.id}</td>
+                            <td>
+                                <strong>${event.title}</strong>
+                                <span class="badge bg-secondary ms-2" style="font-size: 0.65rem;">ENDED</span>
+                            </td>
+                            <td class="col-date">${event.eventDate}</td>
+                            <td class="col-venue">${event.location}</td>
+                            <td>RM ${event.price}</td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary rounded-pill px-3">
+                                    ${event.totalSeats - event.availableSeats} / ${event.totalSeats} Sold
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                        <%-- Hidden inputs for Edit Modal (still useful for history correction) --%>
+                                    <input type="hidden" class="data-id" value="${event.id}">
+                                    <input type="hidden" class="data-title" value="${event.title}">
+                                    <input type="hidden" class="data-date" value="${event.eventDate}">
+                                    <input type="hidden" class="data-loc" value="${event.location}">
+                                    <input type="hidden" class="data-price" value="${event.price}">
+                                    <input type="hidden" class="data-seats" value="${event.totalSeats}">
+                                    <input type="hidden" class="data-img" value="${event.imageUrl}">
+                                    <div class="d-none data-desc"><c:out value="${event.description}"/></div>
+                                    <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
+                                    <input type="hidden" class="data-booked" value="${bookedCount}">
+
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-start" onclick="openEditModal(this)">Edit</button>
+                                    <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}" class="btn btn-outline-secondary btn-sm">Attendees</a>
+                                    <a href="${pageContext.request.contextPath}/DeleteEventServlet?id=${event.id}" class="btn btn-outline-danger btn-sm rounded-end" onclick="return confirm('Permanently delete history?');">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:if>
+                </c:forEach>
+
+                <c:if test="${!hasHistory}">
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No past events found.</td></tr>
+                </c:if>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
 
-<%-- MODAL --%>
+<%-- MODAL (Reused standard modal) --%>
 <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -224,42 +296,48 @@
                 <h5 class="modal-title fw-bold" id="modalTitle">Create New Event</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
             </div>
-            <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data">
+
+            <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data"
+                  class="needs-validation" novalidate id="eventForm">
+
                 <div class="modal-body p-4">
                     <input type="hidden" name="id" id="eventId">
                     <input type="hidden" name="currentImage" id="currentImage">
 
                     <div class="mb-3">
                         <label for="title" class="form-label fw-bold">Event Title</label>
-                        <input type="text" id="title" name="title" class="form-control" required>
+                        <input type="text" id="title" name="title" class="form-control" required placeholder="e.g. Annual Tech Talk">
+                        <div class="invalid-feedback">Please provide an event title.</div>
                     </div>
 
                     <div class="mb-3">
                         <label for="description" class="form-label fw-bold">Description</label>
-                        <textarea id="description" name="description" class="form-control" rows="4"></textarea>
+                        <textarea id="description" name="description" class="form-control" rows="4" placeholder="Brief details..."></textarea>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="eventDate" class="form-label fw-bold">Date</label>
                             <input type="date" id="eventDate" name="eventDate" class="form-control" required>
+                            <div class="invalid-feedback">Please select a valid date.</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="location" class="form-label fw-bold">Location</label>
-                            <input type="text" id="location" name="location" class="form-control" required>
+                            <input type="text" id="location" name="location" class="form-control" required placeholder="e.g. Main Auditorium">
+                            <div class="invalid-feedback">Please specify the location.</div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="price" class="form-label fw-bold">Price (RM)</label>
-                            <input type="number" step="0.01" id="price" name="price" class="form-control" required>
+                            <input type="number" step="0.01" min="0" id="price" name="price" class="form-control" required placeholder="0.00">
+                            <div class="invalid-feedback">Price cannot be negative.</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="totalSeats" class="form-label fw-bold">Total Seats</label>
-                            <%-- Added helper text for validation --%>
-                            <input type="number" id="totalSeats" name="totalSeats" class="form-control" required>
-                            <div id="seatHelp" class="form-text text-danger" style="display:none;"></div>
+                            <input type="number" min="1" id="totalSeats" name="totalSeats" class="form-control" required placeholder="e.g. 100">
+                            <div class="invalid-feedback" id="seatFeedback">Must be at least 1.</div>
                         </div>
                     </div>
 
@@ -283,8 +361,24 @@
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 <script>
     var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+    var eventForm = document.getElementById('eventForm');
     var totalSeatsInput = document.getElementById('totalSeats');
-    var seatHelp = document.getElementById('seatHelp');
+    var seatFeedback = document.getElementById('seatFeedback');
+    var dateInput = document.getElementById('eventDate');
+
+    eventForm.addEventListener('submit', function (event) {
+        if (!eventForm.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        eventForm.classList.add('was-validated');
+    }, false);
+
+    function resetFormState() {
+        eventForm.classList.remove('was-validated');
+        totalSeatsInput.setCustomValidity("");
+        seatFeedback.innerText = "Must be at least 1.";
+    }
 
     function openAddModal() {
         document.getElementById('modalTitle').innerText = "Create New Event";
@@ -298,20 +392,19 @@
         document.getElementById('price').value = "";
         document.getElementById('imageFile').value = "";
 
-        // Reset Validation for Add Mode
+        resetFormState();
         totalSeatsInput.value = "";
         totalSeatsInput.min = 1;
         totalSeatsInput.oninput = null;
-        totalSeatsInput.setCustomValidity("");
-        seatHelp.style.display = "none";
+
+        let today = new Date().toISOString().split("T")[0];
+        dateInput.value = today;
 
         eventModal.show();
     }
 
     function openEditModal(btn) {
         let row = btn.closest('tr');
-
-        // Fetch data
         let id = row.querySelector('.data-id').value;
         let title = row.querySelector('.data-title').value;
         let date = row.querySelector('.data-date').value;
@@ -320,11 +413,8 @@
         let seats = row.querySelector('.data-seats').value;
         let img = row.querySelector('.data-img').value;
         let desc = row.querySelector('.data-desc').textContent;
-
-        // NEW: Get Booked Count
         let booked = row.querySelector('.data-booked').value;
 
-        // Populate Modal
         document.getElementById('modalTitle').innerText = "Edit Event";
         document.getElementById('eventId').value = id;
         document.getElementById('currentImage').value = img;
@@ -336,25 +426,20 @@
         document.getElementById('price').value = price;
         document.getElementById('imageFile').value = "";
 
-        // --- VALIDATION LOGIC ---
+        resetFormState();
         totalSeatsInput.value = seats;
-        totalSeatsInput.min = booked; // Set HTML5 Min Attribute
+        totalSeatsInput.min = booked;
 
-        // Add Real-time Validation Listener
         totalSeatsInput.oninput = function() {
             if (parseInt(this.value) < parseInt(booked)) {
-                let msg = "Cannot reduce capacity below " + booked + " (seats already booked).";
+                let msg = "Cannot be less than booked seats (" + booked + ").";
                 this.setCustomValidity(msg);
-                seatHelp.innerText = msg;
-                seatHelp.style.display = "block";
+                seatFeedback.innerText = msg;
             } else {
                 this.setCustomValidity("");
-                seatHelp.style.display = "none";
+                seatFeedback.innerText = "Must be at least 1.";
             }
         };
-        // Reset visual error state immediately upon opening
-        totalSeatsInput.setCustomValidity("");
-        seatHelp.style.display = "none";
 
         eventModal.show();
     }

@@ -11,7 +11,6 @@
 <%-- UPDATED NAVBAR WITH LOGO --%>
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container">
-        <%-- Added d-flex and align-items-center for proper logo alignment --%>
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/EventListServlet">
             <img src="${pageContext.request.contextPath}/assets/img/logo.png"
                  alt="Logo" width="30" height="30"
@@ -27,10 +26,23 @@
         <div class="row g-0">
             <%-- Left Column: Event Image --%>
             <div class="col-md-6">
-                <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}"
-                     class="img-fluid rounded-start w-100"
-                     style="height: 500px; object-fit: cover;"
-                     alt="Event Poster">
+
+                <%-- UPDATED: Image Placeholder Logic --%>
+                <c:choose>
+                    <c:when test="${not empty event.imageUrl}">
+                        <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}"
+                             class="img-fluid rounded-start w-100"
+                             style="height: 500px; object-fit: cover;"
+                             alt="Event Poster">
+                    </c:when>
+                    <c:otherwise>
+                        <img src="https://placehold.co/600x400?text=No+Image"
+                             class="img-fluid rounded-start w-100"
+                             style="height: 500px; object-fit: cover;"
+                             alt="Event Poster">
+                    </c:otherwise>
+                </c:choose>
+
             </div>
 
             <%-- Right Column: Event Details --%>
@@ -51,18 +63,34 @@
                     <hr class="my-4">
 
                     <%-- Add to Cart Form --%>
-                    <div class="d-grid gap-2">
+                    <div class="">
                         <form action="${pageContext.request.contextPath}/CartServlet" method="post">
                             <input type="hidden" name="eventId" value="${event.id}">
                             <input type="hidden" name="action" value="add">
 
-                            <button type="submit" class="btn btn-success btn-lg w-100" ${event.availableSeats <= 0 ? 'disabled' : ''}>
-                                ${event.availableSeats > 0 ? 'Add to Cart' : 'Sold Out'}
-                            </button>
+                            <%-- Added Quantity Counter from previous fix --%>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Select Quantity:</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="input-group" style="width: 160px;">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(-1)">-</button>
+                                        <input type="text" id="quantityDisplay" name="quantity" class="form-control text-center fw-bold bg-white"
+                                               value="1" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(1)">+</button>
+                                    </div>
+                                    <span class="ms-3 text-muted small">
+                                        Only ${event.availableSeats} seats left!
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" ${event.availableSeats <= 0 ? 'disabled' : ''}>
+                                    ${event.availableSeats > 0 ? 'Add to Cart' : 'Sold Out'}
+                                </button>
+                            </div>
                         </form>
                     </div>
-
-                    <p class="mt-3 text-muted small text-center">${event.availableSeats} seats remaining</p>
                 </div>
             </div>
         </div>
@@ -70,5 +98,21 @@
 </div>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+
+<%-- JAVASCRIPT FOR QUANTITY COUNTER --%>
+<script>
+    var maxSeats = ${event.availableSeats};
+
+    function updateQuantity(change) {
+        var input = document.getElementById('quantityDisplay');
+        var currentVal = parseInt(input.value);
+        var newVal = currentVal + change;
+
+        if (newVal >= 1 && newVal <= maxSeats) {
+            input.value = newVal;
+        }
+    }
+</script>
+
 </body>
 </html>

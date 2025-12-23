@@ -70,7 +70,7 @@
             padding: 40px;
             display: flex;
             flex-direction: column;
-            height: 550px; /* Match container height */
+            height: 550px;
         }
 
         .summary-header { border-bottom: 2px solid #ffc107; padding-bottom: 15px; margin-bottom: 25px; }
@@ -93,7 +93,7 @@
             padding: 40px;
             position: relative;
             height: 550px; /* Match container height */
-            overflow-y: auto; /* Allow form to scroll if needed */
+            overflow-y: auto;
         }
 
         .total-row {
@@ -103,7 +103,7 @@
             margin-top: auto; /* Pushes to bottom */
             padding-top: 20px;
             border-top: 1px solid rgba(255,255,255,0.2);
-            background-color: #2c1a4d; /* Ensure background covers scroll */
+            background-color: #2c1a4d;
         }
 
         /* Payment Options Styling */
@@ -119,7 +119,8 @@
         .card-option.selected { border-color: #2c1a4d; background-color: rgba(44, 26, 77, 0.05); }
 
         .btn-pay {
-            background-color: #2c1a4d; color: white; font-weight: bold;
+            background-color: #2c1a4d;
+            color: white; font-weight: bold;
             padding: 15px; border-radius: 8px; width: 100%; transition: all 0.3s;
             margin-top: 20px;
         }
@@ -151,11 +152,6 @@
 
 <div class="checkout-container">
 
-    <%--
-       CLOSE BUTTON:
-       - If Success -> Catalog
-       - If Checkout -> Cart
-    --%>
     <a href="${pageContext.request.contextPath}/${not empty message ? 'EventListServlet' : 'CartServlet'}"
        class="btn-close-modal" title="Close">&times;</a>
 
@@ -190,12 +186,19 @@
                         <c:forEach var="item" items="${sessionScope.cart}">
                             <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
                                 <div>
-                                    <div class="fw-bold">${item.title}</div>
+                                    <div class="fw-bold">
+                                            ${item.title}
+                                            <%-- UPDATED: Show Quantity Badge --%>
+                                        <span class="badge bg-light text-dark ms-1">x${item.quantity}</span>
+                                    </div>
                                     <small class="text-white-50">${item.location}</small>
                                 </div>
-                                <span class="fw-bold">RM ${item.price}</span>
+                                    <%-- UPDATED: Show Price * Quantity --%>
+                                <span class="fw-bold">RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2"/></span>
                             </div>
-                            <c:set var="totalAmount" value="${totalAmount + item.price}" />
+
+                            <%-- UPDATED: Add Price * Quantity to Total --%>
+                            <c:set var="totalAmount" value="${totalAmount + (item.price * item.quantity)}" />
                         </c:forEach>
 
                         <c:if test="${empty sessionScope.cart}">
@@ -280,10 +283,7 @@
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Only initialize Form Logic if the form actually exists
     if (document.getElementById('paymentForm')) {
-
-        // --- 1. UI Toggle Logic ---
         function toggleNewCardForm(show) {
             const form = document.getElementById('newCardForm');
             const inputs = form.querySelectorAll('input:not([type="checkbox"])');
@@ -298,7 +298,6 @@
             } else {
                 form.style.display = 'none';
                 inputs.forEach(i => i.disabled = true);
-
                 document.querySelectorAll('.card-option').forEach(el => el.classList.remove('selected'));
                 const checked = document.querySelector('input[name="paymentMethod"]:checked');
                 if(checked) checked.closest('.card-option').classList.add('selected');
@@ -315,41 +314,32 @@
             toggleNewCardForm(true);
         };
 
-        // Initialize UI
         if(document.getElementById('newCardRadio').checked) {
             selectNewCard();
         } else {
             toggleNewCardForm(false);
         }
 
-        // --- 2. Inline Validation Logic ---
         document.getElementById('paymentForm').addEventListener('submit', function(event) {
             const isNewCard = document.getElementById('newCardRadio').checked;
-
             if (!isNewCard) return;
 
             let isValid = true;
-
             const cardInput = document.getElementById('cardNumberInput');
             const expiryInput = document.getElementById('expiryInput');
             const cvvInput = document.getElementById('cvvInput');
 
             [cardInput, expiryInput, cvvInput].forEach(input => input.classList.remove('is-invalid'));
 
-            // A. Validate Card Number
             const cleanCardVal = cardInput.value.replace(/\s/g, '');
             if (!/^\d{13,19}$/.test(cleanCardVal)) {
                 cardInput.classList.add('is-invalid');
                 isValid = false;
             }
-
-            // B. Validate Expiry
             if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryInput.value)) {
                 expiryInput.classList.add('is-invalid');
                 isValid = false;
             }
-
-            // C. Validate CVV
             if (!/^\d{3,4}$/.test(cvvInput.value)) {
                 cvvInput.classList.add('is-invalid');
                 isValid = false;
@@ -361,7 +351,6 @@
             }
         });
 
-        // Auto-format Expiry
         document.getElementById('expiryInput').addEventListener('input', function(e) {
             let input = e.target.value.replace(/\D/g, '');
             if (input.length > 2) {

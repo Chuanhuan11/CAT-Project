@@ -12,55 +12,66 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @WebServlet("/EventListServlet")
 public class EventListServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Create a list to hold the events
-        List<Event> events = new ArrayList<>();
+        List<Event> allEvents = new ArrayList<>();
 
-        // 2. Connect to Database using your DBConnection utility
+        // 1. Fetch ALL events first
         try (Connection con = DBConnection.getConnection()) {
-
-            // --- UPDATED SQL QUERY ---
-            // Filter 1: event_date >= CURDATE()  -> Hides past events
-            // Filter 2: available_seats > 0      -> Hides sold-out events
-            // Order by: event_date ASC           -> Shows soonest events first
-            String sql = "SELECT * FROM events WHERE event_date >= CURDATE() AND available_seats > 0 ORDER BY event_date ASC";
-
-            PreparedStatement ps = con.prepareStatement(sql);
-
-            // 4. Execute and get results
-            ResultSet rs = ps.executeQuery();
-
-            // 5. Loop through every row in the database table
-            while (rs.next()) {
-                Event e = new Event();
-                e.setId(rs.getInt("id"));
-                e.setTitle(rs.getString("title"));
-                e.setDescription(rs.getString("description"));
-                e.setEventDate(rs.getDate("event_date"));
-                e.setLocation(rs.getString("location"));
-                e.setPrice(rs.getDouble("price"));
-                e.setImageUrl(rs.getString("image_url"));
-                e.setTotalSeats(rs.getInt("total_seats"));
-                e.setAvailableSeats(rs.getInt("available_seats"));
-
-                // Add to our list
-                events.add(e);
+            String sql = "SELECT * FROM events";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    Event e = new Event();
+                    e.setId(rs.getInt("id"));
+                    e.setTitle(rs.getString("title"));
+                    e.setDescription(rs.getString("description"));
+                    e.setEventDate(rs.getDate("event_date"));
+                    e.setLocation(rs.getString("location"));
+                    e.setPrice(rs.getDouble("price"));
+                    e.setImageUrl(rs.getString("image_url"));
+                    e.setTotalSeats(rs.getInt("total_seats"));
+                    e.setAvailableSeats(rs.getInt("available_seats"));
+                    allEvents.add(e);
+                }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // 6. Send the Filtered List to the JSP
-        request.setAttribute("eventList", events);
+        // 2. Separate Logic in Java
+        LocalDate today = LocalDate.now();
 
-        // 7. Forward to the Home Page
+        // A. Upcoming (Future + Available Seats) -> Sort Ascending (Soonest first)
+        List<Event> upcomingEvents = allEvents.stream()
+                .filter(e -> !e.getEventDate().toLocalDate().isBefore(today) && e.getAvailableSeats() > 0)
+                .sorted(Comparator.comparing(Event::getEventDate))
+                .collect(Collectors.toList());
+
+        // B. Sold Out (Future + No Seats) -> Sort Ascending
+        List<Event> soldOutEvents = allEvents.stream()
+                .filter(e -> !e.getEventDate().toLocalDate().isBefore(today) && e.getAvailableSeats() <= 0)
+                .sorted(Comparator.comparing(Event::getEventDate))
+                .collect(Collectors.toList());
+
+        // C. Past (Past Date) -> Sort Descending (Most recent past first)
+        List<Event> pastEvents = allEvents.stream()
+                .filter(e -> e.getEventDate().toLocalDate().isBefore(today))
+                .sorted((e1, e2) -> e2.getEventDate().compareTo(e1.getEventDate()))
+                .collect(Collectors.toList());
+
+        request.setAttribute("upcomingEvents", upcomingEvents);
+        request.setAttribute("soldOutEvents", soldOutEvents);
+        request.setAttribute("pastEvents", pastEvents);
+
         request.getRequestDispatcher("/catalog/home.jsp").forward(request, response);
     }
 }

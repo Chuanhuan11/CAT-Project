@@ -7,7 +7,6 @@
     <title>Shopping Cart - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
-        /* --- THEME SETUP --- */
         body {
             background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
             background-size: cover;
@@ -17,7 +16,7 @@
         }
         .navbar { box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .hero-section {
-            background-color: rgba(50, 13, 70, 0.9); /* Brand Purple */
+            background-color: rgba(50, 13, 70, 0.9);
             color: white;
             padding: 40px 0;
             margin-bottom: 30px;
@@ -30,11 +29,10 @@
             margin-bottom: 50px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
-        /* --- TABLE STYLING --- */
         .custom-table thead {
             background-color: #2c1a4d;
             color: white;
-            border-bottom: 3px solid #ffc107; /* Gold Accent */
+            border-bottom: 3px solid #ffc107;
         }
         .custom-table th {
             font-weight: 600;
@@ -47,10 +45,6 @@
             padding: 15px;
             vertical-align: middle;
             font-size: 1rem;
-        }
-        .event-title {
-            color: #2c1a4d;
-            font-weight: bold;
         }
         .total-section {
             background-color: #f8f9fa;
@@ -104,12 +98,9 @@
     </div>
 </nav>
 
-<%-- HERO HEADER (UPDATED) --%>
 <div class="hero-section text-center">
     <div class="container">
-        <%-- Changed from h1 display-4 to h2 --%>
         <h2 class="fw-bold">Your Shopping Cart</h2>
-        <%-- Changed from p lead to p mb-0 --%>
         <p class="mb-0">Review your selected events before checkout.</p>
     </div>
 </div>
@@ -122,16 +113,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <c:remove var="errorMessage" scope="session"/>
-        </c:if>
-        <c:if test="${not empty param.error}">
-            <div class="alert alert-danger text-center rounded-pill mb-4">
-                <c:choose>
-                    <c:when test="${param.error == 'Missing Event ID'}">Error: Event ID is missing.</c:when>
-                    <c:when test="${param.error == 'Invalid Event ID'}">Error: Invalid Event ID.</c:when>
-                    <c:when test="${param.error == 'Event Not Found'}">Error: Event not found.</c:when>
-                    <c:otherwise>An unknown error occurred.</c:otherwise>
-                </c:choose>
-            </div>
         </c:if>
 
         <c:if test="${empty sessionScope.cart}">
@@ -152,8 +133,9 @@
                     <tr>
                         <th style="width: 40%;">Event</th>
                         <th>Date</th>
-                        <th>Location</th>
-                        <th>Price</th>
+                        <th>Price (Unit)</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
                         <th class="text-end">Action</th>
                     </tr>
                     </thead>
@@ -161,31 +143,32 @@
                     <c:set var="grandTotal" value="0" />
 
                     <c:forEach var="item" items="${sessionScope.cart}">
-                        <tr>
+                        <tr class="cart-row" data-id="${item.id}" data-price="${item.price}" data-available="${item.availableSeats}">
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="event-title fw-bold">${item.title}</div>
                                 </div>
-                                <small class="text-muted">${item.eventDate}</small>
+                                <small class="text-muted">${item.location}</small>
                             </td>
+
+                            <td><small class="text-muted">${item.eventDate}</small></td>
 
                             <td class="text-muted">RM <fmt:formatNumber value="${item.price}" type="number" minFractionDigits="2" /></td>
 
-                                <%-- QUANTITY ADJUSTER --%>
+                                <%-- JAVASCRIPT QUANTITY CONTROLS --%>
                             <td>
-                                <form action="${pageContext.request.contextPath}/CartServlet" method="post" class="d-flex m-0">
-                                    <input type="hidden" name="action" value="update">
-                                    <input type="hidden" name="eventId" value="${item.id}">
+                                <div class="input-group input-group-sm" style="width: 130px;">
+                                    <button class="btn btn-outline-secondary qty-btn" type="button" onclick="updateCartQuantity(${item.id}, -1, this)">-</button>
 
-                                    <div class="input-group input-group-sm" style="width: 120px;">
-                                        <button class="btn btn-outline-secondary" type="submit" name="quantity" value="${item.quantity - 1}">-</button>
-                                        <input type="text" class="form-control text-center bg-white" value="${item.quantity}" readonly>
-                                        <button class="btn btn-outline-secondary" type="submit" name="quantity" value="${item.quantity + 1}">+</button>
-                                    </div>
-                                </form>
+                                    <input type="text" class="form-control text-center bg-white qty-input"
+                                           value="${item.quantity}" readonly>
+
+                                    <button class="btn btn-outline-secondary qty-btn" type="button" onclick="updateCartQuantity(${item.id}, 1, this)">+</button>
+                                </div>
+                                <div class="text-danger small mt-1 max-msg" style="display:none;">Max reached</div>
                             </td>
 
-                            <td class="fw-bold text-dark">
+                            <td class="fw-bold text-dark row-total">
                                 RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2" />
                             </td>
 
@@ -197,7 +180,6 @@
                                 </a>
                             </td>
                         </tr>
-                        <%-- Calculate Grand Total --%>
                         <c:set var="grandTotal" value="${grandTotal + (item.price * item.quantity)}" />
                     </c:forEach>
                     </tbody>
@@ -211,7 +193,7 @@
                 <div class="text-end d-flex align-items-center">
                     <div class="me-4 text-end">
                         <span class="text-muted small d-block">Total Amount</span>
-                        <span class="h3 fw-bold text-dark m-0">RM <fmt:formatNumber value="${total}" type="number" minFractionDigits="2" /></span>
+                        <span class="h3 fw-bold text-dark m-0" id="grandTotalDisplay">RM <fmt:formatNumber value="${grandTotal}" type="number" minFractionDigits="2" /></span>
                     </div>
                     <a href="${pageContext.request.contextPath}/CheckoutServlet" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
                         Proceed to Checkout &rarr;
@@ -223,5 +205,65 @@
 </div>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Context path for AJAX
+    const contextPath = "${pageContext.request.contextPath}";
+
+    function updateCartQuantity(eventId, change, btn) {
+        // Find DOM elements relative to the button clicked
+        const row = btn.closest('.cart-row');
+        const input = row.querySelector('.qty-input');
+        const totalCell = row.querySelector('.row-total');
+        const msgDiv = row.querySelector('.max-msg');
+
+        // Get data from attributes
+        const price = parseFloat(row.dataset.price);
+        const available = parseInt(row.dataset.available);
+        let currentQty = parseInt(input.value);
+
+        // Calculate new quantity
+        let newQty = currentQty + change;
+
+        // Validation Logic
+        if (newQty < 1) return; // Cannot go below 1 (use remove button for that)
+
+        if (newQty > available) {
+            // Show "Max reached" message briefly
+            msgDiv.style.display = "block";
+            setTimeout(() => msgDiv.style.display = "none", 2000);
+            return; // Stop execution
+        }
+
+        // 1. UPDATE UI IMMEDIATELY (No Lag)
+        input.value = newQty;
+
+        // Update Row Total
+        let newRowTotal = (price * newQty).toFixed(2);
+        totalCell.innerText = "RM " + newRowTotal;
+
+        // Recalculate Grand Total
+        updateGrandTotal();
+
+        // 2. SEND BACKGROUND UPDATE TO SERVER
+        // We use fetch to fire-and-forget (or handle error)
+        fetch(contextPath + '/CartServlet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=update&eventId=' + eventId + '&quantity=' + newQty
+        }).catch(err => console.error('Error updating cart:', err));
+    }
+
+    function updateGrandTotal() {
+        let grandTotal = 0;
+        document.querySelectorAll('.cart-row').forEach(row => {
+            const price = parseFloat(row.dataset.price);
+            const qty = parseInt(row.querySelector('.qty-input').value);
+            grandTotal += (price * qty);
+        });
+        document.getElementById('grandTotalDisplay').innerText = "RM " + grandTotal.toFixed(2);
+    }
+</script>
 </body>
 </html>

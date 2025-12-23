@@ -30,13 +30,13 @@ public class OrderHistoryServlet extends HttpServlet {
         List<Ticket> tickets = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
-            // Join Bookings with Events to get all details
+            // Updated SQL: Order by Title first to allow grouping in JSP
             String sql = "SELECT b.id AS booking_id, b.booking_date, b.status, " +
                     "e.title, e.event_date, e.location, e.price, e.image_url " +
                     "FROM bookings b " +
                     "JOIN events e ON b.event_id = e.id " +
                     "WHERE b.user_id = ? " +
-                    "ORDER BY b.booking_date DESC";
+                    "ORDER BY e.title ASC, b.booking_date DESC";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
@@ -63,7 +63,7 @@ public class OrderHistoryServlet extends HttpServlet {
         request.getRequestDispatcher("/booking/my_tickets.jsp").forward(request, response);
     }
 
-    // --- Inner DTO Class for easier data handling ---
+    // --- Inner DTO Class ---
     public static class Ticket {
         private int bookingId;
         private Date bookingDate;
