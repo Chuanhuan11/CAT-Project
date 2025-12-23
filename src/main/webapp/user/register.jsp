@@ -15,7 +15,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .register-card {
             background-color: rgba(255, 255, 255, 0.95);
             border: none;
@@ -23,14 +22,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             overflow: hidden;
         }
-
         .register-header {
             background-color: #2c1a4d;
             color: white;
             padding: 20px;
             text-align: center;
         }
-
         .btn-brand {
             background-color: #2c1a4d;
             color: white;
@@ -41,6 +38,9 @@
             background-color: #4a2c82;
             color: white;
         }
+        /* Validation Styling */
+        input:invalid { border-color: #dc3545; }
+        input:valid { border-color: #198754; }
     </style>
 </head>
 <body>
@@ -61,27 +61,29 @@
                 </div>
                 <div class="card-body p-4">
 
-                    <%-- Show Error Message if Registration Fails --%>
                     <c:if test="${not empty errorMessage}">
                         <div class="alert alert-danger text-center small p-2">
                                 ${errorMessage}
                         </div>
                     </c:if>
 
-                    <form action="${pageContext.request.contextPath}/register" method="post">
+                    <%-- Added 'needs-validation' class and 'novalidate' to handle it via custom script --%>
+                    <form action="${pageContext.request.contextPath}/register" method="post" id="registerForm" onsubmit="return validateForm()">
 
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">FULL NAME</label>
-                            <input type="text" name="fullname" class="form-control" required placeholder="John Doe">
+                            <input type="text" name="fullname" class="form-control" required minlength="3" placeholder="John Doe">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">USM EMAIL</label>
-                            <input type="email" name="email" class="form-control" required placeholder="student@student.usm.my">
+                            <%-- PATTERN: Must end with .usm.my --%>
+                            <input type="email" name="email" class="form-control" required
+                                   placeholder="student@student.usm.my"
+                                   pattern=".+@.+\.usm\.my">
                             <div class="form-text small">Must be a valid USM email ending in .usm.my</div>
                         </div>
 
-                        <%-- NEW: Role Selection Dropdown --%>
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">ACCOUNT TYPE</label>
                             <select name="role" class="form-select" required>
@@ -94,18 +96,23 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold">PASSWORD</label>
-                                <input type="password" name="password" class="form-control" required>
+                                <%-- Min length 6 --%>
+                                <input type="password" name="password" id="password" class="form-control" required minlength="6">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold">CONFIRM</label>
-                                <input type="password" name="confirm_password" class="form-control" required>
+                                <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
                             </div>
+                        </div>
+                        <%-- Password Match Error Message --%>
+                        <div id="passwordError" class="text-danger small mb-3" style="display:none;">
+                            Passwords do not match!
                         </div>
 
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="terms" required>
                             <label class="form-check-label small" for="terms">
-                                I agree to the <a href="#" style="color: #2c1a4d;">Rules & Regulations</a>
+                                I agree to the <a href="rules.jsp" target="_blank" style="color: #2c1a4d; font-weight: bold;">Rules & Regulations</a>
                             </label>
                         </div>
 
@@ -124,6 +131,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    function validateForm() {
+        var pw = document.getElementById("password").value;
+        var cpw = document.getElementById("confirm_password").value;
+        var errorDiv = document.getElementById("passwordError");
+
+        if (pw !== cpw) {
+            errorDiv.style.display = "block";
+            return false; // Stop form submission
+        } else {
+            errorDiv.style.display = "none";
+            return true;
+        }
+    }
+</script>
 
 </body>
 </html>

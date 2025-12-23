@@ -23,7 +23,6 @@ public class OrganiserDashboardServlet extends HttpServlet {
         String role = (String) session.getAttribute("role");
         Integer userId = (Integer) session.getAttribute("userId");
 
-        // 1. Security Check
         if (role == null || (!role.equals("ADMIN") && !role.equals("ORGANIZER"))) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
@@ -35,13 +34,10 @@ public class OrganiserDashboardServlet extends HttpServlet {
             String sql;
             PreparedStatement ps;
 
-            // 2. Role-Based Logic
             if ("ADMIN".equals(role)) {
-                // Admin sees EVERYTHING
                 sql = "SELECT * FROM events";
                 ps = con.prepareStatement(sql);
             } else {
-                // Organizer sees ONLY their own events
                 sql = "SELECT * FROM events WHERE organizer_id = ?";
                 ps = con.prepareStatement(sql);
                 ps.setInt(1, userId);
@@ -56,7 +52,14 @@ public class OrganiserDashboardServlet extends HttpServlet {
                 e.setLocation(rs.getString("location"));
                 e.setPrice(rs.getDouble("price"));
                 e.setAvailableSeats(rs.getInt("available_seats"));
-                e.setOrganizerId(rs.getInt("organizer_id")); // Ensure Event model has this setter
+                e.setOrganizerId(rs.getInt("organizer_id"));
+
+                // --- FIX: FETCH MISSING COLUMNS ---
+                e.setTotalSeats(rs.getInt("total_seats"));
+                e.setImageUrl(rs.getString("image_url"));
+                e.setDescription(rs.getString("description"));
+                // ----------------------------------
+
                 events.add(e);
             }
         } catch (Exception e) {

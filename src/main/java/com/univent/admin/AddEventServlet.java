@@ -1,6 +1,6 @@
 package com.univent.admin;
 
-import com.univent.model.Event; // Ensure your Event model has get/setOrganizerId
+import com.univent.model.Event;
 import com.univent.util.DBConnection;
 
 import javax.servlet.ServletException;
@@ -17,55 +17,13 @@ import java.sql.ResultSet;
 @MultipartConfig
 public class AddEventServlet extends HttpServlet {
 
-    // DISPLAY FORM (Check Permissions for Edit)
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String idParam = request.getParameter("id");
-
-        if (idParam != null) {
-            // EDIT MODE: Fetch event details
-            int eventId = Integer.parseInt(idParam);
-            try (Connection con = DBConnection.getConnection()) {
-                String sql = "SELECT * FROM events WHERE id = ?";
-                PreparedStatement ps = con.prepareStatement(sql);
-                ps.setInt(1, eventId);
-                ResultSet rs = ps.executeQuery();
-
-                if (rs.next()) {
-                    // OWNERSHIP CHECK
-                    HttpSession session = request.getSession();
-                    String role = (String) session.getAttribute("role");
-                    int userId = (Integer) session.getAttribute("userId");
-                    int eventOwnerId = rs.getInt("organizer_id");
-
-                    if (!"ADMIN".equals(role) && userId != eventOwnerId) {
-                        response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet"); // Block Access
-                        return;
-                    }
-
-                    // Load Data
-                    Event event = new Event();
-                    event.setId(rs.getInt("id"));
-                    event.setTitle(rs.getString("title"));
-                    event.setDescription(rs.getString("description"));
-                    event.setEventDate(rs.getDate("event_date"));
-                    event.setLocation(rs.getString("location"));
-                    event.setPrice(rs.getDouble("price"));
-                    event.setTotalSeats(rs.getInt("total_seats"));
-                    event.setImageUrl(rs.getString("image_url"));
-
-                    request.setAttribute("event", event);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        request.getRequestDispatcher("/admin/add_event.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
     }
 
-    // PROCESS FORM (Save/Update)
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId"); // The logged-in Organizer/Admin
+        Integer userId = (Integer) session.getAttribute("userId");
 
         String idParam = request.getParameter("id");
         String title = request.getParameter("title");
@@ -75,7 +33,7 @@ public class AddEventServlet extends HttpServlet {
         double price = Double.parseDouble(request.getParameter("price"));
         int totalSeats = Integer.parseInt(request.getParameter("totalSeats"));
 
-        // Image Upload Logic (Simplified)
+        // Image Upload Logic
         Part filePart = request.getPart("imageFile");
         String fileName = filePart.getSubmittedFileName();
         String finalImageName = request.getParameter("currentImage");
@@ -90,7 +48,7 @@ public class AddEventServlet extends HttpServlet {
 
         try (Connection con = DBConnection.getConnection()) {
             if (idParam == null || idParam.isEmpty()) {
-                // --- CREATE NEW EVENT ---
+                // --- INSERT NEW EVENT ---
                 String sql = "INSERT INTO events (title, description, event_date, location, price, total_seats, available_seats, image_url, organizer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setString(1, title);
@@ -99,24 +57,30 @@ public class AddEventServlet extends HttpServlet {
                 ps.setString(4, location);
                 ps.setDouble(5, price);
                 ps.setInt(6, totalSeats);
-                ps.setInt(7, totalSeats); // Available starts same as Total
+                ps.setInt(7, totalSeats); // Initially, Available = Total
                 ps.setString(8, finalImageName);
-                ps.setInt(9, userId); // <--- ASSIGN OWNER HERE
+                ps.setInt(9, userId);
                 ps.executeUpdate();
             } else {
-                // --- UPDATE EXISTING EVENT ---
-                String sql = "UPDATE events SET title=?, description=?, event_date=?, location=?, price=?, total_seats=?, image_url=? WHERE id=?";
+                // --- UPDATE EXISTING (SELF-CORRECTING LOGIC) ---
+                // Formula: Available = New Total - (Count of Confirmed Bookings)
+                String sql = "UPDATE events SET title=?, description=?, event_date=?, location=?, price=?, " +
+                        "total_seats=?, image_url=?, " +
+                        "available_seats = ? - (SELECT COUNT(*) FROM bookings WHERE event_id = events.id AND status='CONFIRMED') " +
+                        "WHERE id=?";
+
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setString(1, title);
                 ps.setString(2, description);
                 ps.setString(3, date);
                 ps.setString(4, location);
                 ps.setDouble(5, price);
-                ps.setInt(6, totalSeats);
+                ps.setInt(6, totalSeats);       // Set Total
                 ps.setString(7, finalImageName);
-                ps.setInt(8, Integer.parseInt(idParam));
+                ps.setInt(8, totalSeats);       // Use Total for Calculation
+                ps.setInt(9, Integer.parseInt(idParam));
+
                 ps.executeUpdate();
-                // Note: For strict security, you should add "AND (organizer_id = ? OR role='ADMIN')" to the WHERE clause here too.
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -34,16 +34,15 @@ public class CartServlet extends HttpServlet {
             removeFromCart(request, response);
         } else {
             // Default Action: VIEW CART
-            // Load from DB first so we see items even after logging out and back in
             loadCartFromDatabase(request);
             request.getRequestDispatcher("/booking/cart.jsp").forward(request, response);
         }
     }
 
-    // --- 1. ADD TO DATABASE ---
+    // --- 1. ADD TO DATABASE (Modified to allow multiples) ---
     private void addToCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId"); // Uses Integer ID, not User object
+        Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
@@ -53,23 +52,33 @@ public class CartServlet extends HttpServlet {
         int eventId = Integer.parseInt(request.getParameter("eventId"));
 
         try (Connection con = DBConnection.getConnection()) {
-            // Check if item already exists to prevent duplicates
-            String checkSql = "SELECT id FROM cart WHERE user_id = ? AND event_id = ?";
-            PreparedStatement checkPs = con.prepareStatement(checkSql);
-            checkPs.setInt(1, userId);
-            checkPs.setInt(2, eventId);
-            ResultSet rs = checkPs.executeQuery();
 
-            if (!rs.next()) {
-                // Insert into DB if not exists
-                String insertSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
-                PreparedStatement ps = con.prepareStatement(insertSql);
+            // VALIDATION: Only check if Sold Out
+            // We removed the "Already Booked" and "Already in Cart" checks to allow multiple tickets.
+            String availabilitySql = "SELECT title, available_seats FROM events WHERE id = ?";
+            try (PreparedStatement checkPs = con.prepareStatement(availabilitySql)) {
+                checkPs.setInt(1, eventId);
+                ResultSet rs = checkPs.executeQuery();
+                if (rs.next()) {
+                    if (rs.getInt("available_seats") <= 0) {
+                        session.setAttribute("errorMessage", "Sorry, " + rs.getString("title") + " is fully booked.");
+                        response.sendRedirect(request.getContextPath() + "/CartServlet");
+                        return;
+                    }
+                }
+            }
+
+            // INSERT NEW ROW (Allows multiple rows for same user & event)
+            String insertSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
+            try (PreparedStatement ps = con.prepareStatement(insertSql)) {
                 ps.setInt(1, userId);
                 ps.setInt(2, eventId);
                 ps.executeUpdate();
             }
+
         } catch (Exception e) {
             e.printStackTrace();
+            session.setAttribute("errorMessage", "Error adding to cart: " + e.getMessage());
         }
 
         response.sendRedirect(request.getContextPath() + "/CartServlet");
@@ -83,7 +92,8 @@ public class CartServlet extends HttpServlet {
         if (userId != null) {
             int eventId = Integer.parseInt(request.getParameter("eventId"));
             try (Connection con = DBConnection.getConnection()) {
-                String sql = "DELETE FROM cart WHERE user_id = ? AND event_id = ?";
+                // LIMIT 1 ensures we only remove ONE ticket if they have multiple of the same event
+                String sql = "DELETE FROM cart WHERE user_id = ? AND event_id = ? LIMIT 1";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, userId);
                 ps.setInt(2, eventId);
@@ -95,7 +105,7 @@ public class CartServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/CartServlet");
     }
 
-    // --- 3. LOAD FROM DATABASE (Persist on Logout) ---
+    // --- 3. LOAD FROM DATABASE ---
     private void loadCartFromDatabase(HttpServletRequest request) {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
@@ -103,7 +113,7 @@ public class CartServlet extends HttpServlet {
 
         if (userId != null) {
             try (Connection con = DBConnection.getConnection()) {
-                // Join cart with events to get titles/prices
+                // Simple Join - will return multiple rows if multiple tickets exist
                 String sql = "SELECT e.* FROM events e JOIN cart c ON e.id = c.event_id WHERE c.user_id = ?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, userId);
@@ -123,7 +133,6 @@ public class CartServlet extends HttpServlet {
                 e.printStackTrace();
             }
         }
-        // Save list to session so JSP can display it
         session.setAttribute("cart", cart);
     }
 }

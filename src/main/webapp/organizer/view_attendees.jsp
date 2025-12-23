@@ -67,9 +67,9 @@
         .custom-table tbody tr:nth-of-type(even) { background-color: rgba(44, 26, 77, 0.04); }
         .custom-table tbody tr:nth-of-type(odd) { background-color: #ffffff; }
 
-        .custom-table tbody tr {
-            transition: all 0.2s ease;
+        .custom-table tbody tr td:first-child {
             border-left: 4px solid transparent;
+            transition: border-left 0.2s ease;
         }
 
         .custom-table tbody tr:hover {
@@ -98,7 +98,7 @@
                     Hello, ${sessionScope.username}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
+                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/EventListServlet">Home Page</a></li>
                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
                 </ul>
             </div>

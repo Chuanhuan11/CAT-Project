@@ -11,36 +11,61 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.regex.Pattern;
 
-@WebServlet("/register") // This matches the action in your register.jsp
+@WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Retrieve parameters from the form
-        String username = request.getParameter("fullname"); // Maps 'fullname' input to 'username' column
+        String username = request.getParameter("fullname");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirm_password");
-
-        // Optional: Role selection (Default to STUDENT if not provided)
         String role = request.getParameter("role");
-        if (role == null || role.isEmpty()) {
-            role = "STUDENT";
+
+        // --- 1. SERVER-SIDE INPUT VALIDATION ---
+
+        // Check for empty fields
+        if (username == null || username.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
+
+            request.setAttribute("errorMessage", "All fields are required.");
+            request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+            return;
         }
 
-        // 2. Validate Password Match
+        // Validate Email Domain (Must contain .usm.my)
+        // Regex: Anything + @ + Anything + .usm.my
+        if (!Pattern.matches(".+@.+\\.usm\\.my", email)) {
+            request.setAttribute("errorMessage", "Invalid Email. Please use a valid USM email address (ending in .usm.my).");
+            request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate Password Length
+        if (password.length() < 6) {
+            request.setAttribute("errorMessage", "Password must be at least 6 characters long.");
+            request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+            return;
+        }
+
+        // Validate Password Match
         if (!password.equals(confirmPassword)) {
             request.setAttribute("errorMessage", "Passwords do not match!");
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
             return;
         }
 
-        // 3. Database Operation
-        try (Connection con = DBConnection.getConnection()) {
+        // Default role safety
+        if (role == null || role.isEmpty()) {
+            role = "STUDENT";
+        }
 
-            // --- FIX FOR YOUR ERROR: Handle Null Connection ---
+        // --- 2. DATABASE LOGIC ---
+        try (Connection con = DBConnection.getConnection()) {
             if (con == null) {
-                request.setAttribute("errorMessage", "Database connection failed. Check server logs.");
+                request.setAttribute("errorMessage", "Database connection failed.");
                 request.getRequestDispatcher("/user/register.jsp").forward(request, response);
                 return;
             }
@@ -53,29 +78,24 @@ public class RegisterServlet extends HttpServlet {
             ResultSet rs = checkPs.executeQuery();
 
             if (rs.next()) {
-                // User exists
                 request.setAttribute("errorMessage", "Username or Email already taken!");
                 request.getRequestDispatcher("/user/register.jsp").forward(request, response);
             } else {
-                // Insert new user
                 String insertSql = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(insertSql);
                 ps.setString(1, username);
                 ps.setString(2, email);
-                ps.setString(3, password); // Note: In production, hash this password!
+                ps.setString(3, password);
                 ps.setString(4, role);
 
                 int result = ps.executeUpdate();
-
                 if (result > 0) {
-                    // Success: Redirect to login
                     response.sendRedirect(request.getContextPath() + "/user/login.jsp?success=1");
                 } else {
                     request.setAttribute("errorMessage", "Registration failed. Please try again.");
                     request.getRequestDispatcher("/user/register.jsp").forward(request, response);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "System Error: " + e.getMessage());

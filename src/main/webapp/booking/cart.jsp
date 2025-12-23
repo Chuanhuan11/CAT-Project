@@ -116,6 +116,13 @@
 
 <div class="container mb-5">
     <div class="content-box">
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Notice:</strong> ${sessionScope.errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <c:remove var="errorMessage" scope="session"/>
+        </c:if>
         <c:if test="${not empty param.error}">
             <div class="alert alert-danger text-center rounded-pill mb-4">
                 <c:choose>
@@ -151,26 +158,47 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:set var="total" value="0" />
+                    <c:set var="grandTotal" value="0" />
+
                     <c:forEach var="item" items="${sessionScope.cart}">
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="event-title">${item.title}</div>
+                                    <div class="event-title fw-bold">${item.title}</div>
                                 </div>
+                                <small class="text-muted">${item.eventDate}</small>
                             </td>
-                            <td class="text-muted">${item.eventDate}</td>
-                            <td class="text-muted small"><em>${item.location}</em></td>
-                            <td class="fw-bold text-primary">RM <fmt:formatNumber value="${item.price}" type="number" minFractionDigits="2" /></td>
+
+                            <td class="text-muted">RM <fmt:formatNumber value="${item.price}" type="number" minFractionDigits="2" /></td>
+
+                                <%-- QUANTITY ADJUSTER --%>
+                            <td>
+                                <form action="${pageContext.request.contextPath}/CartServlet" method="post" class="d-flex m-0">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="eventId" value="${item.id}">
+
+                                    <div class="input-group input-group-sm" style="width: 120px;">
+                                        <button class="btn btn-outline-secondary" type="submit" name="quantity" value="${item.quantity - 1}">-</button>
+                                        <input type="text" class="form-control text-center bg-white" value="${item.quantity}" readonly>
+                                        <button class="btn btn-outline-secondary" type="submit" name="quantity" value="${item.quantity + 1}">+</button>
+                                    </div>
+                                </form>
+                            </td>
+
+                            <td class="fw-bold text-dark">
+                                RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2" />
+                            </td>
+
                             <td class="text-end">
                                 <a href="${pageContext.request.contextPath}/CartServlet?action=remove&eventId=${item.id}"
                                    class="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                   onclick="return confirm('Remove this event from your cart?');">
+                                   onclick="return confirm('Remove this event?');">
                                     Remove
                                 </a>
                             </td>
                         </tr>
-                        <c:set var="total" value="${total + item.price}" />
+                        <%-- Calculate Grand Total --%>
+                        <c:set var="grandTotal" value="${grandTotal + (item.price * item.quantity)}" />
                     </c:forEach>
                     </tbody>
                 </table>

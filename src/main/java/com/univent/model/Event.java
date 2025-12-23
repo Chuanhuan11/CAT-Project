@@ -14,6 +14,7 @@ public class Event implements Serializable {
     private int totalSeats;
     private int availableSeats;
     private int organizerId;
+    private int quantity;
 
     public Event() {}
 
@@ -60,4 +61,7 @@ public class Event implements Serializable {
 
     public int getOrganizerId() { return organizerId; }
     public void setOrganizerId(int organizerId) { this.organizerId = organizerId; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

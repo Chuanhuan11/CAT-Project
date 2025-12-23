@@ -20,6 +20,13 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
+        // --- VALIDATION ---
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "Please enter both username and password.");
+            request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            return;
+        }
+
         try (Connection con = DBConnection.getConnection()) {
             if (con == null) {
                 request.setAttribute("errorMessage", "Database is offline.");
@@ -27,6 +34,7 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
+            // Using Prepared Statement prevents SQL Injection
             String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, username);
@@ -34,7 +42,6 @@ public class LoginServlet extends HttpServlet {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                // --- SUCCESS ---
                 HttpSession session = request.getSession();
                 session.setAttribute("userId", rs.getInt("id"));
                 session.setAttribute("username", rs.getString("username"));
@@ -45,15 +52,12 @@ public class LoginServlet extends HttpServlet {
                 if ("ADMIN".equals(role) || "ORGANIZER".equals(role)) {
                     response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
                 } else {
-                    // --- CHANGE 1: Redirect Students to Catalog (EventListServlet) instead of Landing Page ---
                     response.sendRedirect(request.getContextPath() + "/EventListServlet");
                 }
-
             } else {
                 request.setAttribute("errorMessage", "Invalid Username or Password!");
                 request.getRequestDispatcher("/user/login.jsp").forward(request, response);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "System Error: " + e.getMessage());
