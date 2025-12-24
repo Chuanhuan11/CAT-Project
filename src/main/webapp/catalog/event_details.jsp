@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <html>
 <head>
@@ -55,7 +56,13 @@
                         <span class="badge bg-secondary fs-6">Venue: ${event.location}</span>
                     </div>
 
-                    <h3 class="text-success mb-4">Price: RM ${event.price}</h3>
+                    <h3 class="text-success mb-4">
+                        Price:
+                        <c:choose>
+                            <c:when test="${event.price == 0}">FREE</c:when>
+                            <c:otherwise>RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" /></c:otherwise>
+                        </c:choose>
+                    </h3>
 
                     <h5 class="mt-4">About this Event:</h5>
                     <p class="card-text lead">${event.description}</p>

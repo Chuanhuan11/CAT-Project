@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%-- 1. GET TODAY'S DATE FOR COMPARISON --%>
 <% request.setAttribute("todayDate", new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date())); %>
@@ -197,7 +198,7 @@
                             <td><strong class="col-title">${event.title}</strong></td>
                             <td class="col-date">${event.eventDate}</td>
                             <td class="col-venue">${event.location}</td>
-                            <td class="col-price text-primary fw-bold">RM ${event.price}</td>
+                            <td class="col-price text-primary fw-bold">RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
                             <td class="text-center">
                                 <span class="badge rounded-pill ${event.availableSeats > 0 ? 'bg-success' : 'bg-danger'} px-3">
                                     ${event.availableSeats} Left
@@ -249,7 +250,7 @@
                             </td>
                             <td class="col-date">${event.eventDate}</td>
                             <td class="col-venue">${event.location}</td>
-                            <td>RM ${event.price}</td>
+                            <td>RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
                             <td class="text-center">
                                 <span class="badge bg-secondary rounded-pill px-3">
                                     ${event.totalSeats - event.availableSeats} / ${event.totalSeats} Sold
@@ -423,7 +424,7 @@
         document.getElementById('description').value = desc;
         document.getElementById('eventDate').value = date;
         document.getElementById('location').value = loc;
-        document.getElementById('price').value = price;
+        document.getElementById('price').value = parseFloat(price).toFixed(2);
         document.getElementById('imageFile').value = "";
 
         resetFormState();

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <html>
 <head>
     <title>Univent - Catalog</title>
@@ -189,7 +190,12 @@
                                 <span class="badge bg-secondary me-1">DATE</span> ${event.eventDate} <br>
                                 <span class="badge bg-secondary me-1">LOC</span> ${event.location}
                             </p>
-                            <h6 class="text-primary mt-2">RM ${event.price}</h6>
+                            <h6 class="text-primary mt-2">
+                                <c:choose>
+                                    <c:when test="${event.price == 0}">FREE</c:when>
+                                    <c:otherwise>RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></c:otherwise>
+                                </c:choose>
+                            </h6>
                             <div class="d-none full-description">${event.description}</div>
                             <p class="card-text mt-3 text-secondary event-desc" style="font-size: 0.9rem;">
                                     ${event.description.length() > 60 ? event.description.substring(0, 60).concat('...') : event.description}
@@ -353,13 +359,15 @@
     function openDetailsModal(id, title, btnRef, date, loc, price, img, seats, status) {
         let cardBody = btnRef.closest('.card').querySelector('.card-body');
         let fullDesc = cardBody.querySelector('.full-description').innerText;
+        let priceVal = parseFloat(price);
+        let displayPrice = (priceVal === 0) ? "FREE" : "RM " + priceVal.toFixed(2);
 
         document.getElementById('modalEventId').value = id;
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalDesc').innerText = fullDesc;
         document.getElementById('modalDate').innerText = date;
         document.getElementById('modalLoc').innerText = loc;
-        document.getElementById('modalPrice').innerText = "RM " + price;
+        document.getElementById('modalPrice').innerText = displayPrice;
         document.getElementById('modalSeats').innerText = seats + " seats remaining";
 
         if (img && img.trim() !== "") {
