@@ -22,12 +22,12 @@
             background-color: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
 
         .login-header {
-            background-color: #2c1a4d; /* Your Brand Purple */
+            background-color: #2c1a4d; /* Brand Purple */
             color: white;
             padding: 25px;
             text-align: center;
@@ -39,6 +39,7 @@
             font-weight: bold;
             transition: all 0.3s;
         }
+
         .btn-brand:hover {
             background-color: #4a2c82; /* Lighter purple on hover */
             color: white;
@@ -76,6 +77,7 @@
                         </div>
                     </c:if>
 
+                    <%-- Login form: sends data to LoginServlet --%>
                     <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">USERNAME</label>

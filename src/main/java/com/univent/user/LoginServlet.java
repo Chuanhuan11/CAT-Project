@@ -17,10 +17,12 @@ import java.sql.ResultSet;
 public class LoginServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Get the username and password the user typed in
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
         // --- VALIDATION ---
+        // Make sure they didn't leave the fields empty
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             request.setAttribute("errorMessage", "Please enter both username and password.");
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
@@ -42,6 +44,7 @@ public class LoginServlet extends HttpServlet {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                // If we found a match, save their info in the session so they stay logged in
                 HttpSession session = request.getSession();
                 session.setAttribute("userId", rs.getInt("id"));
                 session.setAttribute("username", rs.getString("username"));
@@ -49,12 +52,14 @@ public class LoginServlet extends HttpServlet {
 
                 String role = rs.getString("role");
 
+                // Send them to the right page based on who they are
                 if ("ADMIN".equals(role) || "ORGANIZER".equals(role)) {
                     response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/EventListServlet");
                 }
             } else {
+                // No match found, tell them it's wrong
                 request.setAttribute("errorMessage", "Invalid Username or Password!");
                 request.getRequestDispatcher("/user/login.jsp").forward(request, response);
             }
