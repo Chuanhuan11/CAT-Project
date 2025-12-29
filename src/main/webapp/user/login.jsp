@@ -80,13 +80,15 @@
                     <%-- Login form: sends data to LoginServlet --%>
                     <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">USERNAME</label>
-                            <input type="text" name="username" class="form-control form-control-lg" required placeholder="Enter username">
+                            <label class="form-label text-muted fw-bold" style="font-size: 1.0rem;">USERNAME</label>
+                            <input type="text" name="username" class="form-control" required placeholder="Enter username"
+                                   style="font-size: 1.2rem;">
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label text-muted small fw-bold">PASSWORD</label>
-                            <input type="password" name="password" class="form-control form-control-lg" required placeholder="Enter password">
+                            <label class="form-label text-muted fw-bold" style="font-size: 1.0rem;">PASSWORD</label>
+                            <input type="password" name="password" class="form-control" required
+                                   placeholder="Enter password" style="font-size: 1.2rem;">
                         </div>
 
                         <div class="d-grid gap-2">

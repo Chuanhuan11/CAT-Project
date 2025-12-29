@@ -213,6 +213,40 @@
                 </div>
 
                 <div class="col-md-7 payment-section">
+                    <c:choose>
+                        <%-- CASE 1: FREE ORDER (Total=0) --%>
+                    <c:when test="${totalAmount == 0}">
+                        <h3 class="fw-bold mb-4" style="color: #2c1a4d;">Confirm Booking
+                        </h3>
+
+                            <div class="alert alert-info py-3 shadow-sm border-0"
+                                 style="background-color: #e3f2fd; color: #0d47a1;">
+                                <h5 class="alert-heading fw-bold mb-1">Free Event</h5>
+                                <p class="mb-0 small">No payment is required for this order.
+                                    Click below to confirm.</p>
+                            </div>
+
+                            <form
+                                    action="${pageContext.request.contextPath}/CheckoutServlet"
+                                    method="post"
+                                    style="position: absolute; bottom: 40px; left: 40px; right: 40px;">
+                                    <%-- Send 'free' to skip validation server-side --%>
+                                <input type="hidden" name="paymentMethod" value="free">
+
+                                <button type="submit" class="btn-pay shadow-sm mt-3">
+                                    Confirm Booking
+                                </button>
+
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">Instant
+                                        Confirmation</small>
+                                </div>
+                            </form>
+                        </div>
+                    </c:when>
+
+                        <%-- CASE 2: PAID ORDER (Show Card Form) --%>
+                    <c:otherwise>
                     <h3 class="fw-bold mb-4" style="color: #2c1a4d;">Payment Details</h3>
 
                     <c:if test="${not empty error}">
@@ -279,6 +313,9 @@
         </c:otherwise>
     </c:choose>
 </div>
+</div>
+</c:otherwise>
+</c:choose>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 
