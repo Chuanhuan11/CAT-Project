@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @WebServlet("/CartServlet")
@@ -26,6 +27,8 @@ public class CartServlet extends HttpServlet {
             addToCart(request, response);
         } else if ("update".equals(action)) {
             updateCart(request, response);
+        } else if ("prepareCheckout".equals(action)) {
+            prepareCheckout(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/CartServlet");
         }
@@ -39,6 +42,40 @@ public class CartServlet extends HttpServlet {
             loadCartFromDatabase(request);
             request.getRequestDispatcher("/booking/cart.jsp").forward(request, response);
         }
+    }
+
+    // --- NEW: PREPARE CHECKOUT (Filter Selection) ---
+    private void prepareCheckout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        List<Event> fullCart = (List<Event>) session.getAttribute("cart");
+
+        if (fullCart == null || fullCart.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/CartServlet");
+            return;
+        }
+
+        String[] selectedIds = request.getParameterValues("selectedEvents");
+        if (selectedIds == null || selectedIds.length == 0) {
+            session.setAttribute("errorMessage", "Pelase select at least one item to checkout.");
+            response.sendRedirect(request.getContextPath() + "/CartServlet");
+            return;
+        }
+
+        List<Event> checkoutCart = new ArrayList<>();
+        // Filter fullCart to match selectedIds
+        for (String idStr : selectedIds) {
+            int id = Integer.parseInt(idStr);
+            for (Event event : fullCart) {
+                if (event.getId() == id) {
+                    checkoutCart.add(event);
+                    break;
+                }
+            }
+        }
+
+        // Update session cart to strictly reflect what is being validated/purchased
+        session.setAttribute("cart", checkoutCart);
+        response.sendRedirect(request.getContextPath() + "/CheckoutServlet");
     }
 
     // --- 1. ADD TO CART (Strict Validation) ---

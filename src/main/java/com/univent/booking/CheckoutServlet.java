@@ -146,7 +146,7 @@ public class CheckoutServlet extends HttpServlet {
         if (cart != null && !cart.isEmpty()) {
             boolean success = saveBookings(userId, cart);
             if (success) {
-                clearDatabaseCart(userId);
+                removeBookedItemsFromCart(userId, cart);
                 session.removeAttribute("cart");
                 request.setAttribute("message", "Payment Successful! Tickets sent to your email.");
                 request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
@@ -233,12 +233,17 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 
-    private void clearDatabaseCart(int userId) {
+    private void removeBookedItemsFromCart(int userId, List<Event> bookedItems) {
         try (Connection con = DBConnection.getConnection()) {
-            String sql = "DELETE FROM cart WHERE user_id = ?";
+            String sql = "DELETE FROM cart WHERE user_id = ? AND event_id = ?";
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1, userId);
-            ps.executeUpdate();
+            for (Event event : bookedItems) {
+                ps.setInt(1, userId);
+                ps.setInt(1, userId);
+                ps.setInt(2, event.getId());
+                ps.addBatch();
+            }
+            ps.executeBatch();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -127,63 +127,75 @@
         </c:if>
 
         <c:if test="${not empty sessionScope.cart}">
+        <form action="${pageContext.request.contextPath}/CartServlet" method="post" id="cartForm">
+            <input type="hidden" name="action" value="prepareCheckout">
+
             <div class="table-responsive">
-                <table class="table table-hover align-middle custom-table mb-0">
-                    <thead>
-                    <tr>
-                        <th style="width: 40%;">Event</th>
-                        <th>Date</th>
-                        <th>Price (Unit)</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                        <th class="text-end">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <c:set var="grandTotal" value="0" />
-
-                    <c:forEach var="item" items="${sessionScope.cart}">
-                        <tr class="cart-row" data-id="${item.id}" data-price="${item.price}" data-available="${item.availableSeats}">
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="event-title fw-bold">${item.title}</div>
-                                </div>
-                                <small class="text-muted">${item.location}</small>
-                            </td>
-
-                            <td><small class="text-muted">${item.eventDate}</small></td>
-
-                            <td class="text-muted">RM <fmt:formatNumber value="${item.price}" type="number" minFractionDigits="2" /></td>
-
-                                <%-- JAVASCRIPT QUANTITY CONTROLS --%>
-                            <td>
-                                <div class="input-group input-group-sm" style="width: 130px;">
-                                    <button class="btn btn-outline-secondary qty-btn" type="button" onclick="updateCartQuantity(${item.id}, -1, this)">-</button>
-
-                                    <input type="text" class="form-control text-center bg-white qty-input"
-                                           value="${item.quantity}" readonly>
-
-                                    <button class="btn btn-outline-secondary qty-btn" type="button" onclick="updateCartQuantity(${item.id}, 1, this)">+</button>
-                                </div>
-                                <div class="text-danger small mt-1 max-msg" style="display:none;">Max reached</div>
-                            </td>
-
-                            <td class="fw-bold text-dark row-total">
-                                RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2" />
-                            </td>
-
-                            <td class="text-end">
-                                <a href="${pageContext.request.contextPath}/CartServlet?action=remove&eventId=${item.id}"
-                                   class="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                   onclick="return confirm('Remove this event?');">
-                                    Remove
-                                </a>
-                            </td>
+                    <table class="table table-hover align-middle custom-table mb-0">
+                        <thead>
+                        <tr>
+                            <th style="width: 50px;">
+                                <input type="checkbox" id="selectAll" class="form-check-input"
+                                       checked onchange="toggleAll(this)">
+                            </th>
+                            <th style="min-width: 250px;">Event</th>
+                            <th>Date</th>
+                            <th>Price (Unit)</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th class="text-center">Action</th>
                         </tr>
-                        <c:set var="grandTotal" value="${grandTotal + (item.price * item.quantity)}" />
-                    </c:forEach>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        <c:set var="grandTotal" value="0" />
+
+                        <c:forEach var="item" items="${sessionScope.cart}">
+                            <tr class="cart-row" data-id="${item.id}" data-price="${item.price}" data-available="${item.availableSeats}">
+                                <td>
+                                    <input type="checkbox" name="selectedEvents" value="${item.id}"
+                                           class="form-check-input item-check" checked
+                                           onchange="updateGrandTotal()">
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="event-title fw-bold">${item.title}</div>
+                                    </div>
+                                    <small class="text-muted">${item.location}</small>
+                                </td>
+
+                                <td><small class="text-muted">${item.eventDate}</small></td>
+
+                                <td class="text-muted">RM <fmt:formatNumber value="${item.price}" type="number" minFractionDigits="2" /></td>
+
+                                    <%-- JAVASCRIPT QUANTITY CONTROLS --%>
+                                <td>
+                                    <div class="input-group input-group-sm" style="width: 130px;">
+                                        <button class="btn btn-outline-secondary qty-btn" type="button" onclick="updateCartQuantity(${item.id}, -1, this)">-</button>
+
+                                        <input type="text" class="form-control text-center bg-white qty-input"
+                                               value="${item.quantity}" readonly>
+
+                                        <button class="btn btn-outline-secondary qty-btn" type="button" onclick="updateCartQuantity(${item.id}, 1, this)">+</button>
+                                    </div>
+                                    <div class="text-danger small mt-1 max-msg" style="display:none;">Max reached</div>
+                                </td>
+
+                                <td class="fw-bold text-dark row-total">
+                                    RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2" />
+                                </td>
+
+                                <td class="text-center">
+                                    <a href="${pageContext.request.contextPath}/CartServlet?action=remove&eventId=${item.id}"
+                                       class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                       onclick="return confirm('Remove this event?');">
+                                        Remove
+                                    </a>
+                                </td>
+                            </tr>
+                            <c:set var="grandTotal" value="${grandTotal + (item.price * item.quantity)}" />
+                        </c:forEach>
+                        </tbody>
+                    </table>
             </div>
 
             <div class="total-section d-flex justify-content-between align-items-center">
@@ -200,6 +212,7 @@
                     </a>
                 </div>
             </div>
+        </form>
         </c:if>
     </div>
 </div>
@@ -209,6 +222,15 @@
     // Context path for AJAX
     const contextPath = "${pageContext.request.contextPath}";
 
+    // 1. Toggle All Checkboxes
+    function toggleAll(source) {
+        document.querySelectorAll('.item-check').forEach(box => {
+            box.checked = source.checked;
+        });
+        updateGrandTotal();
+    }
+
+    // 2. Update Quantity
     function updateCartQuantity(eventId, change, btn) {
         // Find DOM elements relative to the button clicked
         const row = btn.closest('.cart-row');
@@ -234,7 +256,7 @@
             return; // Stop execution
         }
 
-        // 1. UPDATE UI IMMEDIATELY (No Lag)
+        // UPDATE UI IMMEDIATELY
         input.value = newQty;
 
         // Update Row Total
@@ -244,7 +266,7 @@
         // Recalculate Grand Total
         updateGrandTotal();
 
-        // 2. SEND BACKGROUND UPDATE TO SERVER
+        // SEND BACKGROUND UPDATE TO SERVER
         // We use fetch to fire-and-forget (or handle error)
         fetch(contextPath + '/CartServlet', {
             method: 'POST',
@@ -255,14 +277,32 @@
         }).catch(err => console.error('Error updating cart:', err));
     }
 
+    // 3. Update Grand Total (Based on CHECKED items)
     function updateGrandTotal() {
         let grandTotal = 0;
+        let anyChecked = false;
+
         document.querySelectorAll('.cart-row').forEach(row => {
-            const price = parseFloat(row.dataset.price);
-            const qty = parseInt(row.querySelector('.qty-input').value);
-            grandTotal += (price * qty);
+            const checkbox = row.querySelector('.item-check');
+            if (checkbox.checked) {
+                anyChecked = true;
+                const price = parseFloat(row.dataset.price);
+                const qty = parseInt(row.querySelector('.qty-input').value);
+                grandTotal += (price * qty);
+            }
         });
+
         document.getElementById('grandTotalDisplay').innerText = "RM " + grandTotal.toFixed(2);
+
+        // Disable checkout button if nothing selected
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) checkoutBtn.disabled = !anyChecked;
+
+        // Update master checkbox state
+        const allChecks = document.querySelectorAll('.item-check');
+        const allChecked = Array.from(allChecks).every(c => c.checked);
+        const selectAllParams = document.getElementById('selectAll');
+        if (selectAllParams) selectAllParams.checked = allChecked && allChecks.length > 0;
     }
 </script>
 </body>
