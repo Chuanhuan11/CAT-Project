@@ -63,7 +63,7 @@ public class OrderHistoryServlet extends HttpServlet {
         request.getRequestDispatcher("/booking/my_tickets.jsp").forward(request, response);
     }
 
-    // --- Inner DTO Class ---
+    // Inner DTO Class
     public static class Ticket {
         private int bookingId;
         private Date bookingDate;

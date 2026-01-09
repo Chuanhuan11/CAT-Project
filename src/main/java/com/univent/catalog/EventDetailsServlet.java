@@ -17,23 +17,23 @@ import java.sql.ResultSet;
 public class EventDetailsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // 1. Get the ID from the URL (e.g., ?id=2)
+        // Get the ID from the URL
         String idParam = request.getParameter("id");
 
         if (idParam != null) {
             int eventId = Integer.parseInt(idParam);
             Event event = null;
 
-            // 2. Connect to Database
+            // Connect to Database
             try (Connection con = DBConnection.getConnection()) {
-                // 3. Select ONLY the event that matches the ID
+                // Select ONLY the event that matches the ID
                 String sql = "SELECT * FROM events WHERE id = ?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, eventId); // Set the ? to the eventId
 
                 ResultSet rs = ps.executeQuery();
 
-                // 4. If found, create the Event object
+                // If found, create the Event object
                 if (rs.next()) {
                     event = new Event();
                     event.setId(rs.getInt("id"));
@@ -50,7 +50,7 @@ public class EventDetailsServlet extends HttpServlet {
                 e.printStackTrace();
             }
 
-            // 5. Send the Real Event to the JSP
+            // Send the Real Event to the JSP
             if (event != null) {
                 request.setAttribute("event", event);
                 request.getRequestDispatcher("/catalog/event_details.jsp").forward(request, response);

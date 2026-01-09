@@ -8,8 +8,6 @@ public class Booking implements Serializable {
     private int eventId;
     private String bookingDate;
     private String status;
-
-    // --- NEW FIELDS (For Display Only) ---
     private String attendeeName;
     private String attendeeEmail;
 
@@ -39,7 +37,6 @@ public class Booking implements Serializable {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    // --- NEW GETTERS/SETTERS ---
     public String getAttendeeName() { return attendeeName; }
     public void setAttendeeName(String attendeeName) { this.attendeeName = attendeeName; }
 

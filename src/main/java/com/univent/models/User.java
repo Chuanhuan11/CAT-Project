@@ -5,7 +5,7 @@ public class User {
     private String fullname;
     private String email;
     private String password;
-    private String role; // "student", "admin"
+    private String role;
 
     public User() {}
 

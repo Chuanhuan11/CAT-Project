@@ -7,7 +7,7 @@ public class User implements Serializable {
     private String username;
     private String password;
     private String email;
-    private String role; // "STUDENT" or "ADMIN"
+    private String role;
 
     public User() {}
 

@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,6 +19,15 @@ public class DeleteUserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Role Validation
+        HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
+        if (role == null || !"ADMIN".equals(role)) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
+
         String userIdParam = request.getParameter("id");
 
         if (userIdParam != null && !userIdParam.isEmpty()) {
@@ -25,9 +35,6 @@ public class DeleteUserServlet extends HttpServlet {
 
             try (Connection con = DBConnection.getConnection()) {
 
-                // --- STEP 1: COUNT AND RESTORE SEATS ---
-                // We find all CONFIRMED bookings for this user, grouped by event.
-                // This ensures we know exactly how many seats to give back.
                 String findBookingsSql = "SELECT event_id, COUNT(*) as ticket_count " +
                         "FROM bookings " +
                         "WHERE user_id = ? AND status = 'CONFIRMED' " +
@@ -51,9 +58,6 @@ public class DeleteUserServlet extends HttpServlet {
                     }
                 }
 
-                // --- STEP 2: DELETE USER ---
-                // Deleting the user will cascade delete the bookings (cleaning up the booking table)
-                // but we have already safely restored the seat counts above.
                 String deleteUserSql = "DELETE FROM users WHERE id = ?";
                 try (PreparedStatement psDel = con.prepareStatement(deleteUserSql)) {
                     psDel.setInt(1, userId);

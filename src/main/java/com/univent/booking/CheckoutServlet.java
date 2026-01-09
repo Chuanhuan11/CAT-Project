@@ -28,13 +28,19 @@ public class CheckoutServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
+        List<Event> cart = (List<Event>) session.getAttribute("cart"); //
 
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
 
-        // --- FETCH SAVED CARDS ---
+        if (cart == null || cart.isEmpty()) {
+            session.setAttribute("errorMessage", "Your cart is empty. Please select events to checkout.");
+            response.sendRedirect(request.getContextPath() + "/CartServlet");
+            return;
+        }
+
         List<PaymentMethod> savedCards = new ArrayList<>();
         try (Connection con = DBConnection.getConnection()) {
             String sql = "SELECT * FROM payment_methods WHERE user_id = ?";
@@ -64,8 +70,14 @@ public class CheckoutServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         List<Event> cart = (List<Event>) session.getAttribute("cart");
 
+        // Role Validation
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+
+        if (cart == null || cart.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/CartServlet");
             return;
         }
 
@@ -79,9 +91,8 @@ public class CheckoutServlet extends HttpServlet {
             String expiry = request.getParameter("expiry");
             String cvv = request.getParameter("cvv");
 
-            // --- INPUT VALIDATION START ---
 
-            // 1. Basic Empty Check
+            // Basic Empty Check
             if (cardNumber == null || cardNumber.trim().isEmpty() ||
                     expiry == null || expiry.trim().isEmpty() ||
                     cvv == null || cvv.trim().isEmpty()) {
@@ -90,31 +101,31 @@ public class CheckoutServlet extends HttpServlet {
                 return;
             }
 
-            // 2. Remove spaces/dashes from card number for validation
+            // Remove spaces/dashes from card number for validation
             String cleanCardNum = cardNumber.replaceAll("[\\s-]", "");
 
-            // 3. Validate Card Number (Must be 13 to 19 digits)
+            // Validate Card Number (Must be 13 to 19 digits)
             if (!cleanCardNum.matches("\\d{13,19}")) {
                 request.setAttribute("error", "Invalid Card Number. It must contain only digits (13-19).");
                 doGet(request, response);
                 return;
             }
 
-            // 4. Validate CVV (Must be 3 or 4 digits)
+            // Validate CVV (Must be 3 or 4 digits)
             if (!cvv.matches("\\d{3,4}")) {
                 request.setAttribute("error", "Invalid CVV. It must be 3 or 4 digits.");
                 doGet(request, response);
                 return;
             }
 
-            // 5. Validate Expiry Format (MM/YY)
+            // Validate Expiry Format (MM/YY)
             if (!expiry.matches("(0[1-9]|1[0-2])/\\d{2}")) {
                 request.setAttribute("error", "Invalid Expiry format. Use MM/YY (e.g., 12/26).");
                 doGet(request, response);
                 return;
             }
 
-            // 6. Validate Card is Not Expired
+            // Validate Card is Not Expired
             try {
                 String[] parts = expiry.split("/");
                 int expMonth = Integer.parseInt(parts[0]);
@@ -133,7 +144,6 @@ public class CheckoutServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-            // --- INPUT VALIDATION END ---
 
             // Save Card Logic (Only if validation passes)
             String saveCard = request.getParameter("saveCard");
@@ -143,23 +153,18 @@ public class CheckoutServlet extends HttpServlet {
         }
 
         // Process Payment
-        if (cart != null && !cart.isEmpty()) {
-            boolean success = saveBookings(userId, cart);
-            if (success) {
-                removeBookedItemsFromCart(userId, cart);
-                session.removeAttribute("cart");
-                request.setAttribute("message", "Payment Successful! Tickets sent to your email.");
-                request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
-            } else {
-                request.setAttribute("error", "Booking failed. Some items may be sold out.");
-                doGet(request, response);
-            }
+        boolean success = saveBookings(userId, cart);
+        if (success) {
+            removeBookedItemsFromCart(userId, cart);
+            session.removeAttribute("cart");
+            request.setAttribute("message", "Payment Successful! Tickets sent to your email.");
+            request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/CartServlet");
+            request.setAttribute("error", "Booking failed. Some items may be sold out.");
+            doGet(request, response);
         }
     }
 
-    // --- HELPER TO SAVE CARD ---
     private void savePaymentMethod(int userId, String number, String expiry) {
         String last4 = number.length() > 4 ? number.substring(number.length() - 4) : number;
         String alias = "Card ending " + last4;
@@ -177,7 +182,6 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 
-    // --- EXISTING METHODS (Bookings & Cart) ---
     private boolean saveBookings(int userId, List<Event> cart) {
         String bookingSql = "INSERT INTO bookings (user_id, event_id, booking_date, status) VALUES (?, ?, ?, ?)";
         String updateSeatSql = "UPDATE events SET available_seats = available_seats - 1 WHERE id = ? AND available_seats > 0";
@@ -191,7 +195,6 @@ public class CheckoutServlet extends HttpServlet {
                 String date = LocalDate.now().toString();
 
                 for (Event event : cart) {
-                    // FIX: Loop through the quantity. If quantity is 10, run this loop 10 times.
                     int qty = event.getQuantity();
                     if(qty < 1) qty = 1;
 
@@ -239,8 +242,7 @@ public class CheckoutServlet extends HttpServlet {
             PreparedStatement ps = con.prepareStatement(sql);
             for (Event event : bookedItems) {
                 ps.setInt(1, userId);
-                ps.setInt(1, userId);
-                ps.setInt(2, event.getId());
+                ps.setInt(2, event.getId()); // FIX: was duplicate setInt(1)
                 ps.addBatch();
             }
             ps.executeBatch();

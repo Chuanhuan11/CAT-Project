@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,6 +19,15 @@ import java.util.List;
 @WebServlet("/EventAttendeesServlet")
 public class EventAttendeesServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Role Validation
+        HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
+        if (role == null || (!"ADMIN".equals(role) && !"ORGANIZER".equals(role))) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
+
         String eventIdParam = request.getParameter("eventId");
 
         if (eventIdParam == null || eventIdParam.isEmpty()) {
@@ -37,7 +47,7 @@ public class EventAttendeesServlet extends HttpServlet {
         List<Booking> bookingList = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
-            // 1. Fetch Event Title
+            // Fetch Event Title
             String titleSql = "SELECT title FROM events WHERE id = ?";
             try (PreparedStatement ps = con.prepareStatement(titleSql)) {
                 ps.setInt(1, eventId);
@@ -46,8 +56,7 @@ public class EventAttendeesServlet extends HttpServlet {
                 }
             }
 
-            // 2. Fetch Bookings + User Info
-            // We join tables to get the name/email for each ticket
+            // Fetch Bookings + User Info
             String sql = "SELECT b.id, b.status, b.booking_date, u.username, u.email, u.id as user_id " +
                     "FROM bookings b " +
                     "JOIN users u ON b.user_id = u.id " +
@@ -62,9 +71,8 @@ public class EventAttendeesServlet extends HttpServlet {
                         b.setId(rs.getInt("id"));
                         b.setStatus(rs.getString("status"));
                         b.setBookingDate(rs.getString("booking_date"));
-                        b.setUserId(rs.getInt("user_id")); // Keep user ID reference
+                        b.setUserId(rs.getInt("user_id"));
 
-                        // Set the extra display fields we added to Booking.java
                         b.setAttendeeName(rs.getString("username"));
                         b.setAttendeeEmail(rs.getString("email"));
 

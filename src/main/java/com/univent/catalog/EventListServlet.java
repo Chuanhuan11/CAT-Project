@@ -24,7 +24,7 @@ public class EventListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Event> allEvents = new ArrayList<>();
 
-        // 1. Fetch ALL events first
+        // Fetch ALL events first
         try (Connection con = DBConnection.getConnection()) {
             String sql = "SELECT * FROM events";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -47,22 +47,22 @@ public class EventListServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // 2. Separate Logic in Java
+        // Separate Logic in Java
         LocalDate today = LocalDate.now();
 
-        // A. Upcoming (Future + Available Seats) -> Sort Ascending (Soonest first)
+        // Upcoming (Future + Available Seats) -> Sort Ascending (Soonest first)
         List<Event> upcomingEvents = allEvents.stream()
                 .filter(e -> !e.getEventDate().toLocalDate().isBefore(today) && e.getAvailableSeats() > 0)
                 .sorted(Comparator.comparing(Event::getEventDate))
                 .collect(Collectors.toList());
 
-        // B. Sold Out (Future + No Seats) -> Sort Ascending
+        // Sold Out (Future + No Seats) -> Sort Ascending
         List<Event> soldOutEvents = allEvents.stream()
                 .filter(e -> !e.getEventDate().toLocalDate().isBefore(today) && e.getAvailableSeats() <= 0)
                 .sorted(Comparator.comparing(Event::getEventDate))
                 .collect(Collectors.toList());
 
-        // C. Past (Past Date) -> Sort Descending (Most recent past first)
+        // Past (Past Date) -> Sort Descending (Most recent past first)
         List<Event> pastEvents = allEvents.stream()
                 .filter(e -> e.getEventDate().toLocalDate().isBefore(today))
                 .sorted((e1, e2) -> e2.getEventDate().compareTo(e1.getEventDate()))

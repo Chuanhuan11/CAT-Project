@@ -19,12 +19,13 @@ import java.util.List;
 @WebServlet("/OrganiserDashboardServlet")
 public class OrganiserDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Role Validation
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
         Integer userId = (Integer) session.getAttribute("userId");
 
         if (role == null || (!role.equals("ADMIN") && !role.equals("ORGANIZER"))) {
-            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/");
             return;
         }
 

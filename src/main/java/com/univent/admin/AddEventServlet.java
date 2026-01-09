@@ -22,6 +22,13 @@ public class AddEventServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
+        String role = (String) session.getAttribute("role");
+
+        // Role Validation
+        if (userId == null || role == null || (!"ADMIN".equals(role) && !"ORGANIZER".equals(role))) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
 
         String idParam = request.getParameter("id");
         String title = request.getParameter("title");
@@ -35,7 +42,7 @@ public class AddEventServlet extends HttpServlet {
         double price = 0.0;
         int totalSeats = 0;
 
-        // --- SERVER-SIDE SAFETY CHECKS ---
+        // Server Side Safety Check
         if (title == null || title.trim().isEmpty()) {
             errorMessage = "Title is missing.";
         } else {

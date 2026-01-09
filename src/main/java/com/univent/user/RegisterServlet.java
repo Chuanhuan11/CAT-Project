@@ -21,9 +21,10 @@ public class RegisterServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirm_password");
-        String role = request.getParameter("role");
 
-        // --- 1. SERVER-SIDE INPUT VALIDATION ---
+        String role = "STUDENT";
+
+        // Role Validation
 
         // Check for empty fields
         if (username == null || username.trim().isEmpty() ||
@@ -36,7 +37,6 @@ public class RegisterServlet extends HttpServlet {
         }
 
         // Validate Email Domain (Must contain .usm.my)
-        // Regex: Anything + @ + Anything + .usm.my
         if (!Pattern.matches(".+@.+\\.usm\\.my", email)) {
             request.setAttribute("errorMessage", "Invalid Email. Please use a valid USM email address (ending in .usm.my).");
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
@@ -55,11 +55,6 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Passwords do not match!");
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
             return;
-        }
-
-        // Default role safety
-        if (role == null || role.isEmpty()) {
-            role = "STUDENT";
         }
 
         // --- 2. DATABASE LOGIC ---
@@ -86,7 +81,7 @@ public class RegisterServlet extends HttpServlet {
                 ps.setString(1, username);
                 ps.setString(2, email);
                 ps.setString(3, password);
-                ps.setString(4, role);
+                ps.setString(4, role); // Always inserts "STUDENT"
 
                 int result = ps.executeUpdate();
                 if (result > 0) {

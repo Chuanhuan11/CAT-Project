@@ -21,7 +21,7 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        // --- VALIDATION ---
+        // Role Validation
         // Make sure they didn't leave the fields empty
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             request.setAttribute("errorMessage", "Please enter both username and password.");

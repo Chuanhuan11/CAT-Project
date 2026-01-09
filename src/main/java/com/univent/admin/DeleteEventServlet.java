@@ -21,9 +21,15 @@ public class DeleteEventServlet extends HttpServlet {
         String role = (String) session.getAttribute("role");
         Integer userId = (Integer) session.getAttribute("userId");
 
+        // Role Validation
+        if (userId == null || role == null || (!"ADMIN".equals(role) && !"ORGANIZER".equals(role))) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
+
         if (idParam != null) {
             try (Connection con = DBConnection.getConnection()) {
-                // 1. Ownership Check
+                // Ownership Check (Admins can delete anything)
                 if (!"ADMIN".equals(role)) {
                     String checkSql = "SELECT organizer_id FROM events WHERE id = ?";
                     PreparedStatement checkPs = con.prepareStatement(checkSql);
@@ -31,14 +37,14 @@ public class DeleteEventServlet extends HttpServlet {
                     ResultSet rs = checkPs.executeQuery();
                     if (rs.next()) {
                         if (rs.getInt("organizer_id") != userId) {
-                            // Not the owner -> Deny Access
+                            // Not the owner then Deny Access
                             response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
                             return;
                         }
                     }
                 }
 
-                // 2. Perform Delete
+                // Delete
                 String sql = "DELETE FROM events WHERE id = ?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, Integer.parseInt(idParam));
