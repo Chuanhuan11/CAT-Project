@@ -4,6 +4,7 @@
 
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Details</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
 </head>
@@ -32,7 +33,7 @@
                 <c:choose>
                     <c:when test="${not empty event.imageUrl}">
                         <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}"
-                             class="img-fluid rounded-start w-100"
+                             class="img-fluid rounded-start w-100 event-detail-img"
                              style="height: 500px; object-fit: cover;"
                              alt="Event Poster">
                     </c:when>

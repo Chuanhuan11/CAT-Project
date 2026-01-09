@@ -286,3 +286,30 @@ body {
     color: var(--secondary-color);
     margin-bottom: 1rem;
 }
+
+@media (max-width: 480px) {
+    .navbar {
+        padding: 1rem; /* Reduce navbar padding */
+    }
+
+    .hero h1 {
+        font-size: 2rem; /* Fix hero size */
+    }
+
+    .auth-card {
+        padding: 1.5rem; /* Reduce padding inside login box */
+        max-width: 100%;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    /* Make buttons full width on mobile for easier tapping */
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        display: block;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+}

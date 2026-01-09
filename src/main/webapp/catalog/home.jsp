@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Univent - Catalog</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
@@ -86,6 +87,31 @@
 
         .desc-scroll-area::-webkit-scrollbar { width: 5px; }
         .desc-scroll-area::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+        #searchInput {
+            width: 250px;
+        }
+
+        @media (max-width: 991px) { /* Bootstrap mobile breakpoint */
+            #searchInput {
+                width: 100%; /* Full width on mobile menu */
+                margin-bottom: 10px;
+            }
+
+            .navbar-collapse {
+                background-color: #212529; /* Dark background for opened menu */
+                padding: 15px;
+                border-radius: 10px;
+                margin-top: 10px;
+            }
+
+            .floating-alert {
+                width: 90%; /* Prevent alert from being wider than screen */
+                right: 5%;
+                left: 5%;
+                min-width: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -109,7 +135,7 @@
             </ul>
             <div class="d-flex align-items-center">
                 <div class="me-3">
-                    <input id="searchInput" class="form-control form-control-sm rounded-pill px-3" type="search" placeholder="Search events..." style="width: 250px;">
+                    <input id="searchInput" class="form-control form-control-sm rounded-pill px-3" type="search" placeholder="Search events...">
                 </div>
                 <div>
                     <c:choose>

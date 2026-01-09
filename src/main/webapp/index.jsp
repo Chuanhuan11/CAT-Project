@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Univent - Discover USM Life</title>
     <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo.png" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
@@ -41,21 +42,22 @@
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-
             display: flex;
             flex-direction: column;
+            /* Changed from strict left align to flexible align */
             align-items: flex-start;
             justify-content: center;
             text-align: left;
             padding-left: 10%;
+            padding-right: 10%; /* Add right padding for safety */
         }
 
         :root { --brand-purple: #2c1a4d; }
 
         .big-title {
-            font-size: 5rem;
+            font-size: 5rem; /* Desktop size */
             font-weight: 800;
-            color: var(--brand-purple);
+            color: #2c1a4d;
             line-height: 1.1;
             margin-bottom: 1.5rem;
         }
@@ -97,6 +99,40 @@
             color: var(--brand-purple);
             font-weight: 500;
             font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .brand-header {
+                left: 5%; /* Less gap on mobile */
+                top: 20px;
+            }
+
+            .brand-text {
+                font-size: 1.5rem; /* Smaller logo text */
+            }
+
+            .hero-container {
+                padding-left: 5%;
+                padding-right: 5%;
+                align-items: center; /* Center everything on mobile */
+                text-align: center;  /* Center text */
+            }
+
+            .big-title {
+                font-size: 3rem; /* Reduce from 5rem to 3rem */
+                line-height: 1.2;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .footer-note {
+                left: 0;
+                width: 100%;
+                text-align: center; /* Center footer note */
+                bottom: 30px;
+            }
         }
     </style>
 </head>
