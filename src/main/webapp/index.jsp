@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Univent - Discover USM Life</title>
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo.png" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
 
     <style>
