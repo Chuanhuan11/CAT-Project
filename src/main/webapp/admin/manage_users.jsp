@@ -4,6 +4,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo.png" />
     <title>Manage Users - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
@@ -82,6 +83,55 @@
         .col-id { color: #888; font-weight: bold; font-size: 0.9rem; }
         .col-username { font-weight: 600; color: #2c1a4d; font-size: 1.05rem; }
         .col-email { color: #555; font-style: italic; }
+
+        @media (max-width: 768px) {
+            /* Stack Title and Button vertically */
+            .dashboard-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px;
+            }
+
+            /* Ensure containers take full width */
+            .dashboard-header > div {
+                width: 100% !important;
+            }
+
+            /* Button Container */
+            .dashboard-header .button-group {
+                display: flex;
+                width: 100%;
+            }
+
+            /* Make button full width for easy tapping */
+            .dashboard-header .btn {
+                flex: 1;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Remove margins from text so gap handles spacing */
+            .dashboard-header .text-container {
+                margin-bottom: 0 !important;
+            }
+
+            /* Hide ID and Email on tiny screens, keep Username and Role */
+            .col-id, .col-email { display: none; }
+
+            /* Hide headers (1=ID, 3=Email) */
+            .custom-table th:nth-child(1),
+            .custom-table th:nth-child(3) { display: none; }
+
+            .col-username { font-size: 0.9rem; }
+
+            /* Make the Role Dropdown smaller */
+            .form-select {
+                width: 100px;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,9 +169,19 @@
 <%-- MAIN CONTENT --%>
 <div class="container">
     <div class="content-box">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold text-dark mb-0">Registered Users</h3>
-            <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet" class="btn btn-outline-secondary rounded-pill">Back to Dashboard</a>
+        <div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
+
+            <div class="text-container">
+                <h3 class="fw-bold text-dark mb-0">Registered Users</h3>
+            </div>
+
+            <div class="button-group">
+                <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet"
+                   class="btn btn-outline-secondary rounded-pill">
+                    Back to Dashboard
+                </a>
+            </div>
+
         </div>
 
         <div class="table-responsive table-container">

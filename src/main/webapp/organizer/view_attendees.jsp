@@ -4,6 +4,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo.png" />
     <title>Attendees - ${eventTitle}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
@@ -29,10 +30,47 @@
             margin-bottom: 50px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
+
+        /* TABLE STYLES */
         .custom-table thead { background-color: #2c1a4d; color: white; border-bottom: 4px solid #ffc107; }
         .custom-table th { padding: 15px; border: none; text-transform: uppercase; font-size: 0.85rem; }
         .custom-table td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #eee; }
         .custom-table tbody tr:hover { background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; }
+
+        /* Typography for Table */
+        .col-id { color: #888; font-weight: bold; font-size: 0.9rem; }
+        .col-name { font-weight: 600; color: #2c1a4d; font-size: 1.05rem; }
+        .col-email { color: #555; font-style: italic; }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            /* 1. HEADER FIX (Stack vertically) */
+            .dashboard-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px;
+            }
+            .dashboard-header > div { width: 100% !important; }
+            .dashboard-header .button-group { display: flex; width: 100%; }
+            .dashboard-header .btn {
+                flex: 1;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .dashboard-header .text-container { margin-bottom: 0 !important; }
+
+            /* 2. TABLE OVERFLOW FIX (Hide ID and Email columns) */
+            /* Hide the cells */
+            .col-id { display: none; }
+
+            /* Hide the headers (1=ID, 3=Email) */
+            .custom-table th:nth-child(1) { display: none; }
+
+            /* Adjust name font size */
+            .col-name { font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -67,9 +105,13 @@
 
 <div class="container">
     <div class="content-box">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold text-dark mb-0">Registered Tickets</h3>
-            <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet" class="btn btn-outline-secondary rounded-pill">Back to Dashboard</a>
+        <div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
+            <div class="text-container">
+                <h3 class="fw-bold text-dark mb-0">Registered Tickets</h3>
+            </div>
+            <div class="button-group">
+                <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet" class="btn btn-outline-secondary rounded-pill">Back to Dashboard</a>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -83,12 +125,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <%-- We are now iterating over standard Booking objects --%>
                 <c:forEach var="booking" items="${attendees}">
                     <tr>
-                        <td class="text-muted fw-bold">#${booking.id}</td>
-                        <td class="fw-bold text-dark">${booking.attendeeName}</td>
-                        <td class="text-secondary">${booking.attendeeEmail}</td>
+                        <td class="col-id">#${booking.id}</td>
+                        <td class="col-name">${booking.attendeeName}</td>
+                        <td class="col-email">${booking.attendeeEmail}</td>
                         <td class="text-end">
                             <a href="${pageContext.request.contextPath}/DeleteBookingServlet?eventId=${eventId}&bookingId=${booking.id}"
                                class="btn btn-outline-danger btn-sm rounded-pill px-3"

@@ -6,6 +6,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo.png" />
     <title>Secure Checkout - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
@@ -146,6 +147,66 @@
         @keyframes popIn {
             from { transform: scale(0); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- MOBILE RESPONSIVENESS (Add to bottom of style tag) --- */
+        @media (max-width: 991px) {
+            .checkout-container {
+                height: auto !important;
+                min-height: auto !important;
+                display: flex;
+                flex-direction: column;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+            .summary-section, .payment-section, .success-wrapper {
+                height: auto !important; /* Let content dictate height */
+                padding: 30px 20px;
+            }
+
+            .summary-section {
+                order: 1; /* Show summary first */
+                border-bottom: 5px solid #ffc107; /* Visual divider */
+            }
+
+            .payment-section {
+                order: 2; /* Show payment/buttons second */
+            }
+
+            /* Fix the absolute positioned form in Free Checkout */
+            form[style*="absolute"] {
+                position: static !important; /* Stop floating */
+                margin-top: 20px;
+                padding: 0;
+            }
+
+            /* Adjust scroll areas */
+            .cart-items-scroll {
+                max-height: 250px; /* Limit height on mobile */
+            }
+
+            /* Fix Total Row */
+            .total-row {
+                position: static;
+                margin-top: 20px;
+            }
+
+            /* Fix Close Button position */
+            .btn-close-modal {
+                top: 10px;
+                right: 15px;
+                color: white; /* Make visible against dark summary header if needed */
+                background-color: rgba(0,0,0,0.5); /* Background for visibility */
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                padding-bottom: 4px;
+            }
         }
     </style>
 </head>

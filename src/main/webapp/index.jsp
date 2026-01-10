@@ -11,6 +11,7 @@
             height: 100%;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
         .brand-header {
@@ -36,6 +37,7 @@
             letter-spacing: 1px;
         }
 
+        /* --- DESKTOP HERO STYLES --- */
         .hero-container {
             background-image: url('${pageContext.request.contextPath}/assets/img/landing-bg.jpg');
             height: 100%;
@@ -44,18 +46,23 @@
             background-size: cover;
             display: flex;
             flex-direction: column;
-            /* Changed from strict left align to flexible align */
             align-items: flex-start;
             justify-content: center;
             text-align: left;
             padding-left: 10%;
-            padding-right: 10%; /* Add right padding for safety */
+            padding-right: 10%;
+            position: relative;
+        }
+
+        /* Hide the separate image on desktop because landing-bg.jpg already has it */
+        .mobile-landing-img {
+            display: none;
         }
 
         :root { --brand-purple: #2c1a4d; }
 
         .big-title {
-            font-size: 5rem; /* Desktop size */
+            font-size: 5rem;
             font-weight: 800;
             color: #2c1a4d;
             line-height: 1.1;
@@ -83,7 +90,8 @@
             text-decoration: none;
             box-shadow: 0 10px 20px rgba(44, 26, 77, 0.15);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-top: 30px;
+            margin-top: 20px;
+            display: inline-block;
         }
 
         .btn-explore:hover {
@@ -101,38 +109,75 @@
             font-size: 0.9rem;
         }
 
+        /* --- MOBILE LAYOUT OVERRIDES --- */
         @media (max-width: 768px) {
             .brand-header {
-                left: 5%; /* Less gap on mobile */
+                left: 50%;
+                transform: translateX(-50%); /* Center logo */
                 top: 20px;
+                width: max-content;
             }
 
             .brand-text {
-                font-size: 1.5rem; /* Smaller logo text */
+                font-size: 1.5rem;
             }
 
             .hero-container {
+                /* Switch to standard app background */
+                background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
+                background-attachment: fixed;
                 padding-left: 5%;
                 padding-right: 5%;
-                align-items: center; /* Center everything on mobile */
-                text-align: center;  /* Center text */
+                padding-top: 80px; /* Space for logo */
+                align-items: center;
+                text-align: center;
+                justify-content: flex-start; /* Start stacking from top */
+                overflow-y: auto; /* Allow scrolling if image is tall */
             }
 
             .big-title {
-                font-size: 3rem; /* Reduce from 5rem to 3rem */
+                font-size: 3rem;
                 line-height: 1.2;
+                margin-top: 20px;
             }
 
             .subtitle {
                 font-size: 1rem;
             }
 
-            .footer-note {
-                left: 0;
-                width: 100%;
-                text-align: center; /* Center footer note */
-                bottom: 30px;
+            /* Show the specific image on mobile */
+            .mobile-landing-img {
+                display: block;
+                width: 90%;
+                max-width: 400px; /* Prevent it from getting too huge */
+                height: auto;
+                margin: 20px auto 30px auto;
+                filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+                /* Optional floating animation */
+                animation: float 4s ease-in-out infinite;
             }
+
+            .btn-explore {
+                width: 80%; /* Wider button on mobile */
+                padding: 15px 0;
+                margin-top: 0;
+                margin-bottom: 60px; /* Space above footer */
+            }
+
+            .footer-note {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                margin-top: auto;
+                margin-bottom: 20px;
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
     </style>
 </head>
@@ -146,6 +191,10 @@
 <div class="hero-container">
     <h1 class="big-title">Discover USM <br> Life</h1>
     <p class="subtitle">Concerts. Workshops. Sports. All in One Place.</p>
+
+    <img src="${pageContext.request.contextPath}/assets/img/landing-img.png"
+         alt="University Life 3D Illustration"
+         class="mobile-landing-img">
 
     <a href="${pageContext.request.contextPath}/EventListServlet" class="btn-explore">
         Explore Events

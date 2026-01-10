@@ -54,6 +54,12 @@ public class CartServlet extends HttpServlet {
             return;
         }
 
+        // --- FIX BEGIN: Force reload from DB to get latest quantities/items ---
+        // This ensures that even if quantities were updated via AJAX,
+        // the session variable 'cart' is now perfectly synced with the DB.
+        loadCartFromDatabase(request);
+        // --- FIX END ---
+
         List<Event> fullCart = (List<Event>) session.getAttribute("cart");
 
         if (fullCart == null || fullCart.isEmpty()) {
@@ -71,15 +77,20 @@ public class CartServlet extends HttpServlet {
         List<Event> checkoutCart = new ArrayList<>();
         // Filter fullCart to match selectedIds
         for (String idStr : selectedIds) {
-            int id = Integer.parseInt(idStr);
-            for (Event event : fullCart) {
-                if (event.getId() == id) {
-                    checkoutCart.add(event);
-                    break;
+            try {
+                int id = Integer.parseInt(idStr);
+                for (Event event : fullCart) {
+                    if (event.getId() == id) {
+                        checkoutCart.add(event);
+                        break;
+                    }
                 }
+            } catch (NumberFormatException e) {
+                // Ignore invalid IDs
             }
         }
 
+        // Replace the full cart in the session with ONLY the items to be checked out
         session.setAttribute("cart", checkoutCart);
         response.sendRedirect(request.getContextPath() + "/CheckoutServlet");
     }
@@ -102,16 +113,16 @@ public class CartServlet extends HttpServlet {
         }
 
         try (Connection con = DBConnection.getConnection()) {
-            String availSql = "SELECT title, available_seats FROM events WHERE id = ?";
+            // Check Available Seats
+            String availSql = "SELECT available_seats FROM events WHERE id = ?";
             int availableSeats = 0;
             try (PreparedStatement ps = con.prepareStatement(availSql)) {
                 ps.setInt(1, eventId);
                 ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    availableSeats = rs.getInt("available_seats");
-                }
+                if (rs.next()) availableSeats = rs.getInt("available_seats");
             }
 
+            // Check Current Cart Quantity
             String cartCountSql = "SELECT COUNT(*) FROM cart WHERE user_id = ? AND event_id = ?";
             int currentCartQty = 0;
             try (PreparedStatement ps = con.prepareStatement(cartCountSql)) {
@@ -122,11 +133,12 @@ public class CartServlet extends HttpServlet {
             }
 
             if ((currentCartQty + quantityToAdd) > availableSeats) {
-                session.setAttribute("errorMessage", "Cannot add " + quantityToAdd + " more ticket(s). You have " + currentCartQty + " in cart, and only " + availableSeats + " are available.");
+                session.setAttribute("errorMessage", "Cannot add more tickets. Only " + availableSeats + " available.");
                 response.sendRedirect(request.getContextPath() + "/EventListServlet");
                 return;
             }
 
+            // Add to Cart
             String insertSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
             try (PreparedStatement ps = con.prepareStatement(insertSql)) {
                 ps.setInt(1, userId);
@@ -134,7 +146,7 @@ public class CartServlet extends HttpServlet {
                 for(int i=0; i < quantityToAdd; i++) ps.executeUpdate();
             }
 
-            session.setAttribute("successMessage", "Added " + quantityToAdd + " ticket(s) to cart!");
+            session.setAttribute("successMessage", "Added to cart!");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,50 +161,53 @@ public class CartServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId != null) {
-            int eventId = Integer.parseInt(request.getParameter("eventId"));
-            int newQuantity = Integer.parseInt(request.getParameter("quantity"));
+            try {
+                int eventId = Integer.parseInt(request.getParameter("eventId"));
+                int newQuantity = Integer.parseInt(request.getParameter("quantity"));
 
-            try (Connection con = DBConnection.getConnection()) {
-                String availSql = "SELECT available_seats FROM events WHERE id = ?";
-                int availableSeats = 0;
-                try (PreparedStatement ps = con.prepareStatement(availSql)) {
-                    ps.setInt(1, eventId);
-                    ResultSet rs = ps.executeQuery();
-                    if(rs.next()) availableSeats = rs.getInt("available_seats");
-                }
+                try (Connection con = DBConnection.getConnection()) {
+                    String availSql = "SELECT available_seats FROM events WHERE id = ?";
+                    int availableSeats = 0;
+                    try (PreparedStatement ps = con.prepareStatement(availSql)) {
+                        ps.setInt(1, eventId);
+                        ResultSet rs = ps.executeQuery();
+                        if(rs.next()) availableSeats = rs.getInt("available_seats");
+                    }
 
-                if (newQuantity > availableSeats) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exceeds available seats");
-                    return;
-                }
+                    if (newQuantity > availableSeats) {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exceeds available seats");
+                        return;
+                    }
 
-                String countSql = "SELECT COUNT(*) FROM cart WHERE user_id = ? AND event_id = ?";
-                PreparedStatement psCount = con.prepareStatement(countSql);
-                psCount.setInt(1, userId);
-                psCount.setInt(2, eventId);
-                ResultSet rs = psCount.executeQuery();
-                int currentQty = 0;
-                if (rs.next()) currentQty = rs.getInt(1);
+                    String countSql = "SELECT COUNT(*) FROM cart WHERE user_id = ? AND event_id = ?";
+                    PreparedStatement psCount = con.prepareStatement(countSql);
+                    psCount.setInt(1, userId);
+                    psCount.setInt(2, eventId);
+                    ResultSet rs = psCount.executeQuery();
+                    int currentQty = 0;
+                    if (rs.next()) currentQty = rs.getInt(1);
 
-                if (newQuantity > currentQty) {
-                    int toAdd = newQuantity - currentQty;
-                    String addSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
-                    PreparedStatement psAdd = con.prepareStatement(addSql);
-                    psAdd.setInt(1, userId);
-                    psAdd.setInt(2, eventId);
-                    for(int i=0; i<toAdd; i++) psAdd.executeUpdate();
-                } else if (newQuantity < currentQty) {
-                    int toRemove = currentQty - newQuantity;
-                    if (toRemove > 0) {
-                        String delSql = "DELETE FROM cart WHERE user_id = ? AND event_id = ? LIMIT " + toRemove;
-                        PreparedStatement psDel = con.prepareStatement(delSql);
-                        psDel.setInt(1, userId);
-                        psDel.setInt(2, eventId);
-                        psDel.executeUpdate();
+                    if (newQuantity > currentQty) {
+                        int toAdd = newQuantity - currentQty;
+                        String addSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
+                        PreparedStatement psAdd = con.prepareStatement(addSql);
+                        psAdd.setInt(1, userId);
+                        psAdd.setInt(2, eventId);
+                        for(int i=0; i<toAdd; i++) psAdd.executeUpdate();
+                    } else if (newQuantity < currentQty) {
+                        int toRemove = currentQty - newQuantity;
+                        if (toRemove > 0) {
+                            String delSql = "DELETE FROM cart WHERE user_id = ? AND event_id = ? LIMIT " + toRemove;
+                            PreparedStatement psDel = con.prepareStatement(delSql);
+                            psDel.setInt(1, userId);
+                            psDel.setInt(2, eventId);
+                            psDel.executeUpdate();
+                        }
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
         response.setStatus(HttpServletResponse.SC_OK);
@@ -217,6 +232,7 @@ public class CartServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/CartServlet");
     }
 
+    // Helper to refresh session from DB
     private void loadCartFromDatabase(HttpServletRequest request) {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");

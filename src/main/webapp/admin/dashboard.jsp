@@ -8,6 +8,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/assets/img/logo.png" />
     <title>Dashboard - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
@@ -102,6 +103,88 @@
         .col-venue { color: #666; font-style: italic; }
 
         .modal-header { background-color: #2c1a4d; color: white; }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            /* 1. Stack the Title/Desc section and the Button section vertically */
+            .dashboard-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px; /* Adds space between the text and the buttons */
+            }
+
+            /* 2. Ensure both the text container and button container take full width */
+            .dashboard-header > div {
+                width: 100% !important;
+            }
+
+            /* 3. Button Container Styles */
+            .dashboard-header .button-group {
+                display: flex;
+                width: 100%;
+                gap: 10px; /* Space between the two buttons */
+            }
+
+            /* 4. Make buttons stretch to fill the width (easier to tap) */
+            .dashboard-header .btn {
+                flex: 1; /* Both buttons will share available width equally */
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Optional: Remove the default bottom margin from the text so strict gap is used */
+            .dashboard-header .text-container {
+                margin-bottom: 0 !important;
+            }
+
+            /* Hide less critical columns to save space */
+            .col-id, .col-venue, .col-date {
+                display: none;
+            }
+
+            /* Hide the headers for those columns using nth-child */
+            /* 1=ID, 3=Date, 4=Venue */
+            .custom-table th:nth-child(1),
+            .custom-table th:nth-child(3),
+            .custom-table th:nth-child(4) {
+                display: none;
+            }
+
+            /* Make Action Buttons Stack Vertically */
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-group .btn {
+                border-radius: 5px !important; /* Reset rounded corners */
+                width: 100%;
+                font-size: 0.8rem;
+                padding: 5px;
+            }
+
+            /* Adjust remaining columns */
+            .col-title {
+                font-size: 0.9rem;
+                white-space: normal; /* Allow title to wrap */
+            }
+
+            .custom-table td, .custom-table th {
+                padding: 10px 5px; /* Reduce padding */
+            }
+
+            /* Show small date under title for context since we hid the date column */
+            .col-title::after {
+                content: "\A" attr(data-mobile-date); /* Uses a data attribute we will add */
+                font-size: 0.75rem;
+                color: #666;
+                white-space: pre;
+                font-weight: normal;
+            }
+        }
     </style>
 </head>
 <body>
@@ -145,17 +228,16 @@
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold text-dark mb-0">Active Events</h3>
+        <div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
+            <div class="mb-3 mb-md-0"> <h3 class="fw-bold text-dark mb-0">Active Events</h3>
                 <p class="text-muted small mb-0">Upcoming events visible to students</p>
             </div>
-            <div>
-                <c:if test="${sessionScope.role == 'ADMIN'}">
-                    <a href="${pageContext.request.contextPath}/ManageUsersServlet" class="btn btn-outline-dark rounded-pill me-2">
-                        Users
-                    </a>
-                </c:if>
+
+            <div class="d-flex gap-2"> <c:if test="${sessionScope.role == 'ADMIN'}">
+                <a href="${pageContext.request.contextPath}/ManageUsersServlet" class="btn btn-outline-dark rounded-pill">
+                    Users
+                </a>
+            </c:if>
                 <button class="btn btn-success rounded-pill px-4 fw-bold" onclick="openAddModal()">
                     + Add New Event
                 </button>
@@ -196,7 +278,9 @@
                                 <input type="hidden" class="data-booked" value="${bookedCount}">
                             </td>
 
-                            <td><strong class="col-title">${event.title}</strong></td>
+                            <td>
+                                <strong class="col-title" data-mobile-date="📅 ${event.eventDate}">${event.title}</strong>
+                            </td>
                             <td class="col-date">${event.eventDate}</td>
                             <td class="col-venue">${event.location}</td>
                             <td class="col-price text-primary fw-bold">RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
