@@ -460,6 +460,18 @@
             document.getElementById('modalImg').src = "https://placehold.co/600x400?text=No+Image";
         }
 
+        if (img && img.trim() !== "") {
+            if (img.startsWith("http")) {
+                // It's a Cloudinary/External URL -> Use directly
+                document.getElementById('modalImg').src = img;
+            } else {
+                // It's a Local File -> Prepend path
+                document.getElementById('modalImg').src = "${pageContext.request.contextPath}/assets/img/" + img;
+            }
+        } else {
+            document.getElementById('modalImg').src = "https://placehold.co/600x400?text=No+Image";
+        }
+
         modalMaxSeats = parseInt(seats);
         document.getElementById('modalQuantity').value = 1;
 
