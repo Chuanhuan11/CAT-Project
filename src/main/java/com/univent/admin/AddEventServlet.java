@@ -7,6 +7,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import java.util.Map;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream; // Import added
 // --------------------------
 
 import javax.servlet.ServletException;
@@ -89,11 +90,21 @@ public class AddEventServlet extends HttpServlet {
                         "api_secret", apiSecret
                 ));
 
-                // 2. Upload the file stream
+                // 2. READ STREAM INTO BYTE ARRAY (Fixes "Unrecognized file parameter")
                 InputStream fileContent = filePart.getInputStream();
-                Map uploadResult = cloudinary.uploader().upload(fileContent, ObjectUtils.emptyMap());
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[16384]; // 16kb buffer
+                while ((nRead = fileContent.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+                buffer.flush();
+                byte[] fileBytes = buffer.toByteArray();
 
-                // 3. Get the secure public URL (https://...)
+                // 3. UPLOAD THE BYTES
+                Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap("resource_type", "auto"));
+
+                // 4. Get the secure public URL
                 finalImageName = (String) uploadResult.get("secure_url");
 
             } catch (Exception e) {
@@ -124,13 +135,12 @@ public class AddEventServlet extends HttpServlet {
                 ps.setDouble(5, price);
                 ps.setInt(6, totalSeats);
                 ps.setInt(7, totalSeats);
-                ps.setString(8, finalImageName); // This is now a full URL
+                ps.setString(8, finalImageName);
                 ps.setInt(9, userId);
                 ps.setString(10, status);
                 ps.executeUpdate();
             } else {
                 // UPDATE
-                // If editing, reset to PENDING unless Admin
                 String sql = "UPDATE events SET title=?, description=?, event_date=?, location=?, price=?, total_seats=?, image_url=?, status=?, available_seats = ? - (SELECT COUNT(*) FROM bookings WHERE event_id = events.id AND status='CONFIRMED') WHERE id=?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setString(1, title);
@@ -139,7 +149,7 @@ public class AddEventServlet extends HttpServlet {
                 ps.setString(4, location);
                 ps.setDouble(5, price);
                 ps.setInt(6, totalSeats);
-                ps.setString(7, finalImageName); // This is now a full URL
+                ps.setString(7, finalImageName);
                 ps.setString(8, status);
                 ps.setInt(9, totalSeats);
                 ps.setInt(10, Integer.parseInt(idParam));
