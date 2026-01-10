@@ -89,42 +89,63 @@
         .dropdown-toggle::after {
             display: none !important;
         }
+
+        /* --- MOBILE NAVBAR OVERLAY FIX (Matches home.jsp) --- */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background-color: #212529;
+                padding: 15px;
+                border-radius: 0 0 10px 10px;
+                margin-top: 0;
+                position: absolute; /* Floating menu */
+                top: 120%;          /* Align to bottom of navbar */
+                width: 100%;
+                left: 0;
+                z-index: 1000;
+                box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            }
+        }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container">
+    <%-- ADDED position-relative for absolute positioning of mobile menu --%>
+    <div class="container position-relative">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
             <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2 rounded-circle">
             Univent
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+        <%-- MOVED AVATAR OUTSIDE COLLAPSE (Visible on Mobile, Left of Hamburger) --%>
+        <div class="d-flex align-items-center ms-auto order-lg-last">
+            <div class="dropdown">
+                <button class="user-avatar-btn dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg class="user-avatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
+                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                    </c:if>
+                    <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <%-- HAMBURGER TOGGLER (Now to the right of Avatar) --%>
+        <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+
+        <div class="collapse navbar-collapse me-3" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/EventListServlet">Catalog</a></li>
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/CartServlet">My Cart</a></li>
             </ul>
-            <div class="d-flex align-items-center">
-                <div class="dropdown">
-                    <%-- REPLACED TEXT BUTTON WITH AVATAR ICON --%>
-                    <button class="user-avatar-btn dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg class="user-avatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                        <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                        </c:if>
-                        <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
         </div>
     </div>
 </nav>

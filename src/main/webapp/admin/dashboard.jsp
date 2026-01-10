@@ -121,13 +121,13 @@
             .dashboard-header .btn { flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; }
             .dashboard-header .text-container { margin-bottom: 0 !important; }
 
-            .col-id, .col-venue, .col-date { display: none; }
-            .custom-table th:nth-child(1), .custom-table th:nth-child(3), .custom-table th:nth-child(4) { display: none; }
+            /* Removed the broken generic th:nth-child rules */
 
             .btn-group { display: flex; flex-direction: column; gap: 5px; }
             .btn-group .btn { border-radius: 5px !important; width: 100%; font-size: 0.8rem; padding: 5px; }
 
             .col-title { font-size: 0.9rem; white-space: normal; }
+            /* Mobile date display under title */
             .col-title::after { content: "\A" attr(data-mobile-date); font-size: 0.75rem; color: #666; white-space: pre; font-weight: normal; }
         }
     </style>
@@ -194,24 +194,22 @@
             <table class="table custom-table active-table mb-0">
                 <thead>
                 <tr>
-                    <th style="width: 5%;">ID</th>
+                    <th class="d-none d-md-table-cell" style="width: 5%;">ID</th>
                     <th style="width: 25%;">Event Title</th>
-                    <th style="width: 15%;">Date</th>
-                    <th style="width: 15%;">Venue</th>
-                    <th style="width: 10%;">Price</th>
-                    <th style="width: 10%;" class="text-center">Seats</th>
+                    <th class="d-none d-md-table-cell" style="width: 15%;">Date</th>
+                    <th class="d-none d-md-table-cell" style="width: 15%;">Venue</th>
+                    <th class="d-none d-md-table-cell" style="width: 10%;">Price</th>
+                    <th class="d-none d-md-table-cell" style="width: 10%;" class="text-center">Seats</th>
                     <th style="width: 20%;" class="text-end">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <c:set var="hasActive" value="false" />
                 <c:forEach var="event" items="${eventList}">
-                    <%-- FILTER: Active Date AND Status is APPROVED --%>
                     <c:if test="${event.eventDate >= todayDate && event.status == 'APPROVED'}">
                         <c:set var="hasActive" value="true" />
                         <tr>
-                            <td class="col-id">#${event.id}
-                                    <%-- Hidden Inputs for Edit --%>
+                            <td class="col-id d-none d-md-table-cell">#${event.id}
                                 <input type="hidden" class="data-id" value="${event.id}">
                                 <input type="hidden" class="data-title" value="${event.title}">
                                 <input type="hidden" class="data-date" value="${event.eventDate}">
@@ -224,10 +222,10 @@
                                 <input type="hidden" class="data-booked" value="${bookedCount}">
                             </td>
                             <td><strong class="col-title" data-mobile-date="📅 ${event.eventDate}">${event.title}</strong></td>
-                            <td class="col-date">${event.eventDate}</td>
-                            <td class="col-venue">${event.location}</td>
-                            <td class="col-price text-primary fw-bold">RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
-                            <td class="text-center">
+                            <td class="col-date d-none d-md-table-cell">${event.eventDate}</td>
+                            <td class="col-venue d-none d-md-table-cell">${event.location}</td>
+                            <td class="col-price text-primary fw-bold d-none d-md-table-cell">RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
+                            <td class="text-center d-none d-md-table-cell">
                                 <span class="badge rounded-pill ${event.availableSeats > 0 ? 'bg-success' : 'bg-danger'} px-3">
                                     ${event.availableSeats} Left
                                 </span>
@@ -250,7 +248,7 @@
         </div>
 
         <%-- ========================================= --%>
-        <%-- 2. PENDING PROPOSALS (Middle) --%>
+        <%-- 2. PENDING PROPOSALS --%>
         <%-- ========================================= --%>
         <div class="mb-3 mt-5">
             <h3 class="fw-bold mb-0" style="color: #856404; font-size: 1.3rem;">Pending Proposals</h3>
@@ -261,10 +259,10 @@
             <table class="table custom-table pending-table mb-0">
                 <thead>
                 <tr>
-                    <th style="width: 5%;">ID</th>
+                    <th class="d-none d-md-table-cell" style="width: 5%;">ID</th>
                     <th style="width: 35%;">Event Title</th>
-                    <th style="width: 25%;">Organizer</th>
-                    <th style="width: 15%;">Status</th>
+                    <th class="d-none d-md-table-cell" style="width: 25%;">Organizer</th>
+                    <th class="d-none d-md-table-cell" style="width: 15%;">Status</th>
                     <th style="width: 20%;" class="text-end">Actions</th>
                 </tr>
                 </thead>
@@ -274,20 +272,19 @@
                     <c:if test="${event.status == 'PENDING'}">
                         <c:set var="hasPending" value="true" />
                         <tr>
-                            <td class="text-muted">#${event.id}</td>
+                            <td class="text-muted d-none d-md-table-cell">#${event.id}</td>
                             <td>
                                 <strong>${event.title}</strong><br>
-                                <small class="text-muted">${event.eventDate}</small>
+                                <small class="text-muted d-md-none">${event.eventDate}</small>
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 <c:choose>
                                     <c:when test="${event.organizerId == sessionScope.userId}"> <span class="badge bg-light text-dark border">You</span> </c:when>
                                     <c:otherwise> <span class="text-muted small">ID: ${event.organizerId}</span> </c:otherwise>
                                 </c:choose>
                             </td>
-                            <td><span class="badge bg-warning text-dark">Pending Review</span></td>
+                            <td class="d-none d-md-table-cell"><span class="badge bg-warning text-dark">Pending Review</span></td>
                             <td class="text-end">
-                                    <%-- Hidden Data Fields for Review/Edit Modal --%>
                                 <input type="hidden" class="data-id" value="${event.id}">
                                 <input type="hidden" class="data-title" value="${event.title}">
                                 <input type="hidden" class="data-date" value="${event.eventDate}">
@@ -296,16 +293,13 @@
                                 <input type="hidden" class="data-seats" value="${event.totalSeats}">
                                 <input type="hidden" class="data-img" value="${event.imageUrl}">
                                 <div class="d-none data-desc"><c:out value="${event.description}"/></div>
-                                    <%-- FIXED: Added data-booked so Edit modal works --%>
                                 <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
                                 <input type="hidden" class="data-booked" value="${bookedCount}">
 
                                 <c:choose>
-                                    <%-- ADMIN: REVIEW MODAL BUTTON --%>
                                     <c:when test="${sessionScope.role == 'ADMIN'}">
                                         <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="openReviewModal(this)">Review</button>
                                     </c:when>
-                                    <%-- ORGANIZER: EDIT ONLY --%>
                                     <c:otherwise>
                                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="openEditModal(this)">Edit</button>
                                     </c:otherwise>
@@ -322,7 +316,7 @@
         </div>
 
         <%-- ========================================= --%>
-        <%-- 3. REJECTED PROPOSALS (Organizers) --%>
+        <%-- 3. REJECTED PROPOSALS --%>
         <%-- ========================================= --%>
         <c:if test="${sessionScope.role == 'ORGANIZER'}">
             <div class="mb-3 mt-5">
@@ -335,8 +329,8 @@
                     <thead>
                     <tr>
                         <th style="width: 35%;">Event Title</th>
-                        <th style="width: 20%;">Date</th>
-                        <th style="width: 20%;">Status</th>
+                        <th class="d-none d-md-table-cell" style="width: 20%;">Date</th>
+                        <th class="d-none d-md-table-cell" style="width: 20%;">Status</th>
                         <th style="width: 25%;" class="text-end">Action</th>
                     </tr>
                     </thead>
@@ -346,11 +340,11 @@
                             <tr>
                                 <td>
                                     <strong>${event.title}</strong>
+                                    <div class="d-md-none small text-danger">Rejected</div>
                                 </td>
-                                <td>${event.eventDate}</td>
-                                <td><span class="badge bg-danger">Rejected</span></td>
+                                <td class="d-none d-md-table-cell">${event.eventDate}</td>
+                                <td class="d-none d-md-table-cell"><span class="badge bg-danger">Rejected</span></td>
                                 <td class="text-end">
-                                        <%-- Data for Edit --%>
                                     <input type="hidden" class="data-id" value="${event.id}">
                                     <input type="hidden" class="data-title" value="${event.title}">
                                     <input type="hidden" class="data-date" value="${event.eventDate}">
@@ -383,12 +377,12 @@
             <table class="table custom-table history-table mb-0">
                 <thead>
                 <tr>
-                    <th style="width: 5%;">ID</th>
+                    <th class="d-none d-md-table-cell" style="width: 5%;">ID</th>
                     <th style="width: 25%;">Event Title</th>
-                    <th style="width: 15%;">Date</th>
-                    <th style="width: 15%;">Venue</th>
-                    <th style="width: 10%;">Price</th>
-                    <th style="width: 10%;" class="text-center">Seats</th>
+                    <th class="d-none d-md-table-cell" style="width: 15%;">Date</th>
+                    <th class="d-none d-md-table-cell" style="width: 15%;">Venue</th>
+                    <th class="d-none d-md-table-cell" style="width: 10%;">Price</th>
+                    <th class="d-none d-md-table-cell" style="width: 10%;" class="text-center">Seats</th>
                     <th style="width: 20%;" class="text-end">Actions</th>
                 </tr>
                 </thead>
@@ -398,12 +392,12 @@
                     <c:if test="${event.eventDate < todayDate}">
                         <c:set var="hasHistory" value="true" />
                         <tr>
-                            <td class="col-id">#${event.id}</td>
+                            <td class="col-id d-none d-md-table-cell">#${event.id}</td>
                             <td><strong>${event.title}</strong><span class="badge bg-secondary ms-2" style="font-size: 0.65rem;">ENDED</span></td>
-                            <td class="col-date">${event.eventDate}</td>
-                            <td class="col-venue">${event.location}</td>
-                            <td>RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
-                            <td class="text-center"><span class="badge bg-secondary rounded-pill px-3">${event.totalSeats - event.availableSeats} / ${event.totalSeats} Sold</span></td>
+                            <td class="col-date d-none d-md-table-cell">${event.eventDate}</td>
+                            <td class="col-venue d-none d-md-table-cell">${event.location}</td>
+                            <td class="d-none d-md-table-cell">RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
+                            <td class="text-center d-none d-md-table-cell"><span class="badge bg-secondary rounded-pill px-3">${event.totalSeats - event.availableSeats} / ${event.totalSeats} Sold</span></td>
                             <td class="text-end">
                                 <div class="btn-group" role="group">
                                     <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}" class="btn btn-outline-secondary btn-sm rounded-start">Attendees</a>
@@ -422,10 +416,7 @@
     </div>
 </div>
 
-<%--
-    SHARED MODAL for Add, Edit, and Review
-    (Dynamic JS controls the state)
---%>
+<%-- JS SCRIPT BLOCK (Kept same as before) --%>
 <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -433,22 +424,14 @@
                 <h5 class="modal-title fw-bold" id="modalTitle">Event Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
             </div>
-
-            <%-- FORM: Used for Add/Edit --%>
             <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="eventForm">
                 <div class="modal-body p-4">
                     <input type="hidden" name="id" id="eventId">
                     <input type="hidden" name="currentImage" id="currentImage">
-
-                    <%-- Read-Only Info Field (Only visible in Review Mode) --%>
-                    <div id="reviewNotice" class="alert alert-info d-none mb-3">
-                        <strong>Review Mode:</strong> Verify details before approving.
-                    </div>
-
+                    <div id="reviewNotice" class="alert alert-info d-none mb-3"><strong>Review Mode:</strong> Verify details before approving.</div>
                     <div class="mb-3">
                         <label for="title" class="form-label fw-bold">Event Title</label>
                         <input type="text" id="title" name="title" class="form-control" required placeholder="e.g. Annual Tech Talk">
-                        <div class="invalid-feedback">Please provide an event title.</div>
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label fw-bold">Description</label>
@@ -457,7 +440,6 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="eventDate" class="form-label fw-bold">Date</label>
-                            <%-- FIXED: Added min attribute --%>
                             <input type="date" id="eventDate" name="eventDate" class="form-control" required min="${todayDate}">
                         </div>
                         <div class="col-md-6 mb-3">
@@ -482,14 +464,11 @@
                         <div class="form-text">Current Image: <span id="currentImageDisplay" class="text-primary fw-bold">None</span></div>
                     </div>
                 </div>
-
                 <div class="modal-footer bg-light" id="defaultFooter">
                     <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary rounded-pill px-4" style="background-color: #2c1a4d; border:none;">Save Event</button>
                 </div>
             </form>
-
-            <%-- REVIEW FOOTER (Hidden form for Approval/Rejection) --%>
             <div class="modal-footer bg-light d-none" id="reviewFooter">
                 <form action="${pageContext.request.contextPath}/UpdateEventStatusServlet" method="post" class="w-100 d-flex justify-content-end gap-2">
                     <input type="hidden" name="eventId" id="reviewEventId">
@@ -509,27 +488,19 @@
     var totalSeatsInput = document.getElementById('totalSeats');
     var seatFeedback = document.getElementById('seatFeedback');
     var dateInput = document.getElementById('eventDate');
-
-    // UI Elements
     var defaultFooter = document.getElementById('defaultFooter');
     var reviewFooter = document.getElementById('reviewFooter');
     var reviewNotice = document.getElementById('reviewNotice');
     var modalTitle = document.getElementById('modalTitle');
     var imageUploadDiv = document.getElementById('imageUploadDiv');
-
-    // Inputs to Disable/Enable
     var allInputs = eventForm.querySelectorAll('input, textarea, select');
 
     function resetFormState() {
         eventForm.classList.remove('was-validated');
         eventForm.reset();
-
-        // Reset Validation Logic
         totalSeatsInput.setCustomValidity("");
         seatFeedback.innerText = "Must be at least 1.";
         totalSeatsInput.oninput = null;
-
-        // Enable All Inputs & Reset Visibility
         allInputs.forEach(input => input.disabled = false);
         imageUploadDiv.classList.remove('d-none');
         defaultFooter.classList.remove('d-none');
@@ -546,7 +517,6 @@
         let seats = row.querySelector('.data-seats').value;
         let img = row.querySelector('.data-img').value;
         let desc = row.querySelector('.data-desc').textContent;
-
         document.getElementById('eventId').value = id;
         document.getElementById('currentImage').value = img;
         document.getElementById('currentImageDisplay').innerText = img ? img : "None";
@@ -556,7 +526,6 @@
         document.getElementById('location').value = loc;
         document.getElementById('price').value = parseFloat(price).toFixed(2);
         document.getElementById('totalSeats').value = seats;
-
         return {id, seats};
     }
 
@@ -564,28 +533,20 @@
         resetFormState();
         modalTitle.innerText = "Create New Event";
         document.getElementById('currentImageDisplay').innerText = "None";
-
-        // Ensure today's date is set as min and default
         let today = new Date().toISOString().split("T")[0];
         dateInput.value = today;
-        dateInput.min = today; // Enforce minimum date dynamically
-
+        dateInput.min = today;
         eventModal.show();
     }
 
     function openEditModal(btn) {
         resetFormState();
         modalTitle.innerText = "Edit Event";
-
         let row = btn.closest('tr');
         let data = populateForm(row);
         let booked = row.querySelector('.data-booked').value;
-
-        // Ensure future dates only for editing too
         let today = new Date().toISOString().split("T")[0];
-        dateInput.min = today; // Enforce minimum date dynamically
-
-        // Edit Validation Logic
+        dateInput.min = today;
         totalSeatsInput.min = booked;
         totalSeatsInput.oninput = function() {
             if (parseInt(this.value) < parseInt(booked)) {
@@ -597,30 +558,20 @@
                 seatFeedback.innerText = "Must be at least 1.";
             }
         };
-
         eventModal.show();
     }
 
-    // NEW: Open Modal in "Review Mode"
     function openReviewModal(btn) {
         resetFormState();
         modalTitle.innerText = "Review Event Proposal";
-
         let row = btn.closest('tr');
         let data = populateForm(row);
-
-        // Prepare Review Specifics
         document.getElementById('reviewEventId').value = data.id;
-
-        // Disable Inputs
         allInputs.forEach(input => input.disabled = true);
-
-        // Hide/Show UI Elements
-        imageUploadDiv.classList.add('d-none'); // Admins don't change image during review
+        imageUploadDiv.classList.add('d-none');
         defaultFooter.classList.add('d-none');
         reviewFooter.classList.remove('d-none');
         reviewNotice.classList.remove('d-none');
-
         eventModal.show();
     }
 </script>

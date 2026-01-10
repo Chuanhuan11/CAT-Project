@@ -65,6 +65,33 @@
         .action-btn { width: 100%; }
         .total-display { text-align: center; margin-bottom: 10px; }
 
+        /* --- AVATAR STYLES --- */
+        .user-avatar-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .user-avatar-btn:hover, .user-avatar-btn.show {
+            background: rgba(255,255,255,0.2);
+            border-color: #fff;
+        }
+        .user-avatar-svg {
+            fill: white;
+            width: 24px;
+            height: 24px;
+        }
+        /* Hide default arrow */
+        .dropdown-toggle::after {
+            display: none !important;
+        }
+
         @media (min-width: 768px) {
             .footer-actions {
                 flex-direction: row;
@@ -76,11 +103,11 @@
             .total-display { text-align: right; margin-bottom: 0; margin-right: 10px; }
         }
 
-        /* --- MOBILE CARD DESIGN (FLEXBOX FIX) --- */
+        /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 768px) {
             .custom-table thead { display: none; }
 
-            /* The Card Container: Uses Flex Wrap to flow naturally */
+            /* The Card Container */
             .custom-table tbody tr {
                 display: flex;
                 flex-wrap: wrap;
@@ -101,9 +128,9 @@
                 padding: 5px;
             }
 
-            /* 2. TITLE + DATE (Top Middle - Header) */
+            /* 2. TITLE + DATE (Top Middle) */
             .custom-table td.event-name-cell {
-                width: calc(100% - 90px); /* Full width minus checkbox & trash */
+                width: calc(100% - 90px);
                 order: 2;
                 border: none;
                 padding: 5px 0;
@@ -118,7 +145,7 @@
             }
             .event-name-cell .date-text {
                 font-size: 0.85rem;
-                color: #e65100; /* Orange for date */
+                color: #e65100;
                 font-weight: 600;
                 margin-top: 4px;
                 display: block;
@@ -133,9 +160,9 @@
                 text-align: right;
             }
 
-            /* 4. GRID ITEMS (Venue, Price, Qty, Total) */
+            /* 4. GRID ITEMS */
             .custom-table td {
-                width: 50%; /* Half width */
+                width: 50%;
                 border: none;
                 padding: 10px 5px;
                 display: flex;
@@ -145,7 +172,6 @@
                 border-bottom: 1px solid #f5f5f5;
             }
 
-            /* Labels */
             .custom-table td::before {
                 content: attr(data-label);
                 font-size: 0.75rem;
@@ -155,17 +181,13 @@
                 margin-bottom: 4px;
             }
 
-            /* Align Price & Total to right */
-            .custom-table td:nth-child(4), /* Price */
-            .custom-table td:nth-child(6) { /* Total */
+            .custom-table td:nth-child(4), .custom-table td:nth-child(6) {
                 text-align: right;
                 align-items: flex-end;
             }
 
-            /* Remove border from last row */
             .custom-table td:last-child { border-bottom: none; }
 
-            /* Trash Icon Styling */
             .btn-remove-custom {
                 color: #dc3545;
                 background: none;
@@ -173,7 +195,6 @@
                 padding: 0;
             }
 
-            /* Mobile Select All Bar */
             .mobile-select-all {
                 background: #fff;
                 border: 1px solid #e0e0e0;
@@ -185,20 +206,65 @@
                 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             }
         }
+
+        /* --- MOBILE NAVBAR OVERLAY FIX (Matches home.jsp) --- */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background-color: #212529;
+                padding: 15px;
+                border-radius: 0 0 10px 10px;
+                margin-top: 0;
+                position: absolute;
+                top: 120%;
+                width: 100%;
+                left: 0;
+                z-index: 1000;
+                box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+            }
+        }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container">
+    <div class="container position-relative">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
             <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" width="30" height="30" class="me-2 rounded-circle">
             Univent
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+        <%-- MOVED USER MENU HERE (Outside collapse, left of Hamburger) --%>
+        <div class="d-flex align-items-center ms-auto order-lg-last">
+            <c:choose>
+                <c:when test="${not empty sessionScope.username}">
+                    <div class="dropdown">
+                        <button class="user-avatar-btn dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg class="user-avatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                            <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
+                            </c:if>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrderHistoryServlet">My Tickets</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
+                        </ul>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/user/login.jsp" class="btn btn-warning btn-sm fw-bold px-3 rounded-pill">Login</a>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <%-- HAMBURGER --%>
+        <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+
+        <div class="collapse navbar-collapse me-3" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/EventListServlet">Catalog</a></li>

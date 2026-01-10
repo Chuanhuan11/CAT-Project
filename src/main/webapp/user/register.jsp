@@ -40,7 +40,6 @@
             background-color: #4a2c82;
             color: white;
         }
-        /* Validation Styling */
         input:invalid { border-color: #dc3545; }
         input:valid { border-color: #198754; }
     </style>
@@ -69,7 +68,6 @@
                         </div>
                     </c:if>
 
-                    <%-- Added 'needs-validation' class and 'novalidate' to handle it via custom script --%>
                     <form action="${pageContext.request.contextPath}/register" method="post" id="registerForm" onsubmit="return validateForm()">
 
                         <div class="mb-3">
@@ -79,7 +77,6 @@
 
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">USM EMAIL</label>
-                            <%-- PATTERN: Must end with .usm.my --%>
                             <input type="email" name="email" class="form-control" required
                                    placeholder="student@student.usm.my"
                                    pattern=".+@.+\.usm\.my">
@@ -88,7 +85,7 @@
 
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">ACCOUNT TYPE</label>
-                            <select name="role" class="form-select" required>
+                            <select name="accountType" class="form-select" required>
                                 <option value="STUDENT" selected>Student (Participant)</option>
                                 <option value="ORGANIZER">Event Organizer</option>
                             </select>
@@ -98,7 +95,6 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold">PASSWORD</label>
-                                <%-- Min length 6 --%>
                                 <input type="password" name="password" id="password" class="form-control" required minlength="6">
                             </div>
                             <div class="col-md-6 mb-3">
@@ -106,7 +102,6 @@
                                 <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
                             </div>
                         </div>
-                        <%-- Password Match Error Message --%>
                         <div id="passwordError" class="text-danger small mb-3" style="display:none;">
                             Passwords do not match!
                         </div>
@@ -142,7 +137,7 @@
 
         if (pw !== cpw) {
             errorDiv.style.display = "block";
-            return false; // Stop form submission
+            return false;
         } else {
             errorDiv.style.display = "none";
             return true;

@@ -7,107 +7,132 @@
     <title>Login - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
-        /* Matches your Catalog 'home.jsp' background style */
+        /* --- LAYOUT & CENTERING --- */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
         body {
             background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            min-height: 100vh;
+
+            /* Flexbox for Perfect Centering */
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: center;     /* Vertical Center */
+            justify-content: center; /* Horizontal Center */
+            flex-direction: column;  /* Stack items vertically */
         }
 
-        /* Glass-morphism Card Style */
+        /* --- CARD STYLES --- */
         .login-card {
             background-color: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             overflow: hidden;
+            width: 100%;
+            max-width: 400px;
         }
-
         .login-header {
-            background-color: #2c1a4d; /* Brand Purple */
+            background-color: #2c1a4d;
             color: white;
-            padding: 25px;
+            padding: 30px 20px;
             text-align: center;
         }
-
         .btn-brand {
             background-color: #2c1a4d;
             color: white;
             font-weight: bold;
             transition: all 0.3s;
         }
-
         .btn-brand:hover {
-            background-color: #4a2c82; /* Lighter purple on hover */
+            background-color: #4a2c82;
             color: white;
         }
 
-        .form-control:focus {
-            border-color: #2c1a4d;
-            box-shadow: 0 0 0 0.25rem rgba(44, 26, 77, 0.25);
+        /* --- FLOATING ALERT STYLES --- */
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.5s ease-out;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @media (max-width: 576px) {
+            .floating-alert {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+                min-width: auto;
+            }
         }
     </style>
 </head>
 <body>
 
+<%-- 1. SUCCESS ALERT (From Registration) --%>
+<c:if test="${param.success eq '1'}">
+    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
+        <strong>Success!</strong> Account created successfully.<br>Please log in.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</c:if>
+
+<%-- 2. ERROR ALERT (From Login Failure) --%>
+<c:if test="${not empty errorMessage}">
+    <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert">
+        <strong>Error:</strong> ${errorMessage}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</c:if>
+
+<%-- HOME BUTTON --%>
 <a href="${pageContext.request.contextPath}/index.jsp"
    class="btn btn-light position-absolute top-0 start-0 m-4 shadow-sm rounded-pill px-4 fw-bold"
    style="color: #2c1a4d; text-decoration: none;">
-    &larr; Back to Home
+    &larr; Home
 </a>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <div class="card login-card">
-                <div class="login-header">
-                    <img src="${pageContext.request.contextPath}/assets/img/logo.png"
-                         alt="Univent" width="60" class="rounded-circle mb-2 shadow-sm">
-                    <h4 class="mb-0">Welcome Back</h4>
+<%-- LOGIN FORM CONTAINER --%>
+<div class="container d-flex justify-content-center">
+    <div class="login-card">
+        <div class="login-header">
+            <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" width="60" class="mb-3 rounded-circle border border-2 border-white">
+            <h4 class="mb-0 fw-bold">Welcome Back</h4>
+            <p class="mb-0 small opacity-75">Login to continue</p>
+        </div>
+        <div class="card-body p-4">
+            <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">USERNAME</label>
+                    <input type="text" name="username" class="form-control" required placeholder="Enter your username">
                 </div>
-                <div class="card-body p-4">
-
-                    <%-- Error Message Alert --%>
-                    <c:if test="${not empty errorMessage}">
-                        <div class="alert alert-danger text-center p-2 small">
-                                ${errorMessage}
-                        </div>
-                    </c:if>
-
-                    <%-- Login form: sends data to LoginServlet --%>
-                    <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
-                        <div class="mb-3">
-                            <label class="form-label text-muted fw-bold" style="font-size: 1.0rem;">USERNAME</label>
-                            <input type="text" name="username" class="form-control" required placeholder="Enter username"
-                                   style="font-size: 1.2rem;">
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label text-muted fw-bold" style="font-size: 1.0rem;">PASSWORD</label>
-                            <input type="password" name="password" class="form-control" required
-                                   placeholder="Enter password" style="font-size: 1.2rem;">
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-brand btn-lg">Log In</button>
-                        </div>
-                    </form>
+                <div class="mb-4">
+                    <label class="form-label text-muted small fw-bold">PASSWORD</label>
+                    <input type="password" name="password" class="form-control" required placeholder="Enter your password">
                 </div>
-                <div class="card-footer text-center bg-white py-3 border-0">
-                    <small class="text-muted">
-                        Don't have an account?
-                        <a href="register.jsp" class="fw-bold" style="color: #2c1a4d;">Register here</a>
-                    </small>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-brand btn-lg">Log In</button>
                 </div>
-            </div>
+            </form>
+        </div>
+        <div class="card-footer text-center bg-white py-3 border-0">
+            <small class="text-muted">
+                Don't have an account?
+                <a href="register.jsp" class="fw-bold" style="color: #2c1a4d;">Register Now</a>
+            </small>
         </div>
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

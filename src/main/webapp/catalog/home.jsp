@@ -22,7 +22,7 @@
             background-color: rgba(50, 13, 70, 0.9);
             color: white;
             padding: 40px 0;
-            margin-bottom: 40px; /* FIXED: Added gap between banner and content */
+            margin-bottom: 40px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
@@ -135,7 +135,7 @@
                 border-radius: 0 0 10px 10px;
                 margin-top: 0;
                 position: absolute;
-                top: 100%;
+                top: 120%;
                 width: 100%;
                 left: 0;
                 z-index: 1000;
@@ -340,7 +340,6 @@
                 <c:forEach var="event" items="${pastEvents}">
                     <div class="col-md-4 mb-4 event-item">
                         <div class="card h-100 past-event-card shadow-sm">
-                                <%-- FIXED: Added Images for Past Events --%>
                             <div class="position-relative">
                                 <c:choose>
                                     <c:when test="${not empty event.imageUrl}">

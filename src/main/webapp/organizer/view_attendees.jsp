@@ -35,6 +35,12 @@
         .custom-table thead { background-color: #2c1a4d; color: white; border-bottom: 4px solid #ffc107; }
         .custom-table th { padding: 15px; border: none; text-transform: uppercase; font-size: 0.85rem; }
         .custom-table td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #eee; }
+
+        .custom-table tbody tr {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
         .custom-table tbody tr:hover { background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; }
 
         /* Typography for Table */

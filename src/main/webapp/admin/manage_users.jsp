@@ -43,12 +43,7 @@
             margin-bottom: 2rem;
         }
 
-        .custom-table thead {
-            background-color: #2c1a4d;
-            color: white;
-            border-bottom: 4px solid #ffc107;
-        }
-
+        /* Headers */
         .custom-table th {
             font-weight: 700;
             text-transform: uppercase;
@@ -65,18 +60,32 @@
             color: #444;
         }
 
+        /* Standard Header (Purple) */
+        .custom-table thead {
+            background-color: #2c1a4d;
+            color: white;
+            border-bottom: 4px solid #ffc107;
+        }
+
+        /* Pending Header (Light Gray) - Clean Look */
+        .pending-table thead {
+            background-color: #f8f9fa !important;
+            color: #333 !important;
+            border-bottom: 3px solid #ffc107 !important;
+        }
+
+        /* Zebra & Hover */
         .custom-table tbody tr:nth-of-type(even) { background-color: rgba(44, 26, 77, 0.04); }
         .custom-table tbody tr:nth-of-type(odd) { background-color: #ffffff; }
 
+        /* Fix Jitter on Hover */
+        .custom-table tbody tr {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
         .custom-table tbody tr:hover {
             background-color: rgba(255, 193, 7, 0.1);
             border-left: 4px solid #ffc107;
-        }
-
-        .pending-header {
-            background-color: #ffc107 !important;
-            color: #2c1a4d !important;
-            border-bottom: 4px solid #d39e00 !important;
         }
 
         .col-id { color: #888; font-weight: bold; font-size: 0.9rem; }
@@ -107,26 +116,34 @@
         }
         .dropdown-toggle::after { display: none !important; }
 
+        /* --- MOBILE VIEWPORT OPTIMIZATION --- */
         @media (max-width: 768px) {
-            .dashboard-header {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 15px;
-            }
+            /* Header Stack */
+            .dashboard-header { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
             .dashboard-header > div { width: 100% !important; }
             .dashboard-header .button-group { display: flex; width: 100%; }
-            .dashboard-header .btn {
-                flex: 1;
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
+            .dashboard-header .btn { flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; }
             .dashboard-header .text-container { margin-bottom: 0 !important; }
+
+            /* Table Simplification */
+            /* Hide ID and Email columns to save space */
             .col-id, .col-email { display: none; }
             .custom-table th:nth-child(1), .custom-table th:nth-child(3) { display: none; }
-            .col-username { font-size: 0.9rem; }
-            .form-select { width: 100px; font-size: 0.8rem; }
+
+            /* Adjust remaining columns */
+            .col-username { font-size: 1rem; }
+
+            /* Button Group Stacking for Mobile (Like Dashboard) */
+            .btn-group { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+            .btn-group .btn { border-radius: 5px !important; width: 100%; font-size: 0.8rem; padding: 5px; }
+
+            /* Adjust dropdown width in All Users table */
+            .form-select {
+                width: auto !important;
+                min-width: 110px;
+                font-size: 0.8rem;
+                white-space: normal; /* Allow wrapping */
+            }
         }
     </style>
 </head>
@@ -179,47 +196,65 @@
             </div>
         </div>
 
-        <%-- 1. PENDING ORGANIZER REQUESTS (Only shows if list is not empty) --%>
+        <%-- 1. PENDING ORGANIZER REQUESTS --%>
         <c:if test="${not empty pendingList}">
-            <div class="alert alert-warning border-0 shadow-sm mb-4">
-                <h5 class="fw-bold text-dark"><span style="font-size: 1.2rem;">⚠️</span> Pending Organizer Applications</h5>
-                <p class="mb-2 text-muted small">These users have requested to upgrade their account to Organizer status.</p>
 
-                <div class="table-responsive table-container bg-white">
-                    <table class="table custom-table mb-0">
-                        <thead class="pending-header">
+            <%-- Title Section --%>
+            <div class="mb-3 mt-4">
+                <h3 class="fw-bold mb-0" style="color: #856404; font-size: 1.3rem;">Pending Organizer Applications</h3>
+                <p class="small mb-0" style="color: #856404; opacity: 0.8;">Users requesting upgrade to Organizer status</p>
+            </div>
+
+            <div class="table-responsive table-container mb-5">
+                <table class="table custom-table pending-table mb-0">
+                    <thead>
+                    <tr>
+                        <th style="width: 10%;">ID</th>
+                        <th style="width: 25%;">Username</th>
+                        <th style="width: 30%;">Email</th>
+                        <th style="width: 15%;">Current Role</th>
+                        <th style="width: 20%;" class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="pUser" items="${pendingList}">
                         <tr>
-                            <th style="width: 10%;">ID</th>
-                            <th style="width: 25%;">Username</th>
-                            <th style="width: 30%;">Email</th>
-                            <th style="width: 15%;">Current Role</th>
-                            <th style="width: 20%;" class="text-end">Approve / Reject</th>
+                            <td class="col-id">#${pUser.id}</td>
+                            <td class="col-username">${pUser.username}</td>
+                            <td class="col-email">${pUser.email}</td>
+                            <td><span class="badge bg-secondary">STUDENT</span></td>
+                            <td class="text-end">
+                                <form action="${pageContext.request.contextPath}/ProcessOrganizerRequestServlet" method="post" class="d-inline">
+                                    <input type="hidden" name="userId" value="${pUser.id}">
+
+                                        <%-- UPDATED BUTTON GROUP STYLE --%>
+                                    <div class="btn-group shadow-sm" role="group">
+                                        <button type="submit" name="action" value="approve"
+                                                class="btn btn-outline-success btn-sm fw-bold">
+                                            Approve
+                                        </button>
+                                        <button type="submit" name="action" value="reject"
+                                                class="btn btn-outline-danger btn-sm bg-white"
+                                                onclick="return confirm('Reject request?');">
+                                            Reject
+                                        </button>
+                                    </div>
+
+                                </form>
+                            </td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="pUser" items="${pendingList}">
-                            <tr>
-                                <td class="col-id">#${pUser.id}</td>
-                                <td class="col-username">${pUser.username}</td>
-                                <td class="col-email">${pUser.email}</td>
-                                <td><span class="badge bg-secondary">STUDENT</span></td>
-                                <td class="text-end">
-                                    <form action="${pageContext.request.contextPath}/ProcessOrganizerRequestServlet" method="post" class="d-inline">
-                                        <input type="hidden" name="userId" value="${pUser.id}">
-                                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">Approve</button>
-                                        <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Reject request?');">Reject</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
+                    </c:forEach>
+                    </tbody>
+                </table>
             </div>
         </c:if>
 
         <%-- 2. ALL USERS TABLE --%>
-        <h5 class="fw-bold text-secondary mb-3">All Users</h5>
+        <div class="mb-3 mt-5">
+            <h3 class="fw-bold text-secondary mb-0" style="font-size: 1.3rem;">All Users</h3>
+            <p class="text-muted small mb-0">Full database of registered accounts</p>
+        </div>
+
         <div class="table-responsive table-container">
             <table class="table custom-table mb-0">
                 <thead>
