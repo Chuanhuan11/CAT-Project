@@ -22,7 +22,7 @@
             background-color: rgba(50, 13, 70, 0.9);
             color: white;
             padding: 40px 0;
-            margin-bottom: 0;
+            margin-bottom: 40px; /* FIXED: Added gap between banner and content */
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
@@ -91,8 +91,8 @@
 
         /* --- MOBILE SEARCH BAR FIX --- */
         .mobile-search-container {
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-top: -20px; /* Pull it slightly up into the gap */
+            margin-bottom: 30px;
         }
         .search-input-field {
             box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
@@ -132,17 +132,13 @@
             .navbar-collapse {
                 background-color: #212529;
                 padding: 15px;
-                /* Remove top radius so it sits flush */
                 border-radius: 0 0 10px 10px;
-                /* Remove margin to close the gap */
                 margin-top: 0;
                 position: absolute;
-                /* Align top of menu to exactly bottom of navbar container (100%) */
-                top: 120%;
+                top: 100%;
                 width: 100%;
                 left: 0;
                 z-index: 1000;
-                /* Optional shadow to separate from content below */
                 box-shadow: 0 10px 15px rgba(0,0,0,0.3);
             }
             .floating-alert {
@@ -173,8 +169,6 @@
                             </svg>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                            <li class="dropdown-header">Hello, ${sessionScope.username}</li>
-                            <li><hr class="dropdown-divider"></li>
                             <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
                             </c:if>
@@ -346,6 +340,17 @@
                 <c:forEach var="event" items="${pastEvents}">
                     <div class="col-md-4 mb-4 event-item">
                         <div class="card h-100 past-event-card shadow-sm">
+                                <%-- FIXED: Added Images for Past Events --%>
+                            <div class="position-relative">
+                                <c:choose>
+                                    <c:when test="${not empty event.imageUrl}">
+                                        <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="https://placehold.co/600x400?text=No+Image" class="card-img-top" alt="Placeholder">
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                             <div class="card-body">
                                 <h5 class="card-title event-title text-muted">${event.title}</h5>
                                 <div class="d-none full-description">${event.description}</div>

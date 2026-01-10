@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<%-- 1. GET TODAY'S DATE FOR COMPARISON --%>
+<%-- GET TODAY'S DATE --%>
 <% request.setAttribute("todayDate", new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date())); %>
 
 <html>
@@ -12,7 +12,6 @@
     <title>Dashboard - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
-        /* --- THEME SETUP --- */
         body {
             background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
             background-size: cover;
@@ -47,54 +46,40 @@
             margin-bottom: 2rem;
         }
 
-        /* Active Table Header */
-        .active-table thead {
-            background-color: #2c1a4d;
-            color: white;
-            border-bottom: 4px solid #ffc107;
-        }
+        .custom-table th { font-weight: 700; text-transform: uppercase; font-size: 0.85rem; padding: 18px 15px; border: none; letter-spacing: 0.5px; }
+        .custom-table td { padding: 18px 15px; vertical-align: middle; border-bottom: 1px solid #eee; color: #444; }
 
-        /* Past Table Header (Grey) */
-        .history-table thead {
-            background-color: #6c757d;
-            color: white;
-            border-bottom: 4px solid #dee2e6;
-        }
-
-        .custom-table th {
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            padding: 18px 15px;
-            border: none;
-            letter-spacing: 0.5px;
-        }
-
-        .custom-table td {
-            padding: 18px 15px;
-            vertical-align: middle;
-            border-bottom: 1px solid #eee;
-            color: #444;
-        }
-
-        /* Zebra Striping */
+        /* Common Zebra Striping */
         .custom-table tbody tr:nth-of-type(even) { background-color: rgba(0,0,0, 0.02); }
         .custom-table tbody tr:nth-of-type(odd) { background-color: #ffffff; }
 
-        /* Hover Effect (Active only) */
+        /* 1. ACTIVE TABLE (Purple/Gold) */
+        .active-table thead { background-color: #2c1a4d; color: white; border-bottom: 4px solid #ffc107; }
         .active-table tbody tr:hover { background-color: rgba(255, 193, 7, 0.1); }
         .active-table tbody tr:hover td:first-child { border-left: 4px solid #ffc107; }
 
-        /* Past Row Styling */
-        .history-table td { color: #adb5bd; }
-        .history-table strong { color: #6c757d; }
-        .history-table .btn { filter: grayscale(100%); opacity: 0.7; }
-        .history-table .btn:hover { filter: grayscale(0%); opacity: 1; }
-
-        .custom-table tbody tr td:first-child {
-            border-left: 4px solid transparent;
-            transition: border-left 0.2s ease;
+        /* 2. PENDING TABLE (Soft Yellow/Orange) */
+        .pending-table thead {
+            background-color: #ffc107; /* Gold Header */
+            color: #2c1a4d; /* Purple Text for contrast */
+            border-bottom: 4px solid #e0a800;
         }
+        .pending-table tbody tr:hover { background-color: #fff3cd; } /* Soft yellow hover */
+        .pending-table tbody tr:hover td:first-child { border-left: 4px solid #ffc107; }
+
+        /* 3. REJECTED TABLE (Soft Red) */
+        .rejected-table thead {
+            background-color: #dc3545; /* Red Header */
+            color: white;
+            border-bottom: 4px solid #a71d2a;
+        }
+        .rejected-table tbody tr:hover { background-color: #f8d7da; } /* Soft red hover */
+        .rejected-table tbody tr:hover td:first-child { border-left: 4px solid #dc3545; }
+
+        /* 4. HISTORY TABLE (Grey) */
+        .history-table thead { background-color: #6c757d; color: white; border-bottom: 4px solid #dee2e6; }
+
+        .custom-table tbody tr td:first-child { border-left: 4px solid transparent; transition: border-left 0.2s ease; }
 
         .col-id { color: #888; font-weight: bold; font-size: 0.9rem; }
         .col-title { font-size: 1.05rem; color: #000; }
@@ -102,88 +87,48 @@
         .col-date { font-weight: 500; color: #555; }
         .col-venue { color: #666; font-style: italic; }
 
-        .modal-header { background-color: #2c1a4d; color: white; }
+        /* --- AVATAR STYLES --- */
+        .user-avatar-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .user-avatar-btn:hover, .user-avatar-btn.show {
+            background: rgba(255,255,255,0.2);
+            border-color: #fff;
+        }
+        .user-avatar-svg {
+            fill: white;
+            width: 24px;
+            height: 24px;
+        }
+        .dropdown-toggle::after {
+            display: none !important;
+        }
 
-        /* --- MOBILE RESPONSIVENESS --- */
+        /* MOBILE RESPONSIVENESS */
         @media (max-width: 768px) {
-            /* 1. Stack the Title/Desc section and the Button section vertically */
-            .dashboard-header {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 15px; /* Adds space between the text and the buttons */
-            }
+            .dashboard-header { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
+            .dashboard-header > div { width: 100% !important; }
+            .dashboard-header .button-group { display: flex; width: 100%; gap: 10px; }
+            .dashboard-header .btn { flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; }
+            .dashboard-header .text-container { margin-bottom: 0 !important; }
 
-            /* 2. Ensure both the text container and button container take full width */
-            .dashboard-header > div {
-                width: 100% !important;
-            }
+            .col-id, .col-venue, .col-date { display: none; }
+            .custom-table th:nth-child(1), .custom-table th:nth-child(3), .custom-table th:nth-child(4) { display: none; }
 
-            /* 3. Button Container Styles */
-            .dashboard-header .button-group {
-                display: flex;
-                width: 100%;
-                gap: 10px; /* Space between the two buttons */
-            }
+            .btn-group { display: flex; flex-direction: column; gap: 5px; }
+            .btn-group .btn { border-radius: 5px !important; width: 100%; font-size: 0.8rem; padding: 5px; }
 
-            /* 4. Make buttons stretch to fill the width (easier to tap) */
-            .dashboard-header .btn {
-                flex: 1; /* Both buttons will share available width equally */
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            /* Optional: Remove the default bottom margin from the text so strict gap is used */
-            .dashboard-header .text-container {
-                margin-bottom: 0 !important;
-            }
-
-            /* Hide less critical columns to save space */
-            .col-id, .col-venue, .col-date {
-                display: none;
-            }
-
-            /* Hide the headers for those columns using nth-child */
-            /* 1=ID, 3=Date, 4=Venue */
-            .custom-table th:nth-child(1),
-            .custom-table th:nth-child(3),
-            .custom-table th:nth-child(4) {
-                display: none;
-            }
-
-            /* Make Action Buttons Stack Vertically */
-            .btn-group {
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .btn-group .btn {
-                border-radius: 5px !important; /* Reset rounded corners */
-                width: 100%;
-                font-size: 0.8rem;
-                padding: 5px;
-            }
-
-            /* Adjust remaining columns */
-            .col-title {
-                font-size: 0.9rem;
-                white-space: normal; /* Allow title to wrap */
-            }
-
-            .custom-table td, .custom-table th {
-                padding: 10px 5px; /* Reduce padding */
-            }
-
-            /* Show small date under title for context since we hid the date column */
-            .col-title::after {
-                content: "\A" attr(data-mobile-date); /* Uses a data attribute we will add */
-                font-size: 0.75rem;
-                color: #666;
-                white-space: pre;
-                font-weight: normal;
-            }
+            .col-title { font-size: 0.9rem; white-space: normal; }
+            .col-title::after { content: "\A" attr(data-mobile-date); font-size: 0.75rem; color: #666; white-space: pre; font-weight: normal; }
         }
     </style>
 </head>
@@ -197,10 +142,12 @@
         </a>
         <div class="d-flex align-items-center ms-auto">
             <div class="dropdown">
-                <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    Hello, ${sessionScope.username}
+                <button class="user-avatar-btn dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg class="user-avatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userMenu">
                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/EventListServlet">Home Page</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>
@@ -219,7 +166,6 @@
 
 <div class="container">
     <div class="content-box">
-        <%-- SERVER ERROR FALLBACK --%>
         <c:if test="${not empty sessionScope.errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
                 <strong>System Notice:</strong> ${sessionScope.errorMessage}
@@ -228,19 +174,19 @@
             <c:remove var="errorMessage" scope="session"/>
         </c:if>
 
+        <%-- ========================================= --%>
+        <%-- 1. ACTIVE EVENTS (Top Priority) --%>
+        <%-- ========================================= --%>
         <div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
-            <div class="mb-3 mb-md-0"> <h3 class="fw-bold text-dark mb-0">Active Events</h3>
+            <div class="mb-3 mb-md-0">
+                <h3 class="fw-bold text-dark mb-0">Active Events</h3>
                 <p class="text-muted small mb-0">Upcoming events visible to students</p>
             </div>
-
-            <div class="d-flex gap-2"> <c:if test="${sessionScope.role == 'ADMIN'}">
-                <a href="${pageContext.request.contextPath}/ManageUsersServlet" class="btn btn-outline-dark rounded-pill">
-                    Users
-                </a>
-            </c:if>
-                <button class="btn btn-success rounded-pill px-4 fw-bold" onclick="openAddModal()">
-                    + Add New Event
-                </button>
+            <div class="d-flex gap-2 button-group">
+                <c:if test="${sessionScope.role == 'ADMIN'}">
+                    <a href="${pageContext.request.contextPath}/ManageUsersServlet" class="btn btn-outline-dark rounded-pill">Users</a>
+                </c:if>
+                <button class="btn btn-success rounded-pill px-4 fw-bold" onclick="openAddModal()">+ Add New Event</button>
             </div>
         </div>
 
@@ -260,12 +206,12 @@
                 <tbody>
                 <c:set var="hasActive" value="false" />
                 <c:forEach var="event" items="${eventList}">
-                    <%-- FILTER: Only Future Events --%>
-                    <c:if test="${event.eventDate >= todayDate}">
+                    <%-- FILTER: Active Date AND Status is APPROVED --%>
+                    <c:if test="${event.eventDate >= todayDate && event.status == 'APPROVED'}">
                         <c:set var="hasActive" value="true" />
                         <tr>
-                            <td class="col-id">
-                                #${event.id}
+                            <td class="col-id">#${event.id}
+                                    <%-- Hidden Inputs for Edit --%>
                                 <input type="hidden" class="data-id" value="${event.id}">
                                 <input type="hidden" class="data-title" value="${event.title}">
                                 <input type="hidden" class="data-date" value="${event.eventDate}">
@@ -277,10 +223,7 @@
                                 <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
                                 <input type="hidden" class="data-booked" value="${bookedCount}">
                             </td>
-
-                            <td>
-                                <strong class="col-title" data-mobile-date="📅 ${event.eventDate}">${event.title}</strong>
-                            </td>
+                            <td><strong class="col-title" data-mobile-date="📅 ${event.eventDate}">${event.title}</strong></td>
                             <td class="col-date">${event.eventDate}</td>
                             <td class="col-venue">${event.location}</td>
                             <td class="col-price text-primary fw-bold">RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
@@ -299,7 +242,6 @@
                         </tr>
                     </c:if>
                 </c:forEach>
-
                 <c:if test="${!hasActive}">
                     <tr><td colspan="7" class="text-center py-5 text-muted"><h5>No active events.</h5></td></tr>
                 </c:if>
@@ -307,7 +249,136 @@
             </table>
         </div>
 
-        <h4 class="fw-bold text-secondary mb-3 mt-5">Event History</h4>
+        <%-- ========================================= --%>
+        <%-- 2. PENDING PROPOSALS (Middle) --%>
+        <%-- ========================================= --%>
+        <div class="mb-3 mt-5">
+            <h3 class="fw-bold mb-0" style="color: #856404; font-size: 1.3rem;">Pending Proposals</h3>
+            <p class="small mb-0" style="color: #856404; opacity: 0.8;">Events waiting for admin approval</p>
+        </div>
+
+        <div class="table-responsive table-container mb-5">
+            <table class="table custom-table pending-table mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 5%;">ID</th>
+                    <th style="width: 35%;">Event Title</th>
+                    <th style="width: 25%;">Organizer</th>
+                    <th style="width: 15%;">Status</th>
+                    <th style="width: 20%;" class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:set var="hasPending" value="false" />
+                <c:forEach var="event" items="${eventList}">
+                    <c:if test="${event.status == 'PENDING'}">
+                        <c:set var="hasPending" value="true" />
+                        <tr>
+                            <td class="text-muted">#${event.id}</td>
+                            <td>
+                                <strong>${event.title}</strong><br>
+                                <small class="text-muted">${event.eventDate}</small>
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${event.organizerId == sessionScope.userId}"> <span class="badge bg-light text-dark border">You</span> </c:when>
+                                    <c:otherwise> <span class="text-muted small">ID: ${event.organizerId}</span> </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td><span class="badge bg-warning text-dark">Pending Review</span></td>
+                            <td class="text-end">
+                                    <%-- Hidden Data Fields for Review/Edit Modal --%>
+                                <input type="hidden" class="data-id" value="${event.id}">
+                                <input type="hidden" class="data-title" value="${event.title}">
+                                <input type="hidden" class="data-date" value="${event.eventDate}">
+                                <input type="hidden" class="data-loc" value="${event.location}">
+                                <input type="hidden" class="data-price" value="${event.price}">
+                                <input type="hidden" class="data-seats" value="${event.totalSeats}">
+                                <input type="hidden" class="data-img" value="${event.imageUrl}">
+                                <div class="d-none data-desc"><c:out value="${event.description}"/></div>
+                                    <%-- FIXED: Added data-booked so Edit modal works --%>
+                                <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
+                                <input type="hidden" class="data-booked" value="${bookedCount}">
+
+                                <c:choose>
+                                    <%-- ADMIN: REVIEW MODAL BUTTON --%>
+                                    <c:when test="${sessionScope.role == 'ADMIN'}">
+                                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="openReviewModal(this)">Review</button>
+                                    </c:when>
+                                    <%-- ORGANIZER: EDIT ONLY --%>
+                                    <c:otherwise>
+                                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="openEditModal(this)">Edit</button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                        </tr>
+                    </c:if>
+                </c:forEach>
+                <c:if test="${!hasPending}">
+                    <tr><td colspan="5" class="text-center py-3 text-muted">No pending proposals.</td></tr>
+                </c:if>
+                </tbody>
+            </table>
+        </div>
+
+        <%-- ========================================= --%>
+        <%-- 3. REJECTED PROPOSALS (Organizers) --%>
+        <%-- ========================================= --%>
+        <c:if test="${sessionScope.role == 'ORGANIZER'}">
+            <div class="mb-3 mt-5">
+                <h3 class="fw-bold mb-0" style="color: #721c24; font-size: 1.3rem;">Rejected Proposals</h3>
+                <p class="small mb-0" style="color: #721c24; opacity: 0.8;">Proposals that require revision</p>
+            </div>
+
+            <div class="table-responsive table-container">
+                <table class="table custom-table rejected-table mb-0">
+                    <thead>
+                    <tr>
+                        <th style="width: 35%;">Event Title</th>
+                        <th style="width: 20%;">Date</th>
+                        <th style="width: 20%;">Status</th>
+                        <th style="width: 25%;" class="text-end">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="event" items="${eventList}">
+                        <c:if test="${event.status == 'REJECTED'}">
+                            <tr>
+                                <td>
+                                    <strong>${event.title}</strong>
+                                </td>
+                                <td>${event.eventDate}</td>
+                                <td><span class="badge bg-danger">Rejected</span></td>
+                                <td class="text-end">
+                                        <%-- Data for Edit --%>
+                                    <input type="hidden" class="data-id" value="${event.id}">
+                                    <input type="hidden" class="data-title" value="${event.title}">
+                                    <input type="hidden" class="data-date" value="${event.eventDate}">
+                                    <input type="hidden" class="data-loc" value="${event.location}">
+                                    <input type="hidden" class="data-price" value="${event.price}">
+                                    <input type="hidden" class="data-seats" value="${event.totalSeats}">
+                                    <input type="hidden" class="data-img" value="${event.imageUrl}">
+                                    <div class="d-none data-desc"><c:out value="${event.description}"/></div>
+                                    <input type="hidden" class="data-booked" value="0">
+
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="openEditModal(this)">Edit to Resubmit</button>
+                                </td>
+                            </tr>
+                        </c:if>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </c:if>
+
+        <%-- ========================================= --%>
+        <%-- 4. HISTORY (Bottom) --%>
+        <%-- ========================================= --%>
+        <div class="mb-3 mt-5">
+            <h3 class="fw-bold text-secondary mb-0" style="font-size: 1.3rem;">Event History</h3>
+            <p class="text-muted small mb-0">Past events archive</p>
+        </div>
+
         <div class="table-responsive table-container">
             <table class="table custom-table history-table mb-0">
                 <thead>
@@ -324,122 +395,109 @@
                 <tbody>
                 <c:set var="hasHistory" value="false" />
                 <c:forEach var="event" items="${eventList}">
-                    <%-- FILTER: Only Past Events --%>
                     <c:if test="${event.eventDate < todayDate}">
                         <c:set var="hasHistory" value="true" />
                         <tr>
                             <td class="col-id">#${event.id}</td>
-                            <td>
-                                <strong>${event.title}</strong>
-                                <span class="badge bg-secondary ms-2" style="font-size: 0.65rem;">ENDED</span>
-                            </td>
+                            <td><strong>${event.title}</strong><span class="badge bg-secondary ms-2" style="font-size: 0.65rem;">ENDED</span></td>
                             <td class="col-date">${event.eventDate}</td>
                             <td class="col-venue">${event.location}</td>
                             <td>RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></td>
-                            <td class="text-center">
-                                <span class="badge bg-secondary rounded-pill px-3">
-                                    ${event.totalSeats - event.availableSeats} / ${event.totalSeats} Sold
-                                </span>
-                            </td>
+                            <td class="text-center"><span class="badge bg-secondary rounded-pill px-3">${event.totalSeats - event.availableSeats} / ${event.totalSeats} Sold</span></td>
                             <td class="text-end">
                                 <div class="btn-group" role="group">
-                                        <%-- Hidden inputs for Edit Modal (still useful for history correction) --%>
-                                    <input type="hidden" class="data-id" value="${event.id}">
-                                    <input type="hidden" class="data-title" value="${event.title}">
-                                    <input type="hidden" class="data-date" value="${event.eventDate}">
-                                    <input type="hidden" class="data-loc" value="${event.location}">
-                                    <input type="hidden" class="data-price" value="${event.price}">
-                                    <input type="hidden" class="data-seats" value="${event.totalSeats}">
-                                    <input type="hidden" class="data-img" value="${event.imageUrl}">
-                                    <div class="d-none data-desc"><c:out value="${event.description}"/></div>
-                                    <c:set var="bookedCount" value="${event.totalSeats - event.availableSeats}" />
-                                    <input type="hidden" class="data-booked" value="${bookedCount}">
-
-                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-start" onclick="openEditModal(this)">Edit</button>
-                                    <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}" class="btn btn-outline-secondary btn-sm">Attendees</a>
+                                    <a href="${pageContext.request.contextPath}/EventAttendeesServlet?eventId=${event.id}&eventTitle=${event.title}" class="btn btn-outline-secondary btn-sm rounded-start">Attendees</a>
                                     <a href="${pageContext.request.contextPath}/DeleteEventServlet?id=${event.id}" class="btn btn-outline-danger btn-sm rounded-end" onclick="return confirm('Permanently delete history?');">Delete</a>
                                 </div>
                             </td>
                         </tr>
                     </c:if>
                 </c:forEach>
-
                 <c:if test="${!hasHistory}">
                     <tr><td colspan="7" class="text-center py-4 text-muted">No past events found.</td></tr>
                 </c:if>
                 </tbody>
             </table>
         </div>
-
     </div>
 </div>
 
-<%-- MODAL (Reused standard modal) --%>
+<%--
+    SHARED MODAL for Add, Edit, and Review
+    (Dynamic JS controls the state)
+--%>
 <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="modalTitle">Create New Event</h5>
+                <h5 class="modal-title fw-bold" id="modalTitle">Event Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
             </div>
 
-            <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data"
-                  class="needs-validation" novalidate id="eventForm">
-
+            <%-- FORM: Used for Add/Edit --%>
+            <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="eventForm">
                 <div class="modal-body p-4">
                     <input type="hidden" name="id" id="eventId">
                     <input type="hidden" name="currentImage" id="currentImage">
+
+                    <%-- Read-Only Info Field (Only visible in Review Mode) --%>
+                    <div id="reviewNotice" class="alert alert-info d-none mb-3">
+                        <strong>Review Mode:</strong> Verify details before approving.
+                    </div>
 
                     <div class="mb-3">
                         <label for="title" class="form-label fw-bold">Event Title</label>
                         <input type="text" id="title" name="title" class="form-control" required placeholder="e.g. Annual Tech Talk">
                         <div class="invalid-feedback">Please provide an event title.</div>
                     </div>
-
                     <div class="mb-3">
                         <label for="description" class="form-label fw-bold">Description</label>
                         <textarea id="description" name="description" class="form-control" rows="4" placeholder="Brief details..."></textarea>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="eventDate" class="form-label fw-bold">Date</label>
-                            <input type="date" id="eventDate" name="eventDate" class="form-control" required>
-                            <div class="invalid-feedback">Please select a valid date.</div>
+                            <%-- FIXED: Added min attribute --%>
+                            <input type="date" id="eventDate" name="eventDate" class="form-control" required min="${todayDate}">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="location" class="form-label fw-bold">Location</label>
-                            <input type="text" id="location" name="location" class="form-control" required placeholder="e.g. Main Auditorium">
-                            <div class="invalid-feedback">Please specify the location.</div>
+                            <input type="text" id="location" name="location" class="form-control" required>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="price" class="form-label fw-bold">Price (RM)</label>
-                            <input type="number" step="0.01" min="0" id="price" name="price" class="form-control" required placeholder="0.00">
-                            <div class="invalid-feedback">Price cannot be negative.</div>
+                            <input type="number" step="0.01" min="0" id="price" name="price" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="totalSeats" class="form-label fw-bold">Total Seats</label>
-                            <input type="number" min="1" id="totalSeats" name="totalSeats" class="form-control" required placeholder="e.g. 100">
+                            <input type="number" min="1" id="totalSeats" name="totalSeats" class="form-control" required>
                             <div class="invalid-feedback" id="seatFeedback">Must be at least 1.</div>
                         </div>
                     </div>
-
-                    <div class="mb-3">
+                    <div class="mb-3" id="imageUploadDiv">
                         <label for="imageFile" class="form-label fw-bold">Event Poster</label>
                         <input class="form-control" type="file" id="imageFile" name="imageFile" accept="image/*">
-                        <div class="form-text">
-                            Current Image: <span id="currentImageDisplay" class="text-primary fw-bold">None</span>
-                        </div>
+                        <div class="form-text">Current Image: <span id="currentImageDisplay" class="text-primary fw-bold">None</span></div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
+
+                <div class="modal-footer bg-light" id="defaultFooter">
                     <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary rounded-pill px-4" style="background-color: #2c1a4d; border:none;">Save Event</button>
                 </div>
             </form>
+
+            <%-- REVIEW FOOTER (Hidden form for Approval/Rejection) --%>
+            <div class="modal-footer bg-light d-none" id="reviewFooter">
+                <form action="${pageContext.request.contextPath}/UpdateEventStatusServlet" method="post" class="w-100 d-flex justify-content-end gap-2">
+                    <input type="hidden" name="eventId" id="reviewEventId">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" name="status" value="REJECTED" class="btn btn-outline-danger rounded-pill px-4" onclick="return confirm('Reject this proposal?')">Reject</button>
+                    <button type="submit" name="status" value="APPROVED" class="btn btn-success rounded-pill px-4 fw-bold">Approve Event</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -452,45 +510,34 @@
     var seatFeedback = document.getElementById('seatFeedback');
     var dateInput = document.getElementById('eventDate');
 
-    eventForm.addEventListener('submit', function (event) {
-        if (!eventForm.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        eventForm.classList.add('was-validated');
-    }, false);
+    // UI Elements
+    var defaultFooter = document.getElementById('defaultFooter');
+    var reviewFooter = document.getElementById('reviewFooter');
+    var reviewNotice = document.getElementById('reviewNotice');
+    var modalTitle = document.getElementById('modalTitle');
+    var imageUploadDiv = document.getElementById('imageUploadDiv');
+
+    // Inputs to Disable/Enable
+    var allInputs = eventForm.querySelectorAll('input, textarea, select');
 
     function resetFormState() {
         eventForm.classList.remove('was-validated');
+        eventForm.reset();
+
+        // Reset Validation Logic
         totalSeatsInput.setCustomValidity("");
         seatFeedback.innerText = "Must be at least 1.";
-    }
-
-    function openAddModal() {
-        document.getElementById('modalTitle').innerText = "Create New Event";
-        document.getElementById('eventId').value = "";
-        document.getElementById('currentImage').value = "";
-        document.getElementById('currentImageDisplay').innerText = "None";
-        document.getElementById('title').value = "";
-        document.getElementById('description').value = "";
-        document.getElementById('eventDate').value = "";
-        document.getElementById('location').value = "";
-        document.getElementById('price').value = "";
-        document.getElementById('imageFile').value = "";
-
-        resetFormState();
-        totalSeatsInput.value = "";
-        totalSeatsInput.min = 1;
         totalSeatsInput.oninput = null;
 
-        let today = new Date().toISOString().split("T")[0];
-        dateInput.value = today;
-
-        eventModal.show();
+        // Enable All Inputs & Reset Visibility
+        allInputs.forEach(input => input.disabled = false);
+        imageUploadDiv.classList.remove('d-none');
+        defaultFooter.classList.remove('d-none');
+        reviewFooter.classList.add('d-none');
+        reviewNotice.classList.add('d-none');
     }
 
-    function openEditModal(btn) {
-        let row = btn.closest('tr');
+    function populateForm(row) {
         let id = row.querySelector('.data-id').value;
         let title = row.querySelector('.data-title').value;
         let date = row.querySelector('.data-date').value;
@@ -499,9 +546,7 @@
         let seats = row.querySelector('.data-seats').value;
         let img = row.querySelector('.data-img').value;
         let desc = row.querySelector('.data-desc').textContent;
-        let booked = row.querySelector('.data-booked').value;
 
-        document.getElementById('modalTitle').innerText = "Edit Event";
         document.getElementById('eventId').value = id;
         document.getElementById('currentImage').value = img;
         document.getElementById('currentImageDisplay').innerText = img ? img : "None";
@@ -510,12 +555,38 @@
         document.getElementById('eventDate').value = date;
         document.getElementById('location').value = loc;
         document.getElementById('price').value = parseFloat(price).toFixed(2);
-        document.getElementById('imageFile').value = "";
+        document.getElementById('totalSeats').value = seats;
 
+        return {id, seats};
+    }
+
+    function openAddModal() {
         resetFormState();
-        totalSeatsInput.value = seats;
-        totalSeatsInput.min = booked;
+        modalTitle.innerText = "Create New Event";
+        document.getElementById('currentImageDisplay').innerText = "None";
 
+        // Ensure today's date is set as min and default
+        let today = new Date().toISOString().split("T")[0];
+        dateInput.value = today;
+        dateInput.min = today; // Enforce minimum date dynamically
+
+        eventModal.show();
+    }
+
+    function openEditModal(btn) {
+        resetFormState();
+        modalTitle.innerText = "Edit Event";
+
+        let row = btn.closest('tr');
+        let data = populateForm(row);
+        let booked = row.querySelector('.data-booked').value;
+
+        // Ensure future dates only for editing too
+        let today = new Date().toISOString().split("T")[0];
+        dateInput.min = today; // Enforce minimum date dynamically
+
+        // Edit Validation Logic
+        totalSeatsInput.min = booked;
         totalSeatsInput.oninput = function() {
             if (parseInt(this.value) < parseInt(booked)) {
                 let msg = "Cannot be less than booked seats (" + booked + ").";
@@ -526,6 +597,29 @@
                 seatFeedback.innerText = "Must be at least 1.";
             }
         };
+
+        eventModal.show();
+    }
+
+    // NEW: Open Modal in "Review Mode"
+    function openReviewModal(btn) {
+        resetFormState();
+        modalTitle.innerText = "Review Event Proposal";
+
+        let row = btn.closest('tr');
+        let data = populateForm(row);
+
+        // Prepare Review Specifics
+        document.getElementById('reviewEventId').value = data.id;
+
+        // Disable Inputs
+        allInputs.forEach(input => input.disabled = true);
+
+        // Hide/Show UI Elements
+        imageUploadDiv.classList.add('d-none'); // Admins don't change image during review
+        defaultFooter.classList.add('d-none');
+        reviewFooter.classList.remove('d-none');
+        reviewNotice.classList.remove('d-none');
 
         eventModal.show();
     }

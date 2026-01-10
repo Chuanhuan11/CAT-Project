@@ -24,9 +24,9 @@ public class EventListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Event> allEvents = new ArrayList<>();
 
-        // Fetch ALL events first
+        // Fetch ONLY APPROVED events for the catalog
         try (Connection con = DBConnection.getConnection()) {
-            String sql = "SELECT * FROM events";
+            String sql = "SELECT * FROM events WHERE status = 'APPROVED'";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -40,6 +40,7 @@ public class EventListServlet extends HttpServlet {
                     e.setImageUrl(rs.getString("image_url"));
                     e.setTotalSeats(rs.getInt("total_seats"));
                     e.setAvailableSeats(rs.getInt("available_seats"));
+                    e.setStatus(rs.getString("status"));
                     allEvents.add(e);
                 }
             }

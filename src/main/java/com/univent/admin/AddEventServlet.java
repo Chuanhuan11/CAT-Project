@@ -75,9 +75,16 @@ public class AddEventServlet extends HttpServlet {
             }
         }
 
+        // --- NEW STATUS LOGIC ---
+        String status = "PENDING";
+        if ("ADMIN".equals(role)) {
+            status = "APPROVED"; // Admins auto-approve
+        }
+        // ------------------------
+
         try (Connection con = DBConnection.getConnection()) {
             if (idParam == null || idParam.isEmpty()) {
-                String sql = "INSERT INTO events (title, description, event_date, location, price, total_seats, available_seats, image_url, organizer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO events (title, description, event_date, location, price, total_seats, available_seats, image_url, organizer_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setString(1, title);
                 ps.setString(2, description);
@@ -88,9 +95,11 @@ public class AddEventServlet extends HttpServlet {
                 ps.setInt(7, totalSeats);
                 ps.setString(8, finalImageName);
                 ps.setInt(9, userId);
+                ps.setString(10, status);
                 ps.executeUpdate();
             } else {
-                String sql = "UPDATE events SET title=?, description=?, event_date=?, location=?, price=?, total_seats=?, image_url=?, available_seats = ? - (SELECT COUNT(*) FROM bookings WHERE event_id = events.id AND status='CONFIRMED') WHERE id=?";
+                // If editing, reset to PENDING unless Admin
+                String sql = "UPDATE events SET title=?, description=?, event_date=?, location=?, price=?, total_seats=?, image_url=?, status=?, available_seats = ? - (SELECT COUNT(*) FROM bookings WHERE event_id = events.id AND status='CONFIRMED') WHERE id=?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setString(1, title);
                 ps.setString(2, description);
@@ -99,8 +108,9 @@ public class AddEventServlet extends HttpServlet {
                 ps.setDouble(5, price);
                 ps.setInt(6, totalSeats);
                 ps.setString(7, finalImageName);
-                ps.setInt(8, totalSeats);
-                ps.setInt(9, Integer.parseInt(idParam));
+                ps.setString(8, status); // Update status
+                ps.setInt(9, totalSeats);
+                ps.setInt(10, Integer.parseInt(idParam));
                 ps.executeUpdate();
             }
         } catch (Exception e) {

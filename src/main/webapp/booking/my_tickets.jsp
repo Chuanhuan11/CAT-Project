@@ -62,6 +62,33 @@
             color: #666;
             border-top: 1px dashed #ccc;
         }
+
+        /* --- AVATAR STYLES --- */
+        .user-avatar-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .user-avatar-btn:hover, .user-avatar-btn.show {
+            background: rgba(255,255,255,0.2);
+            border-color: #fff;
+        }
+        .user-avatar-svg {
+            fill: white;
+            width: 24px;
+            height: 24px;
+        }
+        /* Hide the default dropdown arrow */
+        .dropdown-toggle::after {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -83,10 +110,13 @@
             </ul>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle fw-bold" type="button" id="userMenu" data-bs-toggle="dropdown">
-                        Hello, ${sessionScope.username}
+                    <%-- REPLACED TEXT BUTTON WITH AVATAR ICON --%>
+                    <button class="user-avatar-btn dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg class="user-avatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                         <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
                             <li><hr class="dropdown-divider"></li>

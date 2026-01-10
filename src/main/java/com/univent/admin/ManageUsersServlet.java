@@ -19,7 +19,6 @@ import java.util.List;
 @WebServlet("/ManageUsersServlet")
 public class ManageUsersServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Role Validation
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
 
@@ -28,7 +27,8 @@ public class ManageUsersServlet extends HttpServlet {
             return;
         }
 
-        List<User> users = new ArrayList<>();
+        List<User> userList = new ArrayList<>();
+        List<User> pendingList = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
             String sql = "SELECT * FROM users";
@@ -41,13 +41,19 @@ public class ManageUsersServlet extends HttpServlet {
                 u.setUsername(rs.getString("username"));
                 u.setEmail(rs.getString("email"));
                 u.setRole(rs.getString("role"));
-                users.add(u);
+                u.setRoleRequest(rs.getString("role_request"));
+
+                if ("ORGANIZER".equals(u.getRoleRequest())) {
+                    pendingList.add(u);
+                }
+                userList.add(u);
             }
         } catch (Exception e) {
-            System.err.println("Error fetching user list: " + e.getMessage());
+            e.printStackTrace();
         }
 
-        request.setAttribute("userList", users);
+        request.setAttribute("userList", userList);
+        request.setAttribute("pendingList", pendingList);
         request.getRequestDispatcher("/admin/manage_users.jsp").forward(request, response);
     }
 }
