@@ -2,11 +2,17 @@ package com.univent.admin;
 
 import com.univent.util.DBConnection;
 
+// --- CLOUDINARY IMPORTS ---
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import java.util.Map;
+import java.io.InputStream;
+// --------------------------
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,29 +67,54 @@ public class AddEventServlet extends HttpServlet {
             return;
         }
 
-        // Image Upload Logic
+        // --- IMAGE UPLOAD LOGIC (CLOUDINARY) ---
         Part filePart = request.getPart("imageFile");
-        String finalImageName = request.getParameter("currentImage");
+        String finalImageName = request.getParameter("currentImage"); // Keep existing URL by default
+
+        // Check if a NEW file was uploaded
         if (filePart != null && filePart.getSize() > 0) {
-            String fileName = filePart.getSubmittedFileName();
-            if (fileName != null && !fileName.isEmpty()) {
-                finalImageName = fileName;
-                String uploadPath = getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img";
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) uploadDir.mkdir();
-                filePart.write(uploadPath + File.separator + fileName);
+            try {
+                // 1. Configure Cloudinary
+                String cloudName = System.getenv("CLOUDINARY_NAME");
+                String apiKey = System.getenv("CLOUDINARY_KEY");
+                String apiSecret = System.getenv("CLOUDINARY_SECRET");
+
+                if (cloudName == null || apiKey == null || apiSecret == null) {
+                    throw new Exception("Cloudinary environment variables not set!");
+                }
+
+                Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
+                        "cloud_name", cloudName,
+                        "api_key", apiKey,
+                        "api_secret", apiSecret
+                ));
+
+                // 2. Upload the file stream
+                InputStream fileContent = filePart.getInputStream();
+                Map uploadResult = cloudinary.uploader().upload(fileContent, ObjectUtils.emptyMap());
+
+                // 3. Get the secure public URL (https://...)
+                finalImageName = (String) uploadResult.get("secure_url");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("errorMessage", "Image Upload Failed: " + e.getMessage());
+                response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
+                return;
             }
         }
+        // ---------------------------------------
 
-        // --- NEW STATUS LOGIC ---
+        // --- STATUS LOGIC ---
         String status = "PENDING";
         if ("ADMIN".equals(role)) {
             status = "APPROVED"; // Admins auto-approve
         }
-        // ------------------------
+        // --------------------
 
         try (Connection con = DBConnection.getConnection()) {
             if (idParam == null || idParam.isEmpty()) {
+                // INSERT
                 String sql = "INSERT INTO events (title, description, event_date, location, price, total_seats, available_seats, image_url, organizer_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setString(1, title);
@@ -93,11 +124,12 @@ public class AddEventServlet extends HttpServlet {
                 ps.setDouble(5, price);
                 ps.setInt(6, totalSeats);
                 ps.setInt(7, totalSeats);
-                ps.setString(8, finalImageName);
+                ps.setString(8, finalImageName); // This is now a full URL
                 ps.setInt(9, userId);
                 ps.setString(10, status);
                 ps.executeUpdate();
             } else {
+                // UPDATE
                 // If editing, reset to PENDING unless Admin
                 String sql = "UPDATE events SET title=?, description=?, event_date=?, location=?, price=?, total_seats=?, image_url=?, status=?, available_seats = ? - (SELECT COUNT(*) FROM bookings WHERE event_id = events.id AND status='CONFIRMED') WHERE id=?";
                 PreparedStatement ps = con.prepareStatement(sql);
@@ -107,8 +139,8 @@ public class AddEventServlet extends HttpServlet {
                 ps.setString(4, location);
                 ps.setDouble(5, price);
                 ps.setInt(6, totalSeats);
-                ps.setString(7, finalImageName);
-                ps.setString(8, status); // Update status
+                ps.setString(7, finalImageName); // This is now a full URL
+                ps.setString(8, status);
                 ps.setInt(9, totalSeats);
                 ps.setInt(10, Integer.parseInt(idParam));
                 ps.executeUpdate();

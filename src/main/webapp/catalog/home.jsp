@@ -259,7 +259,16 @@
                         <div class="position-relative">
                             <c:choose>
                                 <c:when test="${not empty event.imageUrl}">
-                                    <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                    <c:choose>
+                                        <%-- Case 1: Cloudinary/External URL --%>
+                                        <c:when test="${event.imageUrl.startsWith('http')}">
+                                            <img src="${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                        </c:when>
+                                        <%-- Case 2: Local File (Fallback) --%>
+                                        <c:otherwise>
+                                            <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                        </c:otherwise>
+                                    </c:choose>
                                 </c:when>
                                 <c:otherwise>
                                     <img src="https://placehold.co/600x400?text=No+Image" class="card-img-top" alt="Placeholder">
@@ -309,7 +318,16 @@
                             <div class="position-relative">
                                 <c:choose>
                                     <c:when test="${not empty event.imageUrl}">
-                                        <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                        <c:choose>
+                                            <%-- Case 1: Cloudinary/External URL --%>
+                                            <c:when test="${event.imageUrl.startsWith('http')}">
+                                                <img src="${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                            </c:when>
+                                            <%-- Case 2: Local File (Fallback) --%>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:when>
                                     <c:otherwise>
                                         <img src="https://placehold.co/600x400?text=No+Image" class="card-img-top" alt="Placeholder">
@@ -343,7 +361,16 @@
                             <div class="position-relative">
                                 <c:choose>
                                     <c:when test="${not empty event.imageUrl}">
-                                        <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                        <c:choose>
+                                            <%-- Case 1: Cloudinary/External URL --%>
+                                            <c:when test="${event.imageUrl.startsWith('http')}">
+                                                <img src="${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                            </c:when>
+                                            <%-- Case 2: Local File (Fallback) --%>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:when>
                                     <c:otherwise>
                                         <img src="https://placehold.co/600x400?text=No+Image" class="card-img-top" alt="Placeholder">

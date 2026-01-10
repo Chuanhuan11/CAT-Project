@@ -32,17 +32,14 @@
 
                 <%-- UPDATED: Image Placeholder Logic --%>
                 <c:choose>
+                    <c:when test="${not empty event.imageUrl && event.imageUrl.startsWith('http')}">
+                        <img src="${event.imageUrl}" class="img-fluid rounded mb-3" alt="${event.title}">
+                    </c:when>
                     <c:when test="${not empty event.imageUrl}">
-                        <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}"
-                             class="img-fluid rounded-start w-100 event-detail-img"
-                             style="height: 500px; object-fit: cover;"
-                             alt="Event Poster">
+                        <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="img-fluid rounded mb-3" alt="${event.title}">
                     </c:when>
                     <c:otherwise>
-                        <img src="https://placehold.co/600x400?text=No+Image"
-                             class="img-fluid rounded-start w-100"
-                             style="height: 500px; object-fit: cover;"
-                             alt="Event Poster">
+                        <img src="https://placehold.co/800x400?text=No+Image" class="img-fluid rounded mb-3" alt="Placeholder">
                     </c:otherwise>
                 </c:choose>
 
