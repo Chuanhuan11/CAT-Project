@@ -23,6 +23,8 @@ public class CartServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+
+        // --- ACTION DISPATCHER ---
         if ("add".equals(action)) {
             addToCart(request, response);
         } else if ("update".equals(action)) {
@@ -32,40 +34,43 @@ public class CartServlet extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/CartServlet");
         }
+        // -------------------------
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+
+        // --- VIEW / REMOVE DISPATCHER ---
         if ("remove".equals(action)) {
             removeFromCart(request, response);
         } else {
             loadCartFromDatabase(request);
             request.getRequestDispatcher("/booking/cart.jsp").forward(request, response);
         }
+        // --------------------------------
     }
 
     private void prepareCheckout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
 
-        // Login Validation
+        // --- LOGIN VALIDATION ---
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
+        // ------------------------
 
-        // --- FIX BEGIN: Force reload from DB to get latest quantities/items ---
-        // This ensures that even if quantities were updated via AJAX,
-        // the session variable 'cart' is now perfectly synced with the DB.
+        // --- SYNC SESSION WITH DB ---
+        // Force reload to ensure session variable matches DB state (handles AJAX updates)
         loadCartFromDatabase(request);
-        // --- FIX END ---
-
         List<Event> fullCart = (List<Event>) session.getAttribute("cart");
 
         if (fullCart == null || fullCart.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/CartServlet");
             return;
         }
+        // ----------------------------
 
         String[] selectedIds = request.getParameterValues("selectedEvents");
         if (selectedIds == null || selectedIds.length == 0) {
@@ -74,8 +79,8 @@ public class CartServlet extends HttpServlet {
             return;
         }
 
+        // --- FILTER CHECKOUT ITEMS ---
         List<Event> checkoutCart = new ArrayList<>();
-        // Filter fullCart to match selectedIds
         for (String idStr : selectedIds) {
             try {
                 int id = Integer.parseInt(idStr);
@@ -89,8 +94,9 @@ public class CartServlet extends HttpServlet {
                 // Ignore invalid IDs
             }
         }
+        // -----------------------------
 
-        // Replace the full cart in the session with ONLY the items to be checked out
+        // Replace session cart with ONLY checkout items for the next step
         session.setAttribute("cart", checkoutCart);
         response.sendRedirect(request.getContextPath() + "/CheckoutServlet");
     }
@@ -99,10 +105,12 @@ public class CartServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
 
+        // --- LOGIN VALIDATION ---
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
+        // ------------------------
 
         int eventId = Integer.parseInt(request.getParameter("eventId"));
         int quantityToAdd = 1;
@@ -113,7 +121,8 @@ public class CartServlet extends HttpServlet {
         }
 
         try (Connection con = DBConnection.getConnection()) {
-            // Check Available Seats
+
+            // --- CHECK AVAILABILITY ---
             String availSql = "SELECT available_seats FROM events WHERE id = ?";
             int availableSeats = 0;
             try (PreparedStatement ps = con.prepareStatement(availSql)) {
@@ -121,8 +130,9 @@ public class CartServlet extends HttpServlet {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) availableSeats = rs.getInt("available_seats");
             }
+            // --------------------------
 
-            // Check Current Cart Quantity
+            // --- CHECK CURRENT CART ---
             String cartCountSql = "SELECT COUNT(*) FROM cart WHERE user_id = ? AND event_id = ?";
             int currentCartQty = 0;
             try (PreparedStatement ps = con.prepareStatement(cartCountSql)) {
@@ -137,16 +147,17 @@ public class CartServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/EventListServlet");
                 return;
             }
+            // --------------------------
 
-            // Add to Cart
+            // --- EXECUTE ADD ---
             String insertSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
             try (PreparedStatement ps = con.prepareStatement(insertSql)) {
                 ps.setInt(1, userId);
                 ps.setInt(2, eventId);
                 for(int i=0; i < quantityToAdd; i++) ps.executeUpdate();
             }
-
             session.setAttribute("successMessage", "Added to cart!");
+            // -------------------
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,6 +177,8 @@ public class CartServlet extends HttpServlet {
                 int newQuantity = Integer.parseInt(request.getParameter("quantity"));
 
                 try (Connection con = DBConnection.getConnection()) {
+
+                    // --- CHECK LIMITS ---
                     String availSql = "SELECT available_seats FROM events WHERE id = ?";
                     int availableSeats = 0;
                     try (PreparedStatement ps = con.prepareStatement(availSql)) {
@@ -178,7 +191,9 @@ public class CartServlet extends HttpServlet {
                         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Exceeds available seats");
                         return;
                     }
+                    // --------------------
 
+                    // --- CALCULATE DIFF ---
                     String countSql = "SELECT COUNT(*) FROM cart WHERE user_id = ? AND event_id = ?";
                     PreparedStatement psCount = con.prepareStatement(countSql);
                     psCount.setInt(1, userId);
@@ -186,7 +201,9 @@ public class CartServlet extends HttpServlet {
                     ResultSet rs = psCount.executeQuery();
                     int currentQty = 0;
                     if (rs.next()) currentQty = rs.getInt(1);
+                    // ----------------------
 
+                    // --- ADJUST QUANTITY ---
                     if (newQuantity > currentQty) {
                         int toAdd = newQuantity - currentQty;
                         String addSql = "INSERT INTO cart (user_id, event_id) VALUES (?, ?)";
@@ -204,6 +221,7 @@ public class CartServlet extends HttpServlet {
                             psDel.executeUpdate();
                         }
                     }
+                    // -----------------------
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -220,11 +238,13 @@ public class CartServlet extends HttpServlet {
         if (userId != null) {
             int eventId = Integer.parseInt(request.getParameter("eventId"));
             try (Connection con = DBConnection.getConnection()) {
+                // --- DELETE ITEM ---
                 String sql = "DELETE FROM cart WHERE user_id = ? AND event_id = ?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, userId);
                 ps.setInt(2, eventId);
                 ps.executeUpdate();
+                // -------------------
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -232,7 +252,7 @@ public class CartServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/CartServlet");
     }
 
-    // Helper to refresh session from DB
+    // --- HELPER: REFRESH SESSION ---
     private void loadCartFromDatabase(HttpServletRequest request) {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");

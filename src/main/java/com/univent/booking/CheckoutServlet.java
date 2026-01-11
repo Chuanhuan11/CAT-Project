@@ -28,8 +28,9 @@ public class CheckoutServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
-        List<Event> cart = (List<Event>) session.getAttribute("cart"); //
+        List<Event> cart = (List<Event>) session.getAttribute("cart");
 
+        // --- VALIDATION ---
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
@@ -40,7 +41,9 @@ public class CheckoutServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/CartServlet");
             return;
         }
+        // ------------------
 
+        // --- FETCH SAVED CARDS ---
         List<PaymentMethod> savedCards = new ArrayList<>();
         try (Connection con = DBConnection.getConnection()) {
             String sql = "SELECT * FROM payment_methods WHERE user_id = ?";
@@ -59,6 +62,7 @@ public class CheckoutServlet extends HttpServlet {
             e.printStackTrace();
         }
         request.setAttribute("savedCards", savedCards);
+        // -------------------------
 
         request.getRequestDispatcher("/booking/checkout.jsp").forward(request, response);
     }
@@ -70,7 +74,7 @@ public class CheckoutServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         List<Event> cart = (List<Event>) session.getAttribute("cart");
 
-        // Role Validation
+        // --- ROLE VALIDATION ---
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
@@ -80,17 +84,17 @@ public class CheckoutServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/CartServlet");
             return;
         }
+        // -----------------------
 
         // Determine if using saved card or new card
         String paymentChoice = request.getParameter("paymentMethod"); // "new" or ID
         boolean isNewCard = "new".equals(paymentChoice);
 
         if (isNewCard) {
-            // Get Parameters
+            // --- NEW CARD VALIDATION ---
             String cardNumber = request.getParameter("cardNumber");
             String expiry = request.getParameter("expiry");
             String cvv = request.getParameter("cvv");
-
 
             // Basic Empty Check
             if (cardNumber == null || cardNumber.trim().isEmpty() ||
@@ -144,15 +148,17 @@ public class CheckoutServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
+            // ---------------------------
 
-            // Save Card Logic (Only if validation passes)
+            // --- SAVE CARD LOGIC ---
             String saveCard = request.getParameter("saveCard");
             if ("on".equals(saveCard)) {
                 savePaymentMethod(userId, cleanCardNum, expiry);
             }
+            // -----------------------
         }
 
-        // Process Payment
+        // --- PROCESS PAYMENT ---
         boolean success = saveBookings(userId, cart);
         if (success) {
             removeBookedItemsFromCart(userId, cart);
@@ -163,8 +169,10 @@ public class CheckoutServlet extends HttpServlet {
             request.setAttribute("error", "Booking failed. Some items may be sold out.");
             doGet(request, response);
         }
+        // -----------------------
     }
 
+    // --- HELPER: SAVE PAYMENT METHOD ---
     private void savePaymentMethod(int userId, String number, String expiry) {
         String last4 = number.length() > 4 ? number.substring(number.length() - 4) : number;
         String alias = "Card ending " + last4;
@@ -182,6 +190,7 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 
+    // --- HELPER: EXECUTE BOOKING ---
     private boolean saveBookings(int userId, List<Event> cart) {
         String bookingSql = "INSERT INTO bookings (user_id, event_id, booking_date, status) VALUES (?, ?, ?, ?)";
         String updateSeatSql = "UPDATE events SET available_seats = available_seats - 1 WHERE id = ? AND available_seats > 0";
@@ -236,13 +245,14 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 
+    // --- HELPER: CLEAN CART ---
     private void removeBookedItemsFromCart(int userId, List<Event> bookedItems) {
         try (Connection con = DBConnection.getConnection()) {
             String sql = "DELETE FROM cart WHERE user_id = ? AND event_id = ?";
             PreparedStatement ps = con.prepareStatement(sql);
             for (Event event : bookedItems) {
                 ps.setInt(1, userId);
-                ps.setInt(2, event.getId()); // FIX: was duplicate setInt(1)
+                ps.setInt(2, event.getId());
                 ps.addBatch();
             }
             ps.executeBatch();

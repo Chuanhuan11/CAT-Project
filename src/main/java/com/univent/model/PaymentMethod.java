@@ -1,11 +1,15 @@
 package com.univent.model;
 
 public class PaymentMethod {
+
+    // --- ATTRIBUTES ---
     private int id;
     private String cardAlias;
     private String cardNumber;
     private String expiry;
+    // ------------------
 
+    // --- CONSTRUCTORS ---
     public PaymentMethod() {}
 
     public PaymentMethod(int id, String cardAlias, String cardNumber, String expiry) {
@@ -14,7 +18,9 @@ public class PaymentMethod {
         this.cardNumber = cardNumber;
         this.expiry = expiry;
     }
+    // --------------------
 
+    // --- GETTERS AND SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -26,4 +32,5 @@ public class PaymentMethod {
 
     public String getExpiry() { return expiry; }
     public void setExpiry(String expiry) { this.expiry = expiry; }
+    // ---------------------------
 }

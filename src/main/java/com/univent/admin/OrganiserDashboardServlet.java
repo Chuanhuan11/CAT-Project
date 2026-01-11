@@ -23,13 +23,13 @@ public class OrganiserDashboardServlet extends HttpServlet {
         Integer userId = (Integer) session.getAttribute("userId");
         String sessionRole = (String) session.getAttribute("role");
 
-        // 1. Basic Login Check
+        // --- BASIC LOGIN CHECK ---
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
 
-        // 2. SMART ROLE CHECK (The Fix)
+        // --- SMART ROLE CHECK (AUTO-PROMOTE) ---
         // Check DB to see if they were promoted while logged in
         String currentDbRole = getRoleFromDatabase(userId);
 
@@ -46,15 +46,17 @@ public class OrganiserDashboardServlet extends HttpServlet {
                 sessionRole = "STUDENT";
             }
         }
+        // ---------------------------------------
 
-        // 3. Access Control (Using the updated role)
+        // --- ACCESS CONTROL ---
         if (!"ADMIN".equals(sessionRole) && !"ORGANIZER".equals(sessionRole)) {
             session.setAttribute("errorMessage", "Access Denied. You do not have permission to view the dashboard.");
             response.sendRedirect(request.getContextPath() + "/EventListServlet");
             return;
         }
+        // ----------------------
 
-        // --- EXISTING LOGIC STARTS HERE ---
+        // --- FETCH EVENTS LOGIC ---
         List<Event> events = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
@@ -100,7 +102,7 @@ public class OrganiserDashboardServlet extends HttpServlet {
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
 
-    // Helper method to check DB
+    // --- HELPER METHOD TO CHECK DB ---
     private String getRoleFromDatabase(int userId) {
         String role = null;
         try (Connection con = DBConnection.getConnection()) {

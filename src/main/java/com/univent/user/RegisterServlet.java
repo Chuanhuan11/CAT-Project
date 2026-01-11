@@ -17,22 +17,24 @@ import java.util.regex.Pattern;
 public class RegisterServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // --- PARAMETER RETRIEVAL ---
         String username = request.getParameter("fullname");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirm_password");
-        // Ensure you add a <select name="accountType"> in your register.jsp
         String accountType = request.getParameter("accountType");
+        // ---------------------------
 
+        // --- ROLE DETERMINATION ---
         String role = "STUDENT"; // Default role is always STUDENT
         String roleRequest = null;
 
-        // If user wants to be an organizer, mark it in role_request
         if ("ORGANIZER".equals(accountType)) {
             roleRequest = "ORGANIZER";
         }
+        // --------------------------
 
-        // --- Validation Logic (Same as before) ---
+        // --- INPUT VALIDATION ---
         if (username == null || username.trim().isEmpty() || email == null || password == null) {
             request.setAttribute("errorMessage", "All fields are required.");
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
@@ -53,10 +55,10 @@ public class RegisterServlet extends HttpServlet {
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
             return;
         }
+        // ------------------------
 
-        // --- Database Logic ---
         try (Connection con = DBConnection.getConnection()) {
-            // Check existence
+            // --- DUPLICATE CHECK ---
             String checkSql = "SELECT id FROM users WHERE username = ? OR email = ?";
             PreparedStatement checkPs = con.prepareStatement(checkSql);
             checkPs.setString(1, username);
@@ -66,8 +68,10 @@ public class RegisterServlet extends HttpServlet {
             if (rs.next()) {
                 request.setAttribute("errorMessage", "Username or Email already taken!");
                 request.getRequestDispatcher("/user/register.jsp").forward(request, response);
-            } else {
-                // INSERT with role_request
+            }
+            // -----------------------
+            else {
+                // --- USER REGISTRATION ---
                 String insertSql = "INSERT INTO users (username, email, password, role, role_request) VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(insertSql);
                 ps.setString(1, username);
@@ -83,6 +87,7 @@ public class RegisterServlet extends HttpServlet {
                     request.setAttribute("errorMessage", "Registration failed.");
                     request.getRequestDispatcher("/user/register.jsp").forward(request, response);
                 }
+                // -------------------------
             }
         } catch (Exception e) {
             e.printStackTrace();

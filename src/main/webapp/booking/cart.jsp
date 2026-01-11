@@ -9,6 +9,7 @@
     <title>Shopping Cart - Univent</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
+        /* --- GENERAL STYLES --- */
         body {
             background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
             background-size: cover;

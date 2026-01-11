@@ -26,6 +26,7 @@ public class SearchServlet extends HttpServlet {
             String sql;
             PreparedStatement ps;
 
+            // --- BUILD SEARCH QUERY ---
             if (keyword == null || keyword.trim().isEmpty()) {
                 sql = "SELECT * FROM events";
                 ps = con.prepareStatement(sql);
@@ -36,7 +37,9 @@ public class SearchServlet extends HttpServlet {
                 ps.setString(1, searchPattern);
                 ps.setString(2, searchPattern);
             }
+            // --------------------------
 
+            // --- EXECUTE SEARCH ---
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Event e = new Event();
@@ -51,6 +54,7 @@ public class SearchServlet extends HttpServlet {
                 e.setAvailableSeats(rs.getInt("available_seats"));
                 eventList.add(e);
             }
+            // ----------------------
 
         } catch (Exception e) {
             e.printStackTrace();

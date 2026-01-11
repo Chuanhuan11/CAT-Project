@@ -17,19 +17,18 @@ import java.sql.ResultSet;
 public class EventDetailsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // Get the ID from the URL
+        // --- GET PARAMETERS ---
         String idParam = request.getParameter("id");
 
         if (idParam != null) {
             int eventId = Integer.parseInt(idParam);
             Event event = null;
 
-            // Connect to Database
             try (Connection con = DBConnection.getConnection()) {
-                // Select ONLY the event that matches the ID
+                // --- FETCH EVENT DETAILS ---
                 String sql = "SELECT * FROM events WHERE id = ?";
                 PreparedStatement ps = con.prepareStatement(sql);
-                ps.setInt(1, eventId); // Set the ? to the eventId
+                ps.setInt(1, eventId);
 
                 ResultSet rs = ps.executeQuery();
 
@@ -46,11 +45,12 @@ public class EventDetailsServlet extends HttpServlet {
                     event.setTotalSeats(rs.getInt("total_seats"));
                     event.setAvailableSeats(rs.getInt("available_seats"));
                 }
+                // ---------------------------
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            // Send the Real Event to the JSP
+            // --- FORWARD TO JSP ---
             if (event != null) {
                 request.setAttribute("event", event);
                 request.getRequestDispatcher("/catalog/event_details.jsp").forward(request, response);
@@ -58,6 +58,7 @@ public class EventDetailsServlet extends HttpServlet {
                 // ID not found in database? Go home.
                 response.sendRedirect("EventListServlet");
             }
+            // ----------------------
         } else {
             response.sendRedirect("EventListServlet");
         }

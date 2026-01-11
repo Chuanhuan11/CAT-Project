@@ -14,13 +14,18 @@ public class ProcessOrganizerRequestServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
             HttpSession session = request.getSession();
+
+            // --- ROLE VALIDATION ---
             if (!"ADMIN".equals(session.getAttribute("role"))) return;
+            // -----------------------
 
             int userId = Integer.parseInt(request.getParameter("userId"));
             String action = request.getParameter("action"); // "approve" or "reject"
 
             try (Connection con = DBConnection.getConnection()) {
                 String sql;
+
+                // --- DETERMINE ACTION ---
                 if ("approve".equals(action)) {
                     // Promote to ORGANIZER and clear request
                     sql = "UPDATE users SET role = 'ORGANIZER', role_request = NULL WHERE id = ?";
@@ -28,10 +33,13 @@ public class ProcessOrganizerRequestServlet extends HttpServlet {
                     // Keep as STUDENT but clear request
                     sql = "UPDATE users SET role_request = NULL WHERE id = ?";
                 }
+                // ------------------------
 
+                // --- EXECUTE UPDATE ---
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, userId);
                 ps.executeUpdate();
+                // ----------------------
             }
         } catch (Exception e) {
             e.printStackTrace();

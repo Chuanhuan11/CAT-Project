@@ -22,15 +22,18 @@ public class OrderHistoryServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");
 
+        // --- LOGIN VALIDATION ---
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
+        // ------------------------
 
         List<Ticket> tickets = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
-            // Updated SQL: Order by Title first to allow grouping in JSP
+            // --- FETCH TICKETS ---
+            // Order by Title first to allow grouping in JSP
             String sql = "SELECT b.id AS booking_id, b.booking_date, b.status, " +
                     "e.title, e.event_date, e.location, e.price, e.image_url " +
                     "FROM bookings b " +
@@ -54,6 +57,7 @@ public class OrderHistoryServlet extends HttpServlet {
                 t.setImageUrl(rs.getString("image_url"));
                 tickets.add(t);
             }
+            // ---------------------
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,7 +67,7 @@ public class OrderHistoryServlet extends HttpServlet {
         request.getRequestDispatcher("/booking/my_tickets.jsp").forward(request, response);
     }
 
-    // Inner DTO Class
+    // --- INNER DTO CLASS ---
     public static class Ticket {
         private int bookingId;
         private Date bookingDate;

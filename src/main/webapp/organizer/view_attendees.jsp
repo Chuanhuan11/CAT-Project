@@ -8,6 +8,7 @@
     <title>Attendees - ${eventTitle}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
     <style>
+        /* --- GENERAL STYLES --- */
         body {
             background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
             background-size: cover;
@@ -31,7 +32,7 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
 
-        /* TABLE STYLES */
+        /* --- TABLE STYLING --- */
         .custom-table thead { background-color: #2c1a4d; color: white; border-bottom: 4px solid #ffc107; }
         .custom-table th { padding: 15px; border: none; text-transform: uppercase; font-size: 0.85rem; }
         .custom-table td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #eee; }
@@ -108,6 +109,7 @@
 </head>
 <body>
 
+<%-- --- NAVBAR --- --%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">
@@ -137,14 +139,18 @@
         </div>
     </div>
 </nav>
+<%-- -------------- --%>
 
+<%-- --- HERO HEADER --- --%>
 <div class="hero-section text-center">
     <div class="container">
         <h2 class="fw-bold">Attendees List</h2>
         <p class="mb-0">Managing: <strong style="color: #ffc107;"><c:out value="${eventTitle}"/></strong></p>
     </div>
 </div>
+<%-- ------------------- --%>
 
+<%-- --- MAIN CONTENT --- --%>
 <div class="container">
     <div class="content-box">
         <div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
@@ -156,6 +162,7 @@
             </div>
         </div>
 
+        <%-- 1. ATTENDEES TABLE --%>
         <div class="table-responsive">
             <table class="table custom-table mb-0">
                 <thead>
@@ -192,6 +199,7 @@
                 </tbody>
             </table>
         </div>
+        <%-- ----------------- --%>
     </div>
 </div>
 

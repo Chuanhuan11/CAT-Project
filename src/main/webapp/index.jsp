@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
 
     <style>
+        /* --- GLOBAL STYLES --- */
         body, html {
             height: 100%;
             margin: 0;
@@ -80,6 +81,7 @@
             max-width: 600px;
         }
 
+        /* --- CTA BUTTON --- */
         .btn-explore {
             background-color: white;
             color: var(--brand-purple);
@@ -178,6 +180,7 @@
             }
         }
 
+        /* --- ANIMATIONS --- */
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -187,30 +190,34 @@
 </head>
 <body>
 
-<%--
-    FIX: MOVED .brand-header INSIDE .hero-container
-    This ensures they scroll together on mobile and background covers both.
---%>
+<%-- --- HERO CONTAINER --- --%>
+<%-- Note: .brand-header is inside .hero-container to ensure they scroll together on mobile --%>
 <div class="hero-container">
 
+    <%-- BRAND HEADER --%>
     <div class="brand-header">
         <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" class="brand-logo">
         <span class="brand-text">Univent</span>
     </div>
 
+    <%-- MAIN CONTENT --%>
     <h1 class="big-title">Discover USM <br> Life</h1>
     <p class="subtitle">Concerts. Workshops. Sports. All in One Place.</p>
 
+    <%-- MOBILE ILLUSTRATION --%>
     <img src="${pageContext.request.contextPath}/assets/img/landing-img.png"
          alt="University Life 3D Illustration"
          class="mobile-landing-img">
 
+    <%-- CALL TO ACTION --%>
     <a href="${pageContext.request.contextPath}/EventListServlet" class="btn-explore">
         Explore Events
     </a>
 
+    <%-- FOOTER NOTE --%>
     <p class="footer-note">Join 10,000+ students booking tickets today.</p>
 </div>
+<%-- ---------------------- --%>
 
 </body>
 </html>

@@ -219,161 +219,161 @@
 
     <c:choose>
         <%-- STATE 1: PAYMENT SUCCESSFUL --%>
-        <c:when test="${not empty message}">
-            <div class="success-wrapper">
-                <div class="success-icon">✓</div>
-                <h2 class="fw-bold mb-3" style="color: #2c1a4d;">Payment Successful!</h2>
-                <p class="text-muted mb-4" style="max-width: 400px;">
-                        ${message}
-                </p>
-                <div class="d-flex gap-3">
-                    <a href="${pageContext.request.contextPath}/OrderHistoryServlet" class="btn btn-outline-dark rounded-pill px-4">View My Tickets</a>
-                    <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-success rounded-pill px-4">Continue Shopping</a>
-                </div>
+    <c:when test="${not empty message}">
+        <div class="success-wrapper">
+            <div class="success-icon">✓</div>
+            <h2 class="fw-bold mb-3" style="color: #2c1a4d;">Payment Successful!</h2>
+            <p class="text-muted mb-4" style="max-width: 400px;">
+                    ${message}
+            </p>
+            <div class="d-flex gap-3">
+                <a href="${pageContext.request.contextPath}/OrderHistoryServlet" class="btn btn-outline-dark rounded-pill px-4">View My Tickets</a>
+                <a href="${pageContext.request.contextPath}/EventListServlet" class="btn btn-success rounded-pill px-4">Continue Shopping</a>
             </div>
-        </c:when>
+        </div>
+    </c:when>
 
         <%-- STATE 2: CHECKOUT FORM --%>
-        <c:otherwise>
-            <div class="row g-0">
-                <div class="col-md-5 summary-section">
-                    <div class="summary-header">
-                        <h4 class="mb-0 fw-bold">Order Summary</h4>
-                    </div>
+    <c:otherwise>
+    <div class="row g-0">
+        <div class="col-md-5 summary-section">
+            <div class="summary-header">
+                <h4 class="mb-0 fw-bold">Order Summary</h4>
+            </div>
 
-                        <%-- Calculate Total at top of scope --%>
-                    <c:set var="totalAmount" value="0" />
+                <%-- Calculate Total at top of scope --%>
+            <c:set var="totalAmount" value="0" />
 
-                    <div class="cart-items-scroll">
-                        <c:forEach var="item" items="${sessionScope.cart}">
-                            <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
-                                <div>
-                                    <div class="fw-bold">
-                                            ${item.title}
-                                            <%-- UPDATED: Show Quantity Badge --%>
-                                        <span class="badge bg-light text-dark ms-1">x${item.quantity}</span>
-                                    </div>
-                                    <small class="text-white-50">${item.location}</small>
-                                </div>
-                                    <%-- UPDATED: Show Price * Quantity --%>
-                                <span class="fw-bold">RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2"/></span>
+            <div class="cart-items-scroll">
+                <c:forEach var="item" items="${sessionScope.cart}">
+                    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
+                        <div>
+                            <div class="fw-bold">
+                                    ${item.title}
+                                    <%-- UPDATED: Show Quantity Badge --%>
+                                <span class="badge bg-light text-dark ms-1">x${item.quantity}</span>
                             </div>
-
-                            <%-- UPDATED: Add Price * Quantity to Total --%>
-                            <c:set var="totalAmount" value="${totalAmount + (item.price * item.quantity)}" />
-                        </c:forEach>
-
-                        <c:if test="${empty sessionScope.cart}">
-                            <p class="text-white-50">Your cart is empty.</p>
-                        </c:if>
+                            <small class="text-white-50">${item.location}</small>
+                        </div>
+                            <%-- UPDATED: Show Price * Quantity --%>
+                        <span class="fw-bold">RM <fmt:formatNumber value="${item.price * item.quantity}" type="number" minFractionDigits="2"/></span>
                     </div>
 
-                    <div class="total-row d-flex justify-content-between align-items-center">
-                        <span>TOTAL</span>
-                        <span>RM <fmt:formatNumber value="${totalAmount}" type="number" minFractionDigits="2"/></span>
-                    </div>
+                    <%-- UPDATED: Add Price * Quantity to Total --%>
+                    <c:set var="totalAmount" value="${totalAmount + (item.price * item.quantity)}" />
+                </c:forEach>
+
+                <c:if test="${empty sessionScope.cart}">
+                    <p class="text-white-50">Your cart is empty.</p>
+                </c:if>
+            </div>
+
+            <div class="total-row d-flex justify-content-between align-items-center">
+                <span>TOTAL</span>
+                <span>RM <fmt:formatNumber value="${totalAmount}" type="number" minFractionDigits="2"/></span>
+            </div>
+        </div>
+
+        <div class="col-md-7 payment-section">
+            <c:choose>
+                <%-- CASE 1: FREE ORDER (Total=0) --%>
+            <c:when test="${totalAmount == 0}">
+            <h3 class="fw-bold mb-4" style="color: #2c1a4d;">Confirm Booking
+            </h3>
+
+            <div class="alert alert-info py-3 shadow-sm border-0"
+                 style="background-color: #e3f2fd; color: #0d47a1;">
+                <h5 class="alert-heading fw-bold mb-1">Free Event</h5>
+                <p class="mb-0 small">No payment is required for this order.
+                    Click below to confirm.</p>
+            </div>
+
+            <form
+                    action="${pageContext.request.contextPath}/CheckoutServlet"
+                    method="post"
+                    style="position: absolute; bottom: 40px; left: 40px; right: 40px;">
+                    <%-- Send 'free' to skip validation server-side --%>
+                <input type="hidden" name="paymentMethod" value="free">
+
+                <button type="submit" class="btn-pay shadow-sm mt-3">
+                    Confirm Booking
+                </button>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">Instant
+                        Confirmation</small>
                 </div>
+            </form>
+        </div>
+        </c:when>
 
-                <div class="col-md-7 payment-section">
-                    <c:choose>
-                        <%-- CASE 1: FREE ORDER (Total=0) --%>
-                    <c:when test="${totalAmount == 0}">
-                        <h3 class="fw-bold mb-4" style="color: #2c1a4d;">Confirm Booking
-                        </h3>
+            <%-- CASE 2: PAID ORDER (Show Card Form) --%>
+        <c:otherwise>
+        <h3 class="fw-bold mb-4" style="color: #2c1a4d;">Payment Details</h3>
 
-                            <div class="alert alert-info py-3 shadow-sm border-0"
-                                 style="background-color: #e3f2fd; color: #0d47a1;">
-                                <h5 class="alert-heading fw-bold mb-1">Free Event</h5>
-                                <p class="mb-0 small">No payment is required for this order.
-                                    Click below to confirm.</p>
-                            </div>
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger p-2 small text-center rounded mb-3">${error}</div>
+        </c:if>
 
-                            <form
-                                    action="${pageContext.request.contextPath}/CheckoutServlet"
-                                    method="post"
-                                    style="position: absolute; bottom: 40px; left: 40px; right: 40px;">
-                                    <%-- Send 'free' to skip validation server-side --%>
-                                <input type="hidden" name="paymentMethod" value="free">
+        <form action="${pageContext.request.contextPath}/CheckoutServlet" method="post" id="paymentForm" novalidate>
 
-                                <button type="submit" class="btn-pay shadow-sm mt-3">
-                                    Confirm Booking
-                                </button>
+            <div class="mb-4">
+                <label class="form-label text-muted small fw-bold mb-2">SELECT METHOD</label>
 
-                                <div class="text-center mt-3">
-                                    <small class="text-muted">Instant
-                                        Confirmation</small>
-                                </div>
-                            </form>
+                <c:forEach var="card" items="${savedCards}">
+                    <div class="card-option d-flex align-items-center" onclick="selectCard(${card.id})">
+                        <input class="form-check-input me-3" type="radio" name="paymentMethod" id="card_${card.id}" value="${card.id}" onchange="toggleNewCardForm(false)">
+                        <div>
+                            <div class="fw-bold text-dark">${card.cardAlias}</div>
+                            <div class="text-muted small">Expires: ${card.expiry}</div>
                         </div>
-                    </c:when>
+                    </div>
+                </c:forEach>
 
-                        <%-- CASE 2: PAID ORDER (Show Card Form) --%>
-                    <c:otherwise>
-                    <h3 class="fw-bold mb-4" style="color: #2c1a4d;">Payment Details</h3>
-
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger p-2 small text-center rounded mb-3">${error}</div>
-                    </c:if>
-
-                    <form action="${pageContext.request.contextPath}/CheckoutServlet" method="post" id="paymentForm" novalidate>
-
-                        <div class="mb-4">
-                            <label class="form-label text-muted small fw-bold mb-2">SELECT METHOD</label>
-
-                            <c:forEach var="card" items="${savedCards}">
-                                <div class="card-option d-flex align-items-center" onclick="selectCard(${card.id})">
-                                    <input class="form-check-input me-3" type="radio" name="paymentMethod" id="card_${card.id}" value="${card.id}" onchange="toggleNewCardForm(false)">
-                                    <div>
-                                        <div class="fw-bold text-dark">${card.cardAlias}</div>
-                                        <div class="text-muted small">Expires: ${card.expiry}</div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-
-                            <div class="card-option d-flex align-items-center" onclick="selectNewCard()">
-                                <input class="form-check-input me-3" type="radio" name="paymentMethod" id="newCardRadio" value="new" checked onchange="toggleNewCardForm(true)">
-                                <span class="fw-bold text-dark">+ Add New Card</span>
-                            </div>
-                        </div>
-
-                        <div id="newCardForm">
-                            <div class="mb-3">
-                                <label for="cardNumberInput" class="form-label text-muted small fw-bold">CARD NUMBER</label>
-                                <input type="text" name="cardNumber" id="cardNumberInput" class="form-control form-control-lg" placeholder="0000 0000 0000 0000" maxlength="19">
-                                <div class="invalid-feedback">Invalid card number. Must be 13-19 digits.</div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="expiryInput" class="form-label text-muted small fw-bold">EXPIRY DATE</label>
-                                    <input type="text" name="expiry" id="expiryInput" class="form-control form-control-lg" placeholder="MM/YY" maxlength="5">
-                                    <div class="invalid-feedback">Invalid format. Use MM/YY.</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="cvvInput" class="form-label text-muted small fw-bold">CVV / CVC</label>
-                                    <input type="password" name="cvv" id="cvvInput" class="form-control form-control-lg" placeholder="123" maxlength="4">
-                                    <div class="invalid-feedback">Must be 3 or 4 digits.</div>
-                                </div>
-                            </div>
-
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="saveCard" id="saveCard" checked>
-                                <label class="form-check-label text-muted small" for="saveCard">Save card securely for future payments</label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-pay shadow-sm">
-                            Pay RM <fmt:formatNumber value="${totalAmount}" type="number" minFractionDigits="2"/>
-                        </button>
-
-                        <div class="text-center mt-3">
-                            <small class="text-muted"><span class="me-1">🔒</span> 256-bit SSL Encrypted Payment</small>
-                        </div>
-                    </form>
+                <div class="card-option d-flex align-items-center" onclick="selectNewCard()">
+                    <input class="form-check-input me-3" type="radio" name="paymentMethod" id="newCardRadio" value="new" checked onchange="toggleNewCardForm(true)">
+                    <span class="fw-bold text-dark">+ Add New Card</span>
                 </div>
             </div>
-        </c:otherwise>
-    </c:choose>
+
+            <div id="newCardForm">
+                <div class="mb-3">
+                    <label for="cardNumberInput" class="form-label text-muted small fw-bold">CARD NUMBER</label>
+                    <input type="text" name="cardNumber" id="cardNumberInput" class="form-control form-control-lg" placeholder="0000 0000 0000 0000" maxlength="19">
+                    <div class="invalid-feedback">Invalid card number. Must be 13-19 digits.</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="expiryInput" class="form-label text-muted small fw-bold">EXPIRY DATE</label>
+                        <input type="text" name="expiry" id="expiryInput" class="form-control form-control-lg" placeholder="MM/YY" maxlength="5">
+                        <div class="invalid-feedback">Invalid format. Use MM/YY.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cvvInput" class="form-label text-muted small fw-bold">CVV / CVC</label>
+                        <input type="password" name="cvv" id="cvvInput" class="form-control form-control-lg" placeholder="123" maxlength="4">
+                        <div class="invalid-feedback">Must be 3 or 4 digits.</div>
+                    </div>
+                </div>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="saveCard" id="saveCard" checked>
+                    <label class="form-check-label text-muted small" for="saveCard">Save card securely for future payments</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-pay shadow-sm">
+                Pay RM <fmt:formatNumber value="${totalAmount}" type="number" minFractionDigits="2"/>
+            </button>
+
+            <div class="text-center mt-3">
+                <small class="text-muted"><span class="me-1">🔒</span> 256-bit SSL Encrypted Payment</small>
+            </div>
+        </form>
+    </div>
+</div>
+</c:otherwise>
+</c:choose>
 </div>
 </div>
 </c:otherwise>

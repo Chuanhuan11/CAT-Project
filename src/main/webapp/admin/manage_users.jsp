@@ -149,7 +149,7 @@
 </head>
 <body>
 
-<%-- NAVBAR --%>
+<%-- --- NAVBAR --- --%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">
@@ -178,8 +178,8 @@
         </div>
     </div>
 </nav>
+<%-- -------------- --%>
 
-<%-- HERO HEADER --%>
 <div class="hero-section text-center">
     <div class="container">
         <h2 class="fw-bold">User Management</h2>
@@ -187,7 +187,7 @@
     </div>
 </div>
 
-<%-- MAIN CONTENT --%>
+<%-- --- MAIN CONTENT --- --%>
 <div class="container">
     <div class="content-box">
         <div class="d-flex justify-content-between align-items-center mb-4 dashboard-header">
@@ -205,7 +205,6 @@
         <%-- 1. PENDING ORGANIZER REQUESTS --%>
         <c:if test="${not empty pendingList}">
 
-            <%-- Title Section --%>
             <div class="mb-3 mt-4">
                 <h3 class="fw-bold mb-0" style="color: #856404; font-size: 1.3rem;">Pending Organizer Applications</h3>
                 <p class="small mb-0" style="color: #856404; opacity: 0.8;">Users requesting upgrade to Organizer status</p>
@@ -233,7 +232,6 @@
                                 <form action="${pageContext.request.contextPath}/ProcessOrganizerRequestServlet" method="post" class="d-inline">
                                     <input type="hidden" name="userId" value="${pUser.id}">
 
-                                        <%-- UPDATED BUTTON GROUP STYLE --%>
                                     <div class="btn-group shadow-sm" role="group">
                                         <button type="submit" name="action" value="approve"
                                                 class="btn btn-outline-success btn-sm fw-bold">
@@ -304,6 +302,7 @@
         </div>
     </div>
 </div>
+<%-- --------------------- --%>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 </body>

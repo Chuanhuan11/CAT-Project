@@ -27,7 +27,7 @@
 </head>
 <body>
 
-<%-- UPDATED NAVBAR --%>
+<%-- --- NAVBAR --- --%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">
@@ -47,6 +47,7 @@
         </div>
     </div>
 </nav>
+<%-- -------------- --%>
 
 <div class="container">
     <div class="row justify-content-center">
@@ -57,6 +58,7 @@
                     <p class="text-muted">Fill in the details below</p>
                 </div>
 
+                <%-- --- EVENT FORM --- --%>
                 <form action="${pageContext.request.contextPath}/AddEventServlet" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="${event.id}">
                     <input type="hidden" name="currentImage" value="${event.imageUrl}">
@@ -104,6 +106,7 @@
                         <a href="${pageContext.request.contextPath}/OrganiserDashboardServlet" class="btn btn-outline-secondary rounded-pill">Cancel</a>
                     </div>
                 </form>
+                <%-- ------------------ --%>
             </div>
         </div>
     </div>

@@ -14,22 +14,28 @@ public class UpdateEventStatusServlet extends HttpServlet {
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
 
+        // --- ROLE VALIDATION ---
         // Security: Only Admins can approve/reject
         if (role == null || !"ADMIN".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
             return;
         }
+        // -----------------------
 
         int eventId = Integer.parseInt(request.getParameter("eventId"));
         String newStatus = request.getParameter("status"); // "APPROVED" or "REJECTED"
 
         try (Connection con = DBConnection.getConnection()) {
+
+            // --- UPDATE STATUS LOGIC ---
             String sql = "UPDATE events SET status = ? WHERE id = ?";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ps.setString(1, newStatus);
                 ps.setInt(2, eventId);
                 ps.executeUpdate();
             }
+            // ---------------------------
+
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("errorMessage", "Error updating status.");

@@ -3,6 +3,8 @@ package com.univent.model;
 import java.io.Serializable;
 
 public class Booking implements Serializable {
+
+    // --- FIELDS ---
     private int id;
     private int userId;
     private int eventId;
@@ -10,7 +12,9 @@ public class Booking implements Serializable {
     private String status;
     private String attendeeName;
     private String attendeeEmail;
+    // --------------
 
+    // --- CONSTRUCTORS ---
     public Booking() {}
 
     public Booking(int id, int userId, int eventId, String bookingDate, String status) {
@@ -20,8 +24,9 @@ public class Booking implements Serializable {
         this.bookingDate = bookingDate;
         this.status = status;
     }
+    // --------------------
 
-    // Getters and Setters
+    // --- GETTERS AND SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -42,4 +47,5 @@ public class Booking implements Serializable {
 
     public String getAttendeeEmail() { return attendeeEmail; }
     public void setAttendeeEmail(String attendeeEmail) { this.attendeeEmail = attendeeEmail; }
+    // ---------------------------
 }

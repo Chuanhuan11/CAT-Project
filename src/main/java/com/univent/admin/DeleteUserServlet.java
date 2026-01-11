@@ -19,14 +19,15 @@ public class DeleteUserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Role Validation
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
 
+        // --- ROLE VALIDATION ---
         if (role == null || !"ADMIN".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
+        // -----------------------
 
         String userIdParam = request.getParameter("id");
 
@@ -35,6 +36,8 @@ public class DeleteUserServlet extends HttpServlet {
 
             try (Connection con = DBConnection.getConnection()) {
 
+                // --- RESTORE SEATS LOGIC ---
+                // Before deleting user, return their confirmed tickets to the pool
                 String findBookingsSql = "SELECT event_id, COUNT(*) as ticket_count " +
                         "FROM bookings " +
                         "WHERE user_id = ? AND status = 'CONFIRMED' " +
@@ -57,12 +60,15 @@ public class DeleteUserServlet extends HttpServlet {
                         }
                     }
                 }
+                // ---------------------------
 
+                // --- DELETE USER LOGIC ---
                 String deleteUserSql = "DELETE FROM users WHERE id = ?";
                 try (PreparedStatement psDel = con.prepareStatement(deleteUserSql)) {
                     psDel.setInt(1, userId);
                     psDel.executeUpdate();
                 }
+                // -------------------------
 
             } catch (Exception e) {
                 e.printStackTrace();

@@ -85,11 +85,7 @@
             width: 24px;
             height: 24px;
         }
-
-
-        .dropdown-toggle::after {
-            display: none !important;
-        }
+        .dropdown-toggle::after { display: none !important; }
 
         /* --- MOBILE SEARCH BAR FIX --- */
         .mobile-search-container {
@@ -143,13 +139,11 @@
                 z-index: 1000;
                 box-shadow: 0 10px 15px rgba(0,0,0,0.3);
             }
-
             .dropdown-menu {
-                z-index: 1060 !important; /* Highest priority */
+                z-index: 1060 !important;
                 position: absolute !important;
-                right: 10px; /* Align slightly from right edge */
+                right: 10px;
             }
-
             .floating-alert {
                 width: 90%;
                 right: 5%;
@@ -227,7 +221,7 @@
     </div>
 </div>
 
-<%-- MOBILE SEARCH BAR (Below Hero) --%>
+<%-- MOBILE SEARCH BAR --%>
 <div class="container mobile-search-container d-lg-none">
     <div class="input-group">
         <span class="input-group-text bg-white border-0 shadow-sm ps-3">
@@ -239,7 +233,7 @@
     </div>
 </div>
 
-<%-- SUCCESS/ERROR MESSAGES --%>
+<%-- ALERTS --%>
 <c:if test="${not empty sessionScope.successMessage}">
     <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
         <strong>Success!</strong> ${sessionScope.successMessage}
@@ -267,6 +261,7 @@
             <button class="btn btn-outline-primary btn-sm mt-2" onclick="clearFilter()">Clear Search</button>
         </div>
 
+        <%-- UPCOMING EVENTS --%>
         <div class="row" id="eventsContainer">
             <c:forEach var="event" items="${upcomingEvents}">
                 <div class="col-md-4 mb-4 event-item">
@@ -275,11 +270,9 @@
                             <c:choose>
                                 <c:when test="${not empty event.imageUrl}">
                                     <c:choose>
-                                        <%-- Case 1: Cloudinary/External URL --%>
                                         <c:when test="${event.imageUrl.startsWith('http')}">
                                             <img src="${event.imageUrl}" class="card-img-top" alt="${event.title}">
                                         </c:when>
-                                        <%-- Case 2: Local File (Fallback) --%>
                                         <c:otherwise>
                                             <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
                                         </c:otherwise>
@@ -292,6 +285,16 @@
                         </div>
 
                         <div class="card-body">
+                                <%-- HIDDEN DATA FIELDS --%>
+                            <input type="hidden" class="data-id" value="${event.id}">
+                            <input type="hidden" class="data-title" value="${event.title}">
+                            <input type="hidden" class="data-date" value="${event.eventDate}">
+                            <input type="hidden" class="data-loc" value="${event.location}">
+                            <input type="hidden" class="data-price" value="${event.price}">
+                            <input type="hidden" class="data-img" value="${event.imageUrl}">
+                            <input type="hidden" class="data-seats" value="${event.availableSeats}">
+                            <div class="d-none full-description">${event.description}</div>
+
                             <h5 class="card-title event-title">${event.title}</h5>
                             <p class="card-text text-muted small">
                                 <span class="badge bg-secondary me-1">DATE</span> ${event.eventDate} <br>
@@ -303,14 +306,13 @@
                                     <c:otherwise>RM <fmt:formatNumber value="${event.price}" type="number" minFractionDigits="2" maxFractionDigits="2" /></c:otherwise>
                                 </c:choose>
                             </h6>
-                            <div class="d-none full-description">${event.description}</div>
                             <p class="card-text mt-3 text-secondary event-desc" style="font-size: 0.9rem;">
                                     ${event.description.length() > 60 ? event.description.substring(0, 60).concat('...') : event.description}
                             </p>
                         </div>
                         <div class="card-footer bg-white border-top-0 pb-3">
-                            <button class="btn btn-primary w-100 fw-bold"
-                                    onclick="openDetailsModal('${event.id}', '${event.title}', this, '${event.eventDate}', '${event.location}', '${event.price}', '${event.imageUrl}', '${event.availableSeats}', 'upcoming')">
+                                <%-- MODIFIED: Simple onclick passing 'this' --%>
+                            <button class="btn btn-primary w-100 fw-bold" onclick="openDetailsModal(this, 'upcoming')">
                                 View Details
                             </button>
                         </div>
@@ -323,6 +325,7 @@
             </c:if>
         </div>
 
+        <%-- SOLD OUT EVENTS --%>
         <c:if test="${not empty soldOutEvents}">
             <hr class="my-5">
             <h3 class="fw-bold text-danger mb-4">Sold Out Events</h3>
@@ -334,11 +337,9 @@
                                 <c:choose>
                                     <c:when test="${not empty event.imageUrl}">
                                         <c:choose>
-                                            <%-- Case 1: Cloudinary/External URL --%>
                                             <c:when test="${event.imageUrl.startsWith('http')}">
                                                 <img src="${event.imageUrl}" class="card-img-top" alt="${event.title}">
                                             </c:when>
-                                            <%-- Case 2: Local File (Fallback) --%>
                                             <c:otherwise>
                                                 <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
                                             </c:otherwise>
@@ -353,12 +354,22 @@
                                 </div>
                             </div>
                             <div class="card-body">
+                                    <%-- HIDDEN DATA FIELDS --%>
+                                <input type="hidden" class="data-id" value="${event.id}">
+                                <input type="hidden" class="data-title" value="${event.title}">
+                                <input type="hidden" class="data-date" value="${event.eventDate}">
+                                <input type="hidden" class="data-loc" value="${event.location}">
+                                <input type="hidden" class="data-price" value="${event.price}">
+                                <input type="hidden" class="data-img" value="${event.imageUrl}">
+                                <input type="hidden" class="data-seats" value="0"> <%-- Sold out = 0 seats --%>
+                                <div class="d-none full-description">${event.description}</div>
+
                                 <h5 class="card-title event-title text-muted">${event.title}</h5>
                                 <p class="card-text text-muted small"><span class="badge bg-secondary me-1">DATE</span> ${event.eventDate}</p>
-                                <div class="d-none full-description">${event.description}</div>
                             </div>
                             <div class="card-footer bg-light border-top-0 pb-3">
-                                <button class="btn btn-secondary w-100" onclick="openDetailsModal('${event.id}', '${event.title}', this, '${event.eventDate}', '${event.location}', '${event.price}', '${event.imageUrl}', 0, 'soldout')">View Details (Full)</button>
+                                    <%-- MODIFIED: Simple onclick passing 'this' --%>
+                                <button class="btn btn-secondary w-100" onclick="openDetailsModal(this, 'soldout')">View Details (Full)</button>
                             </div>
                         </div>
                     </div>
@@ -366,6 +377,7 @@
             </div>
         </c:if>
 
+        <%-- PAST EVENTS --%>
         <c:if test="${not empty pastEvents}">
             <hr class="my-5">
             <h3 class="fw-bold text-secondary mb-4">Past Events</h3>
@@ -377,11 +389,9 @@
                                 <c:choose>
                                     <c:when test="${not empty event.imageUrl}">
                                         <c:choose>
-                                            <%-- Case 1: Cloudinary/External URL --%>
                                             <c:when test="${event.imageUrl.startsWith('http')}">
                                                 <img src="${event.imageUrl}" class="card-img-top" alt="${event.title}">
                                             </c:when>
-                                            <%-- Case 2: Local File (Fallback) --%>
                                             <c:otherwise>
                                                 <img src="${pageContext.request.contextPath}/assets/img/${event.imageUrl}" class="card-img-top" alt="${event.title}">
                                             </c:otherwise>
@@ -455,9 +465,20 @@
     var modalMaxSeats = 1;
 
     // ... Modal Functions ...
-    function openDetailsModal(id, title, btnRef, date, loc, price, img, seats, status) {
+    function openDetailsModal(btnRef, status) {
+        // --- 1. GET DATA FROM HIDDEN INPUTS (Safer) ---
         let cardBody = btnRef.closest('.card').querySelector('.card-body');
+
+        let id = cardBody.querySelector('.data-id').value;
+        let title = cardBody.querySelector('.data-title').value;
+        let date = cardBody.querySelector('.data-date').value;
+        let loc = cardBody.querySelector('.data-loc').value;
+        let price = cardBody.querySelector('.data-price').value;
+        let img = cardBody.querySelector('.data-img').value;
+        let seats = cardBody.querySelector('.data-seats').value;
         let fullDesc = cardBody.querySelector('.full-description').innerText;
+
+        // --- 2. UPDATE MODAL CONTENT ---
         let priceVal = parseFloat(price);
         let displayPrice = (priceVal === 0) ? "FREE" : "RM " + priceVal.toFixed(2);
 
@@ -469,25 +490,19 @@
         document.getElementById('modalPrice').innerText = displayPrice;
         document.getElementById('modalSeats').innerText = seats + " seats remaining";
 
-        if (img && img.trim() !== "") {
-            document.getElementById('modalImg').src = "${pageContext.request.contextPath}/assets/img/" + img;
-        } else {
-            document.getElementById('modalImg').src = "https://placehold.co/600x400?text=No+Image";
-        }
-
+        // --- 3. IMAGE LOGIC ---
         if (img && img.trim() !== "") {
             if (img.startsWith("http")) {
-                // It's a Cloudinary/External URL -> Use directly
                 document.getElementById('modalImg').src = img;
             } else {
-                // It's a Local File -> Prepend path
                 document.getElementById('modalImg').src = "${pageContext.request.contextPath}/assets/img/" + img;
             }
         } else {
             document.getElementById('modalImg').src = "https://placehold.co/600x400?text=No+Image";
         }
 
-        modalMaxSeats = parseInt(seats);
+        // --- 4. QUANTITY LOGIC ---
+        modalMaxSeats = parseInt(seats); // IMPORTANT: Set this immediately
         document.getElementById('modalQuantity').value = 1;
 
         let btn = document.getElementById('modalBtn');

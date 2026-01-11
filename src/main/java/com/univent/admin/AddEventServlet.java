@@ -7,8 +7,11 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import java.util.Map;
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream; // Import added
-// --------------------------
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+// ------------------------
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -68,44 +71,66 @@ public class AddEventServlet extends HttpServlet {
             return;
         }
 
-        // --- IMAGE UPLOAD LOGIC (CLOUDINARY) ---
+        // --- IMAGE UPLOAD LOGIC ---
         Part filePart = request.getPart("imageFile");
-        String finalImageName = request.getParameter("currentImage"); // Keep existing URL by default
+        String finalImageName = request.getParameter("currentImage");
+        // ------------------------
 
         // Check if a NEW file was uploaded
         if (filePart != null && filePart.getSize() > 0) {
             try {
-                // 1. Configure Cloudinary
+                // 1. Check for Environment Variables
                 String cloudName = System.getenv("CLOUDINARY_NAME");
                 String apiKey = System.getenv("CLOUDINARY_KEY");
                 String apiSecret = System.getenv("CLOUDINARY_SECRET");
 
-                if (cloudName == null || apiKey == null || apiSecret == null) {
-                    throw new Exception("Cloudinary environment variables not set!");
+                // 2. Decide Cloud Upload or Local Save
+                if (cloudName != null && apiKey != null && apiSecret != null) {
+                    // === A. CLOUD UPLOAD (Production) ===
+                    Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
+                            "cloud_name", cloudName,
+                            "api_key", apiKey,
+                            "api_secret", apiSecret
+                    ));
+
+                    // Read stream into buffer
+                    InputStream fileContent = filePart.getInputStream();
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    int nRead;
+                    byte[] data = new byte[16384];
+                    while ((nRead = fileContent.read(data, 0, data.length)) != -1) {
+                        buffer.write(data, 0, nRead);
+                    }
+                    buffer.flush();
+                    byte[] fileBytes = buffer.toByteArray();
+
+                    // Upload
+                    Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap("resource_type", "auto"));
+                    finalImageName = (String) uploadResult.get("secure_url");
+
+                } else {
+                    // === B. LOCAL SAVE (Localhost Fallback) ===
+                    String fileName = getFileName(filePart);
+
+                    // 1. Create path to "assets/img"
+                    String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img";
+                    File uploadDir = new File(uploadPath);
+                    if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                    // 2. Save the file
+                    String fullSavePath = uploadPath + File.separator + fileName;
+                    try (InputStream input = filePart.getInputStream();
+                         OutputStream output = new FileOutputStream(fullSavePath)) {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = input.read(buffer)) != -1) {
+                            output.write(buffer, 0, bytesRead);
+                        }
+                    }
+
+                    // 3. Set the database value to just the filename
+                    finalImageName = fileName;
                 }
-
-                Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
-                        "cloud_name", cloudName,
-                        "api_key", apiKey,
-                        "api_secret", apiSecret
-                ));
-
-                // 2. READ STREAM INTO BYTE ARRAY (Fixes "Unrecognized file parameter")
-                InputStream fileContent = filePart.getInputStream();
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[16384]; // 16kb buffer
-                while ((nRead = fileContent.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-                buffer.flush();
-                byte[] fileBytes = buffer.toByteArray();
-
-                // 3. UPLOAD THE BYTES
-                Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap("resource_type", "auto"));
-
-                // 4. Get the secure public URL
-                finalImageName = (String) uploadResult.get("secure_url");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -114,14 +139,11 @@ public class AddEventServlet extends HttpServlet {
                 return;
             }
         }
-        // ---------------------------------------
 
-        // --- STATUS LOGIC ---
         String status = "PENDING";
         if ("ADMIN".equals(role)) {
-            status = "APPROVED"; // Admins auto-approve
+            status = "APPROVED";
         }
-        // --------------------
 
         try (Connection con = DBConnection.getConnection()) {
             if (idParam == null || idParam.isEmpty()) {
@@ -160,5 +182,17 @@ public class AddEventServlet extends HttpServlet {
             session.setAttribute("errorMessage", "Database Error: " + e.getMessage());
         }
         response.sendRedirect(request.getContextPath() + "/OrganiserDashboardServlet");
+    }
+
+    // Helper to extract filename safely
+    private String getFileName(Part part) {
+        String contentDisp = part.getHeader("content-disposition");
+        String[] tokens = contentDisp.split(";");
+        for (String token : tokens) {
+            if (token.trim().startsWith("filename")) {
+                return token.substring(token.indexOf("=") + 2, token.length() - 1);
+            }
+        }
+        return "unknown.jpg";
     }
 }

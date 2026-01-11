@@ -78,6 +78,7 @@
 </head>
 <body>
 
+<%-- --- ALERTS --- --%>
 <%-- 1. SUCCESS ALERT (From Registration) --%>
 <c:if test="${param.success eq '1'}">
     <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
@@ -93,6 +94,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 </c:if>
+<%-- -------------- --%>
 
 <%-- HOME BUTTON --%>
 <a href="${pageContext.request.contextPath}/index.jsp"
@@ -101,7 +103,7 @@
     &larr; Home
 </a>
 
-<%-- LOGIN FORM CONTAINER --%>
+<%-- --- LOGIN FORM CONTAINER --- --%>
 <div class="container d-flex justify-content-center">
     <div class="login-card">
         <div class="login-header">
@@ -143,6 +145,7 @@
         </div>
     </div>
 </div>
+<%-- ---------------------------- --%>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 <script>

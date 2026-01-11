@@ -1,14 +1,18 @@
+-- --- DATABASE INITIALIZATION ---
 CREATE DATABASE IF NOT EXISTS univent_db;
 USE univent_db;
+-- -------------------------------
 
--- 1. DROP TABLES (Order matters: Child tables first!)
+-- --- 1. DROP TABLES ---
+-- Order matters: Child tables first!
 DROP TABLE IF EXISTS payment_methods;
 DROP TABLE IF EXISTS cart;
 DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS users;
+-- ----------------------
 
--- 2. CREATE TABLES
+-- --- 2. CREATE TABLES ---
 
 -- Users Table
 CREATE TABLE users (
@@ -66,8 +70,9 @@ CREATE TABLE IF NOT EXISTS payment_methods (
                                                expiry VARCHAR(10),
                                                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+-- ------------------------
 
--- 3. SEED DATA
+-- --- 3. SEED DATA ---
 
 -- Insert Users
 INSERT INTO users (username, password, email, role) VALUES
@@ -88,3 +93,4 @@ INSERT INTO events (title, description, event_date, location, price, image_url, 
                                                                                                                                         ('Legacy Coding Bootcamp', 'An old bootcamp from last year.', '2023-05-10', 'Old Hall', 50.00, 'event1.jpg', 100, 0, 1, 'APPROVED'),
                                                                                                                                         ('Retro Gaming Night', 'Classic games from the 90s.', '2022-11-20', 'Student Union', 5.00, 'event2.jpg', 50, 0, 1, 'APPROVED'),
                                                                                                                                         ('Alumni Gathering 2023', 'Meeting seniors.', '2023-08-15', 'Main Foyer', 0.00, 'event3.jpg', 200, 0, 1, 'APPROVED');
+-- --------------------

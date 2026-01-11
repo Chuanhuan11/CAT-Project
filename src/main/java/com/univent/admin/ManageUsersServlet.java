@@ -22,15 +22,18 @@ public class ManageUsersServlet extends HttpServlet {
         HttpSession session = request.getSession();
         String role = (String) session.getAttribute("role");
 
+        // --- ROLE VALIDATION ---
         if (role == null || !"ADMIN".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
+        // -----------------------
 
         List<User> userList = new ArrayList<>();
         List<User> pendingList = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
+            // --- FETCH ALL USERS ---
             String sql = "SELECT * FROM users";
             PreparedStatement ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -43,11 +46,13 @@ public class ManageUsersServlet extends HttpServlet {
                 u.setRole(rs.getString("role"));
                 u.setRoleRequest(rs.getString("role_request"));
 
+                // --- SEPARATE PENDING ORGANIZERS ---
                 if ("ORGANIZER".equals(u.getRoleRequest())) {
                     pendingList.add(u);
                 }
                 userList.add(u);
             }
+            // -----------------------
         } catch (Exception e) {
             e.printStackTrace();
         }

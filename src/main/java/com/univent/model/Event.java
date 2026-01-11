@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.sql.Date;
 
 public class Event implements Serializable {
+
+    // --- FIELDS ---
     private int id;
     private String title;
     private String description;
@@ -16,7 +18,9 @@ public class Event implements Serializable {
     private int organizerId;
     private int quantity;
     private String status;
+    // --------------
 
+    // --- CONSTRUCTORS ---
     public Event() {}
 
     public Event(int id, String title, String description, Date eventDate, String location, double price, String imageUrl, int totalSeats, int availableSeats, int organizerId) {
@@ -31,8 +35,9 @@ public class Event implements Serializable {
         this.availableSeats = availableSeats;
         this.organizerId = organizerId;
     }
+    // --------------------
 
-    // Getters and Setters
+    // --- GETTERS AND SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -42,8 +47,8 @@ public class Event implements Serializable {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public Date getEventDate() { return eventDate; } // Return type is Date
-    public void setEventDate(Date eventDate) { this.eventDate = eventDate; } // Parameter is Date
+    public Date getEventDate() { return eventDate; }
+    public void setEventDate(Date eventDate) { this.eventDate = eventDate; }
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
@@ -68,4 +73,5 @@ public class Event implements Serializable {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    // ---------------------------
 }

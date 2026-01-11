@@ -8,7 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession; // Added Import
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +24,7 @@ public class EventListServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // --- 1. SMART ROLE CHECK (Auto-Promote User) ---
+        // --- SMART ROLE CHECK (AUTO-PROMOTE) ---
         // This runs before we fetch events. It updates the session if the DB role changed.
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("userId") != null) {
@@ -41,11 +41,11 @@ public class EventListServlet extends HttpServlet {
                 session.setAttribute("successMessage", "<strong>Congratulations!</strong> Your application has been approved. <br>You are now an Event Organizer. Check the menu for your Dashboard.");
             }
         }
-        // -----------------------------------------------
+        // ---------------------------------------
 
         List<Event> allEvents = new ArrayList<>();
 
-        // Fetch ONLY APPROVED events for the catalog
+        // --- FETCH APPROVED EVENTS ---
         try (Connection con = DBConnection.getConnection()) {
             String sql = "SELECT * FROM events WHERE status = 'APPROVED'";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -68,8 +68,9 @@ public class EventListServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // -----------------------------
 
-        // Separate Logic in Java
+        // --- FILTER & SORT LOGIC ---
         LocalDate today = LocalDate.now();
 
         // Upcoming (Future + Available Seats) -> Sort Ascending (Soonest first)
@@ -89,6 +90,7 @@ public class EventListServlet extends HttpServlet {
                 .filter(e -> e.getEventDate().toLocalDate().isBefore(today))
                 .sorted((e1, e2) -> e2.getEventDate().compareTo(e1.getEventDate()))
                 .collect(Collectors.toList());
+        // ---------------------------
 
         request.setAttribute("upcomingEvents", upcomingEvents);
         request.setAttribute("soldOutEvents", soldOutEvents);

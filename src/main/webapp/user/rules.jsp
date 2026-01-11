@@ -93,7 +93,7 @@
             text-align: center;
         }
 
-        /* --- MOBILE OPTIMIZATION (iPhone 14 Pro Max & Similar) --- */
+        /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 576px) {
             .hero-section { padding: 30px 0; }
             .content-box {
@@ -115,7 +115,7 @@
 </head>
 <body>
 
-<%-- 1. NAVBAR --%>
+<%-- --- NAVBAR --- --%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="${pageContext.request.contextPath}/index.jsp">
@@ -127,16 +127,18 @@
         </div>
     </div>
 </nav>
+<%-- -------------- --%>
 
-<%-- 2. HERO BANNER --%>
+<%-- --- HERO BANNER --- --%>
 <div class="hero-section text-center">
     <div class="container">
         <h2 class="fw-bold">Terms of Service</h2>
         <p class="mb-0 small opacity-75">Usage Policy & Guidelines</p>
     </div>
 </div>
+<%-- ------------------- --%>
 
-<%-- 3. MAIN CONTENT --%>
+<%-- --- MAIN CONTENT --- --%>
 <div class="container">
     <div class="content-box mx-auto" style="max-width: 850px;">
 
@@ -210,6 +212,7 @@
 
     </div>
 </div>
+<%-- -------------------- --%>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 </body>

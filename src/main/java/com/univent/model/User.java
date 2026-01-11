@@ -3,13 +3,17 @@ package com.univent.model;
 import java.io.Serializable;
 
 public class User implements Serializable {
+
+    // --- FIELDS ---
     private int id;
     private String username;
     private String email;
     private String password;
     private String role;
-    private String roleRequest; // <--- NEW FIELD
+    private String roleRequest;
+    // --------------
 
+    // --- CONSTRUCTORS ---
     public User() {}
 
     public User(int id, String username, String email, String password, String role) {
@@ -19,8 +23,9 @@ public class User implements Serializable {
         this.password = password;
         this.role = role;
     }
+    // --------------------
 
-    // Getters and Setters
+    // --- GETTERS AND SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -36,7 +41,7 @@ public class User implements Serializable {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    // --- NEW GETTER & SETTER ---
     public String getRoleRequest() { return roleRequest; }
     public void setRoleRequest(String roleRequest) { this.roleRequest = roleRequest; }
+    // ---------------------------
 }
