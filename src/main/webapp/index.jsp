@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +10,11 @@
     <style>
         /* --- GLOBAL STYLES --- */
         body, html {
-            height: 100%;
+            /* REMOVED height: 100% to prevent scroll locking issues */
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
+            background-color: #f4f4f4; /* Fallback color */
         }
 
         :root { --brand-purple: #2c1a4d; }
@@ -20,26 +22,30 @@
         /* --- HERO CONTAINER --- */
         .hero-container {
             background-image: url('${pageContext.request.contextPath}/assets/img/landing-bg.jpg');
-            height: 100%;
+
+            /* FIX 1: Use min-height: 100vh.
+               This guarantees it covers the full viewport, but allows
+               content to expand if needed without breaking layout. */
+            min-height: 100vh;
+            width: 100%;
+
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
+
+            /* Flexbox to vertically center the content */
             display: flex;
             flex-direction: column;
-
-            /* Desktop Alignment */
-            align-items: flex-start;
-            justify-content: center;
+            justify-content: center; /* Centers content vertically */
 
             text-align: left;
-            padding-left: 10%;
-            padding-right: 10%;
-            position: relative; /* Crucial for absolute children */
+            padding: 80px 10%; /* Added top padding so header doesn't overlap */
+            position: relative;
         }
 
         /* --- BRAND HEADER --- */
         .brand-header {
-            position: absolute; /* Default: Floating on Desktop */
+            position: absolute;
             top: 30px;
             left: 10%;
             display: flex;
@@ -106,7 +112,7 @@
 
         .footer-note {
             position: absolute;
-            bottom: 50px;
+            bottom: 30px;
             left: 10%;
             color: var(--brand-purple);
             font-weight: 500;
@@ -117,29 +123,24 @@
         @media (max-width: 768px) {
             .hero-container {
                 background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
-                background-attachment: fixed;
 
-                /* Reset padding */
-                padding: 40px 5% 20px 5%;
+                /* FIX 2: 'scroll' prevents jumpy background on iPhone */
+                background-attachment: scroll;
 
-                align-items: center;
+                padding: 100px 5% 40px 5%; /* More top padding for mobile */
                 text-align: center;
+                align-items: center;
 
-                /* FIX: Start from top, don't center vertically */
+                /* On mobile, we let the content stack naturally */
                 justify-content: flex-start;
-
-                /* Allow scrolling */
-                overflow-y: auto;
             }
 
-            /* FIX: Make logo part of the flow (not floating) */
             .brand-header {
-                position: relative;
-                top: auto;
-                left: auto;
-                margin-bottom: 20px; /* Push content down */
-                justify-content: center;
+                position: absolute;
+                top: 30px;
+                left: 0;
                 width: 100%;
+                justify-content: center;
             }
 
             .brand-text { font-size: 1.5rem; }
@@ -147,7 +148,7 @@
             .big-title {
                 font-size: 3rem;
                 line-height: 1.2;
-                margin-top: 10px;
+                margin-top: 20px;
             }
 
             .subtitle { font-size: 1rem; }
@@ -165,22 +166,20 @@
             .btn-explore {
                 width: 80%;
                 padding: 15px 0;
-                margin-top: 0;
-                margin-bottom: 50px;
+                margin-bottom: 20px;
             }
 
             .footer-note {
                 position: relative;
                 bottom: auto;
                 left: auto;
-                margin-top: auto;
+                margin-top: 20px;
                 opacity: 0.8;
                 font-size: 0.8rem;
-                padding-bottom: 20px;
+                padding-bottom: 10px;
             }
         }
 
-        /* --- ANIMATIONS --- */
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -191,7 +190,6 @@
 <body>
 
 <%-- --- HERO CONTAINER --- --%>
-<%-- Note: .brand-header is inside .hero-container to ensure they scroll together on mobile --%>
 <div class="hero-container">
 
     <%-- BRAND HEADER --%>
@@ -201,23 +199,28 @@
     </div>
 
     <%-- MAIN CONTENT --%>
-    <h1 class="big-title">Discover USM <br> Life</h1>
-    <p class="subtitle">Concerts. Workshops. Sports. All in One Place.</p>
+    <div>
+        <h1 class="big-title">Discover USM <br> Life</h1>
+        <p class="subtitle">Concerts. Workshops. Sports. All in One Place.</p>
 
-    <%-- MOBILE ILLUSTRATION --%>
-    <img src="${pageContext.request.contextPath}/assets/img/landing-img.png"
-         alt="University Life 3D Illustration"
-         class="mobile-landing-img">
+        <%-- MOBILE ILLUSTRATION --%>
+        <img src="${pageContext.request.contextPath}/assets/img/landing-img.png"
+             alt="University Life 3D Illustration"
+             class="mobile-landing-img">
 
-    <%-- CALL TO ACTION --%>
-    <a href="${pageContext.request.contextPath}/EventListServlet" class="btn-explore">
-        Explore Events
-    </a>
+        <%-- CALL TO ACTION --%>
+        <a href="${pageContext.request.contextPath}/EventListServlet" class="btn-explore">
+            Explore Events
+        </a>
+    </div>
 
-    <%-- FOOTER NOTE --%>
+    <%-- FOOTER NOTE (Optional: Keep if you like the "Join 10,000" text) --%>
     <p class="footer-note">Join 10,000+ students booking tickets today.</p>
 </div>
-<%-- ---------------------- --%>
 
+<%-- --- STANDARD FOOTER (Appears below the hero when scrolling) --- --%>
+<jsp:include page="footer.jsp" />
+
+<script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
