@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession; // Added Import
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,6 +23,26 @@ import java.util.stream.Collectors;
 public class EventListServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        // --- 1. SMART ROLE CHECK (Auto-Promote User) ---
+        // This runs before we fetch events. It updates the session if the DB role changed.
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("userId") != null) {
+            Integer userId = (Integer) session.getAttribute("userId");
+            String currentSessionRole = (String) session.getAttribute("role");
+
+            // Check what the Database says right now
+            String realDbRole = getRoleFromDatabase(userId);
+
+            // If Database is "ORGANIZER" but Session is "STUDENT" -> UPDATE IT
+            if (realDbRole != null && "ORGANIZER".equals(realDbRole) && "STUDENT".equals(currentSessionRole)) {
+                session.setAttribute("role", "ORGANIZER");
+                // This message triggers the green alert in your JSP
+                session.setAttribute("successMessage", "<strong>Congratulations!</strong> Your application has been approved. <br>You are now an Event Organizer. Check the menu for your Dashboard.");
+            }
+        }
+        // -----------------------------------------------
+
         List<Event> allEvents = new ArrayList<>();
 
         // Fetch ONLY APPROVED events for the catalog
@@ -74,5 +95,22 @@ public class EventListServlet extends HttpServlet {
         request.setAttribute("pastEvents", pastEvents);
 
         request.getRequestDispatcher("/catalog/home.jsp").forward(request, response);
+    }
+
+    // --- HELPER METHOD TO CHECK DB ---
+    private String getRoleFromDatabase(int userId) {
+        String role = null;
+        try (Connection con = DBConnection.getConnection()) {
+            String sql = "SELECT role FROM users WHERE id = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                role = rs.getString("role");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return role;
     }
 }

@@ -11,11 +11,34 @@
             height: 100%;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
         }
 
+        :root { --brand-purple: #2c1a4d; }
+
+        /* --- HERO CONTAINER --- */
+        .hero-container {
+            background-image: url('${pageContext.request.contextPath}/assets/img/landing-bg.jpg');
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+
+            /* Desktop Alignment */
+            align-items: flex-start;
+            justify-content: center;
+
+            text-align: left;
+            padding-left: 10%;
+            padding-right: 10%;
+            position: relative; /* Crucial for absolute children */
+        }
+
+        /* --- BRAND HEADER --- */
         .brand-header {
-            position: absolute;
+            position: absolute; /* Default: Floating on Desktop */
             top: 30px;
             left: 10%;
             display: flex;
@@ -37,29 +60,8 @@
             letter-spacing: 1px;
         }
 
-        /* --- DESKTOP HERO STYLES --- */
-        .hero-container {
-            background-image: url('${pageContext.request.contextPath}/assets/img/landing-bg.jpg');
-            height: 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-            text-align: left;
-            padding-left: 10%;
-            padding-right: 10%;
-            position: relative;
-        }
-
-        /* Hide the separate image on desktop because landing-bg.jpg already has it */
-        .mobile-landing-img {
-            display: none;
-        }
-
-        :root { --brand-purple: #2c1a4d; }
+        /* --- CONTENT STYLES --- */
+        .mobile-landing-img { display: none; }
 
         .big-title {
             font-size: 5rem;
@@ -111,57 +113,58 @@
 
         /* --- MOBILE LAYOUT OVERRIDES --- */
         @media (max-width: 768px) {
-            .brand-header {
-                left: 50%;
-                transform: translateX(-50%); /* Center logo */
-                top: 20px;
-                width: max-content;
-            }
-
-            .brand-text {
-                font-size: 1.5rem;
-            }
-
             .hero-container {
-                /* Switch to standard app background */
                 background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
                 background-attachment: fixed;
-                padding-left: 5%;
-                padding-right: 5%;
-                padding-top: 80px; /* Space for logo */
+
+                /* Reset padding */
+                padding: 40px 5% 20px 5%;
+
                 align-items: center;
                 text-align: center;
-                justify-content: flex-start; /* Start stacking from top */
-                overflow-y: auto; /* Allow scrolling if image is tall */
+
+                /* FIX: Start from top, don't center vertically */
+                justify-content: flex-start;
+
+                /* Allow scrolling */
+                overflow-y: auto;
             }
+
+            /* FIX: Make logo part of the flow (not floating) */
+            .brand-header {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 20px; /* Push content down */
+                justify-content: center;
+                width: 100%;
+            }
+
+            .brand-text { font-size: 1.5rem; }
 
             .big-title {
                 font-size: 3rem;
                 line-height: 1.2;
-                margin-top: 20px;
+                margin-top: 10px;
             }
 
-            .subtitle {
-                font-size: 1rem;
-            }
+            .subtitle { font-size: 1rem; }
 
-            /* Show the specific image on mobile */
             .mobile-landing-img {
                 display: block;
                 width: 90%;
-                max-width: 400px; /* Prevent it from getting too huge */
+                max-width: 350px;
                 height: auto;
                 margin: 20px auto 30px auto;
                 filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-                /* Optional floating animation */
                 animation: float 4s ease-in-out infinite;
             }
 
             .btn-explore {
-                width: 80%; /* Wider button on mobile */
+                width: 80%;
                 padding: 15px 0;
                 margin-top: 0;
-                margin-bottom: 60px; /* Space above footer */
+                margin-bottom: 50px;
             }
 
             .footer-note {
@@ -169,8 +172,9 @@
                 bottom: auto;
                 left: auto;
                 margin-top: auto;
-                margin-bottom: 20px;
                 opacity: 0.8;
+                font-size: 0.8rem;
+                padding-bottom: 20px;
             }
         }
 
@@ -183,12 +187,17 @@
 </head>
 <body>
 
-<div class="brand-header">
-    <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" class="brand-logo">
-    <span class="brand-text">Univent</span>
-</div>
-
+<%--
+    FIX: MOVED .brand-header INSIDE .hero-container
+    This ensures they scroll together on mobile and background covers both.
+--%>
 <div class="hero-container">
+
+    <div class="brand-header">
+        <img src="${pageContext.request.contextPath}/assets/img/logo.png" alt="Logo" class="brand-logo">
+        <span class="brand-text">Univent</span>
+    </div>
+
     <h1 class="big-title">Discover USM <br> Life</h1>
     <p class="subtitle">Concerts. Workshops. Sports. All in One Place.</p>
 

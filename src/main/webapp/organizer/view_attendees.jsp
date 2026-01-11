@@ -123,6 +123,12 @@
                     </svg>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userMenu">
+                    <li>
+                        <h6 class="dropdown-header text-truncate" style="max-width: 200px;">
+                            Hello, ${sessionScope.username}
+                        </h6>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/EventListServlet">Home Page</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/LogoutServlet">Logout</a></li>

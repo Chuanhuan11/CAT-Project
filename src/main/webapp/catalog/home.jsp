@@ -85,6 +85,8 @@
             width: 24px;
             height: 24px;
         }
+
+
         .dropdown-toggle::after {
             display: none !important;
         }
@@ -141,6 +143,13 @@
                 z-index: 1000;
                 box-shadow: 0 10px 15px rgba(0,0,0,0.3);
             }
+
+            .dropdown-menu {
+                z-index: 1060 !important; /* Highest priority */
+                position: absolute !important;
+                right: 10px; /* Align slightly from right edge */
+            }
+
             .floating-alert {
                 width: 90%;
                 right: 5%;
@@ -169,6 +178,12 @@
                             </svg>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                            <li>
+                                <h6 class="dropdown-header text-truncate" style="max-width: 200px;">
+                                    Hello, ${sessionScope.username}
+                                </h6>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <c:if test="${sessionScope.role == 'ADMIN' || sessionScope.role == 'ORGANIZER'}">
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/OrganiserDashboardServlet">Dashboard</a></li>
                             </c:if>
@@ -553,6 +568,32 @@
         document.getElementById('noResultsMessage').style.display = 'none';
         document.getElementById('filterCount').textContent = "Browsing Catalog";
     }
+
+    document.addEventListener("DOMContentLoaded", function(){
+        const navbarCollapse = document.getElementById('navbarNav');
+        const userDropdownBtn = document.getElementById('userMenu');
+
+        // 1. If Hamburger opens -> Close Avatar Dropdown
+        navbarCollapse.addEventListener('show.bs.collapse', function () {
+            if (userDropdownBtn && userDropdownBtn.classList.contains('show')) {
+                // Using Bootstrap 5 API to hide dropdown
+                const dropdownInstance = bootstrap.Dropdown.getInstance(userDropdownBtn);
+                if(dropdownInstance) dropdownInstance.hide();
+            }
+        });
+
+        // 2. If Avatar Dropdown opens -> Close Hamburger
+        if(userDropdownBtn) {
+            userDropdownBtn.addEventListener('show.bs.dropdown', function () {
+                // Check if navbar is open
+                if (navbarCollapse.classList.contains('show')) {
+                    // Using Bootstrap 5 API to hide collapse
+                    const collapseInstance = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if(collapseInstance) collapseInstance.hide();
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>

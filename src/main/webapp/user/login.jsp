@@ -117,7 +117,18 @@
                 </div>
                 <div class="mb-4">
                     <label class="form-label text-muted small fw-bold">PASSWORD</label>
-                    <input type="password" name="password" class="form-control" required placeholder="Enter your password">
+                    <div class="input-group">
+                        <%-- Added id="passwordInput" for JS targeting --%>
+                        <input type="password" name="password" id="passwordInput" class="form-control" required placeholder="Enter your password" style="border-right: none;">
+
+                        <%-- The Eye Button --%>
+                        <button class="btn btn-white bg-white border border-start-0" type="button" id="togglePassword" style="border-color: #ced4da;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#6c757d" class="bi bi-eye-fill" viewBox="0 0 16 16" id="eyeIcon">
+                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="d-grid">
                     <button type="submit" class="btn btn-brand btn-lg">Log In</button>
@@ -127,12 +138,30 @@
         <div class="card-footer text-center bg-white py-3 border-0">
             <small class="text-muted">
                 Don't have an account?
-                <a href="register.jsp" class="fw-bold" style="color: #2c1a4d;">Register Now</a>
+                <a href="${pageContext.request.contextPath}/user/register.jsp" class="fw-bold" style="color: #2c1a4d;">Register Now</a>
             </small>
         </div>
     </div>
 </div>
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#passwordInput');
+    const eyeIcon = document.querySelector('#eyeIcon');
+
+    togglePassword.addEventListener('click', function (e) {
+        // 1. Toggle the type attribute
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+
+        // 2. Toggle the eye icon color/style (Optional visual feedback)
+        if (type === 'text') {
+            eyeIcon.style.fill = "#2c1a4d"; // Brand Purple when visible
+        } else {
+            eyeIcon.style.fill = "#6c757d"; // Gray when hidden
+        }
+    });
+</script>
 </body>
 </html>

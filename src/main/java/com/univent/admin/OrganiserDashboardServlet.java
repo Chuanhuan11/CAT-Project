@@ -19,23 +19,49 @@ import java.util.List;
 @WebServlet("/OrganiserDashboardServlet")
 public class OrganiserDashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Role Validation
         HttpSession session = request.getSession();
-        String role = (String) session.getAttribute("role");
         Integer userId = (Integer) session.getAttribute("userId");
+        String sessionRole = (String) session.getAttribute("role");
 
-        if (role == null || (!role.equals("ADMIN") && !role.equals("ORGANIZER"))) {
-            response.sendRedirect(request.getContextPath() + "/");
+        // 1. Basic Login Check
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
 
+        // 2. SMART ROLE CHECK (The Fix)
+        // Check DB to see if they were promoted while logged in
+        String currentDbRole = getRoleFromDatabase(userId);
+
+        if (currentDbRole != null && !currentDbRole.equals(sessionRole)) {
+            // Role Mismatch Detected!
+            if ("ORGANIZER".equals(currentDbRole)) {
+                // They were promoted! Update session immediately.
+                session.setAttribute("role", "ORGANIZER");
+                session.setAttribute("successMessage", "Congratulations! Your application has been approved. You are now an Event Organizer.");
+                sessionRole = "ORGANIZER"; // Update local variable so access check passes below
+            } else if ("STUDENT".equals(currentDbRole)) {
+                // Demoted? Update session for safety.
+                session.setAttribute("role", "STUDENT");
+                sessionRole = "STUDENT";
+            }
+        }
+
+        // 3. Access Control (Using the updated role)
+        if (!"ADMIN".equals(sessionRole) && !"ORGANIZER".equals(sessionRole)) {
+            session.setAttribute("errorMessage", "Access Denied. You do not have permission to view the dashboard.");
+            response.sendRedirect(request.getContextPath() + "/EventListServlet");
+            return;
+        }
+
+        // --- EXISTING LOGIC STARTS HERE ---
         List<Event> events = new ArrayList<>();
 
         try (Connection con = DBConnection.getConnection()) {
             String sql;
             PreparedStatement ps;
 
-            if ("ADMIN".equals(role)) {
+            if ("ADMIN".equals(sessionRole)) {
                 sql = "SELECT * FROM events";
                 ps = con.prepareStatement(sql);
             } else {
@@ -72,5 +98,22 @@ public class OrganiserDashboardServlet extends HttpServlet {
 
         request.setAttribute("eventList", events);
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
+    }
+
+    // Helper method to check DB
+    private String getRoleFromDatabase(int userId) {
+        String role = null;
+        try (Connection con = DBConnection.getConnection()) {
+            String sql = "SELECT role FROM users WHERE id = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                role = rs.getString("role");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return role;
     }
 }
