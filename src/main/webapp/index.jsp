@@ -10,11 +10,10 @@
     <style>
         /* --- GLOBAL STYLES --- */
         body, html {
-            /* REMOVED height: 100% to prevent scroll locking issues */
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
-            background-color: #f4f4f4; /* Fallback color */
+            background-color: #f4f4f4;
         }
 
         :root { --brand-purple: #2c1a4d; }
@@ -22,24 +21,16 @@
         /* --- HERO CONTAINER --- */
         .hero-container {
             background-image: url('${pageContext.request.contextPath}/assets/img/landing-bg.jpg');
-
-            /* FIX 1: Use min-height: 100vh.
-               This guarantees it covers the full viewport, but allows
-               content to expand if needed without breaking layout. */
             min-height: 100vh;
             width: 100%;
-
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-
-            /* Flexbox to vertically center the content */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centers content vertically */
-
+            justify-content: center;
             text-align: left;
-            padding: 80px 10%; /* Added top padding so header doesn't overlap */
+            padding: 80px 10%;
             position: relative;
         }
 
@@ -119,19 +110,20 @@
             font-size: 0.9rem;
         }
 
+        /* --- THIS IS THE FIX --- */
+        /* Forces the footer to touch the Hero Image, removing the white gap */
+        .univent-footer {
+            margin-top: 0 !important;
+        }
+
         /* --- MOBILE LAYOUT OVERRIDES --- */
         @media (max-width: 768px) {
             .hero-container {
                 background-image: url('${pageContext.request.contextPath}/assets/img/home-bg.jpg');
-
-                /* FIX 2: 'scroll' prevents jumpy background on iPhone */
                 background-attachment: scroll;
-
-                padding: 100px 5% 40px 5%; /* More top padding for mobile */
+                padding: 100px 5% 40px 5%;
                 text-align: center;
                 align-items: center;
-
-                /* On mobile, we let the content stack naturally */
                 justify-content: flex-start;
             }
 
@@ -214,11 +206,11 @@
         </a>
     </div>
 
-    <%-- FOOTER NOTE (Optional: Keep if you like the "Join 10,000" text) --%>
+    <%-- FOOTER NOTE --%>
     <p class="footer-note">Join 10,000+ students booking tickets today.</p>
 </div>
 
-<%-- --- STANDARD FOOTER (Appears below the hero when scrolling) --- --%>
+<%-- --- STANDARD FOOTER --- --%>
 <jsp:include page="footer.jsp" />
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
