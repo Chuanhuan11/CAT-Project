@@ -2,6 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <style>
+    body.modal-open {
+        padding-right: 0 !important;
+        overflow-y: auto !important;
+    }
+
     /* --- ULTRA-MINIMAL FOOTER --- */
     .univent-footer {
         background-color: #2c1a4d; /* Brand Purple */
@@ -66,7 +71,7 @@
         margin-right: auto;
     }
 
-    /* --- MODAL STYLES (Unchanged) --- */
+    /* --- MODAL STYLES --- */
     .inquiry-modal-content {
         border-radius: 15px; border: none;
         box-shadow: 0 10px 40px rgba(0,0,0,0.4); text-align: left;
