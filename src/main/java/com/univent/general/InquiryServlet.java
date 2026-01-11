@@ -15,32 +15,39 @@ public class InquiryServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // --- 1. SECURE CONFIGURATION ---
+        // 1. SECURE CONFIGURATION
         final String senderEmail = System.getenv("MAIL_USER");
         final String senderPassword = System.getenv("MAIL_PASSWORD");
-
         final String recipientEmail = System.getenv("MAIL_RECEIVER");
 
-        // Safety Check: If config is missing, log error and skip email
+        // Safety Check
         if (senderEmail == null || senderPassword == null) {
             System.err.println("CRITICAL ERROR: MAIL_USER or MAIL_PASSWORD environment variables are missing!");
             response.sendRedirect("index.jsp?msg=SystemError");
             return;
         }
 
-        // --- 2. GET FORM DATA ---
+        // 2. GET FORM DATA
         String name = request.getParameter("name");
         String userEmail = request.getParameter("email");
         String messageBody = request.getParameter("message");
 
-        // --- 3. SETUP GMAIL PROPERTIES ---
+        // 3. SETUP GMAIL PROPERTIES (SSL / Port 465)
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
 
-        // --- 4. AUTHENTICATE ---
+        // --- CRITICAL FIX FOR RENDER: USE SSL PORT 465 ---
+        // This forces a secure SSL connection which is less likely to be blocked than port 587
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.port", "465");
+
+        // Add timeouts to prevent infinite loading (10 seconds max)
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+
+        // 4. AUTHENTICATE
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -49,11 +56,10 @@ public class InquiryServlet extends HttpServlet {
         });
 
         try {
-            // --- 5. COMPOSE EMAIL ---
+            // 5. COMPOSE EMAIL
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(senderEmail));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-
             message.setSubject("Univent Inquiry: " + name);
 
             String emailContent = "You have received a new inquiry via Univent.\n\n"
@@ -64,16 +70,15 @@ public class InquiryServlet extends HttpServlet {
 
             message.setText(emailContent);
 
-            // --- 6. SEND EMAIL ---
+            // 6. SEND EMAIL
             Transport.send(message);
             System.out.println("SUCCESS: Inquiry email sent to " + recipientEmail);
-
-            // --- 7. REDIRECT USER ---
             response.sendRedirect("index.jsp?msg=InquirySent");
 
         } catch (MessagingException e) {
             e.printStackTrace();
-            System.err.println("ERROR: Failed to send email. Check App Password or Network.");
+            System.err.println("ERROR: Failed to send email. " + e.getMessage());
+            // Redirect with error so the user isn't stuck
             response.sendRedirect("index.jsp?msg=ErrorSending");
         }
     }
