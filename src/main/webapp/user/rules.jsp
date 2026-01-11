@@ -204,7 +204,7 @@
 
         <%-- Action Button --%>
         <div class="text-center mt-5">
-            <a href="${pageContext.request.contextPath}/user/register.jsp" class="btn btn-primary btn-lg rounded-pill px-5 shadow fw-bold" style="background-color: #2c1a4d; border: none; width: 100%; max-width: 300px;">
+            <a href="${pageContext.request.contextPath}/user/register.jsp?agree=true" class="btn btn-primary btn-lg rounded-pill px-5 shadow fw-bold" style="background-color: #2c1a4d; border: none; width: 100%; max-width: 300px;">
                 I Understand & Agree
             </a>
             <div class="mt-2 text-muted small">By clicking above, you return to the registration page.</div>

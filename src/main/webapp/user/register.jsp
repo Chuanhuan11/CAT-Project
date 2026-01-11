@@ -139,7 +139,7 @@
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="terms" required>
                                 <label class="form-check-label small" for="terms">
-                                    I agree to the <a href="${pageContext.request.contextPath}/user/rules.jsp" target="_blank" style="color: #2c1a4d; font-weight: bold;">Rules & Regulations</a>
+                                    I agree to the <a href="${pageContext.request.contextPath}/user/rules.jsp"  style="color: #2c1a4d; font-weight: bold;">Rules & Regulations</a>
                                 </label>
                                 <div class="invalid-feedback">You must agree before proceeding.</div>
                             </div>
@@ -164,6 +164,7 @@
 
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 <script>
+
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.getElementById('registerForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -175,6 +176,15 @@
         const terms = document.getElementById('terms');
         const emailPattern = /.+@.+\.usm\.my$/;
 
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('agree') === 'true') {
+            if (terms) {
+                terms.checked = true;
+                validateInput(terms, true);
+            }
+        }
+
+        // 1. DYNAMIC VALIDATION FUNCTION
         function validateInput(input, condition) {
             if (condition) {
                 input.classList.remove('is-invalid');
